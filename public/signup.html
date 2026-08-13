@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sign Up</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#fafafa; margin:0; }
+  .container { max-width:360px; margin:80px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  h2 { text-align:center; color:#333; }
+  input { width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:4px; box-sizing:border-box;}
+  button { width:100%; padding:10px; background:#3b82f6; color:#fff; border:none; border-radius:4px; cursor:pointer; margin-top:10px;}
+  .msg { text-align:center; margin-top:15px; font-size:14px; }
+  .error { color:#c0392b; }
+  .success { color:#27ae60; }
+  .footer { text-align:center; font-size:13px; margin-top:20px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Account</h2>
+    <form id="signupForm">
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password (min 8 characters)" required minlength="8">
+      <button type="submit">Sign Up</button>
+    </form>
+    <div class="msg" id="msg"></div>
+    <div class="footer">Already have an account? <a href="/login.html">Log in</a></div>
+  </div>
+
+<script>
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  const msgEl = document.getElementById('msg');
+  msgEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      msgEl.textContent = result.message + ' Redirecting to login...';
+      msgEl.className = 'msg success';
+      setTimeout(() => window.location.href = '/login.html', 1200);
+    } else {
+      msgEl.textContent = result.error;
+      msgEl.className = 'msg error';
+    }
+  } catch (err) {
+    msgEl.textContent = 'Network error. Please try again.';
+    msgEl.className = 'msg error';
+  }
+});
+</script>
+</body>
+</html>
