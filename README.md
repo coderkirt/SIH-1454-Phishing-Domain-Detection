@@ -60,13 +60,11 @@ Try signing up with a real-looking test email (e.g. `test@example.com`) and a
 password of 8+ characters, then log in and confirm the dashboard loads and
 shows your email. Try wrong passwords to confirm the error handling works,
 and try the rate limiter by failing login 11 times quickly.
-## 🛡️ PhishShield – Scanner Module
+## Frontend Status
+🚧 In Progress — Building the React + TypeScript UI (Scanner, Result, and History pages). Currently setting up the project structure.
 
-### 🚀 Current Progress
-- **Scanner UI Design:** Initiated dark-mode cyber aesthetic layout.
-- **Homepage Structure:** Planning component flow and responsive layout.
-- **UI/UX Research:** Analyzing modern cybersecurity scanner interfaces.
-- **Core Module:** Scanner logic and input validation under development.
-
-### 👩‍💻 Developer
-**Astha Mishra**
+### Pages Planned
+- **Scanner** — URL input and scan trigger (entry point)
+- **Analyzing** — loading state showing real-time scan progress (domain check → visual comparison → ML classifier)
+- **Result** — verdict, confidence score, and reason breakdown for the scanned URL
+- **History** — table of past scans with stats overview (total / safe / suspicious / phishing counts)
