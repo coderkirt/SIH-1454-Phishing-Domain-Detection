@@ -67,4 +67,4 @@ and try the rate limiter by failing login 11 times quickly.
 - **Scanner** — URL input and scan trigger (entry point)
 - **Analyzing** — loading state showing real-time scan progress (domain check → visual comparison → ML classifier)
 - **Result** — verdict, confidence score, and reason breakdown for the scanned URL
-- **History** — table of past scans with stats overview (total / safe / suspicious / phishing counts)ss
+- **History** — table of past scans with stats overview (total / safe / suspicious / phishing counts)
