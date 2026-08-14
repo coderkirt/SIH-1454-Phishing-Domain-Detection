@@ -60,5 +60,8 @@ Try signing up with a real-looking test email (e.g. `test@example.com`) and a
 password of 8+ characters, then log in and confirm the dashboard loads and
 shows your email. Try wrong passwords to confirm the error handling works,
 and try the rate limiter by failing login 11 times quickly.
+<<<<<<< HEAD
 
 now we are moving to the next phase that is the backend part
+=======
+>>>>>>> 3bda2831118f354b453b7fdc339e1ceff9555d94
