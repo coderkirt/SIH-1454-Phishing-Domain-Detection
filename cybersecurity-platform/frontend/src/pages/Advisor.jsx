@@ -25,13 +25,13 @@ export default function Advisor() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Security Advisor</h1>
-        <p className="text-slate-400">Simple explanations. No technical jargon required.</p>
+        <h1 className="text-2xl font-semibold text-ink">Security Advisor</h1>
+        <p className="text-muted">Simple explanations. No technical jargon required.</p>
       </div>
       {topics.map((item) => (
         <div key={item.q} className="card p-6">
-          <h2 className="font-medium text-white">{item.q}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-300">{item.a}</p>
+          <h2 className="font-medium text-ink">{item.q}</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">{item.a}</p>
         </div>
       ))}
     </div>

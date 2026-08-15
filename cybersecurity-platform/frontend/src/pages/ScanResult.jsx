@@ -38,9 +38,9 @@ export default function ScanResult() {
   if (!result) {
     return (
       <div className="card p-8 text-center">
-        <p className="text-lg text-white">No scan result yet</p>
-        <p className="mt-2 text-slate-400">Scan a URL first to see a detailed report.</p>
-        <Link to="/scanner" className="mt-6 inline-block rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950">Scan a URL</Link>
+        <p className="text-lg text-ink">No scan result yet</p>
+        <p className="mt-2 text-muted">Scan a URL first to see a detailed report.</p>
+        <Link to="/scanner" className="btn-accent mt-6 px-5 py-3">Scan a URL</Link>
       </div>
     );
   }
@@ -56,10 +56,10 @@ export default function ScanResult() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Scan result</h1>
-          <p className="mt-1 break-all font-mono text-sm text-cyan-200">{result.url}</p>
+          <h1 className="text-2xl font-semibold text-ink">Scan result</h1>
+          <p className="mt-1 break-all font-mono text-sm text-accent">{result.url}</p>
         </div>
-        <button onClick={() => navigate("/scanner")} className="rounded-xl border border-slate-600 px-4 py-2 text-sm">
+        <button onClick={() => navigate("/scanner")} className="rounded-xl border border-line px-4 py-2 text-sm text-ink-soft hover:bg-nav-active">
           Scan another URL
         </button>
       </div>
@@ -68,14 +68,14 @@ export default function ScanResult() {
         <div className="card flex flex-col items-center justify-center p-6">
           <div
             className="grid h-36 w-36 place-items-center rounded-full"
-            style={{ background: `conic-gradient(${color.hex} ${score * 3.6}deg, rgba(148,163,184,0.18) 0deg)` }}
+            style={{ background: `conic-gradient(${color.hex} ${score * 3.6}deg, var(--gauge-track) 0deg)` }}
           >
-            <div className="grid h-28 w-28 place-items-center rounded-full bg-[#0b1524] text-center">
-              <p className="text-3xl font-semibold text-white">{score}</p>
-              <p className="text-xs text-slate-400">/ 100</p>
+            <div className="grid h-28 w-28 place-items-center rounded-full text-center" style={{ background: "var(--gauge-inner)" }}>
+              <p className="text-3xl font-semibold text-ink">{score}</p>
+              <p className="text-xs text-muted">/ 100</p>
             </div>
           </div>
-          <p className="mt-4 text-sm text-slate-400">Risk score</p>
+          <p className="mt-4 text-sm text-muted">Risk score</p>
         </div>
 
         <div className="card space-y-4 p-6">
@@ -84,11 +84,11 @@ export default function ScanResult() {
             <span className={`rounded-full border px-3 py-1 text-sm ${result.safe ? "border-emerald-500/30 text-emerald-300" : "border-red-500/30 text-red-300"}`}>
               {result.safe ? "Safe" : "Unsafe"}
             </span>
-            <span className="text-sm text-slate-400">{result.simple_view?.verdict}</span>
+            <span className="text-sm text-muted">{result.simple_view?.verdict}</span>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">Recommendation</p>
-            <p className="mt-2 text-slate-200">{recommendationFor(result.risk_level, warning)}</p>
+            <p className="text-xs uppercase tracking-widest text-muted">Recommendation</p>
+            <p className="mt-2 text-ink-soft">{recommendationFor(result.risk_level, warning)}</p>
           </div>
         </div>
       </div>
@@ -97,16 +97,16 @@ export default function ScanResult() {
         <div className="card p-6">
           <h2 className="font-medium">Detection reasons</h2>
           {reasons.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-400">No suspicious signals were found.</p>
+            <p className="mt-3 text-sm text-muted">No suspicious signals were found.</p>
           ) : (
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-300">
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-ink-soft">
               {reasons.map((reason) => <li key={reason}>{reason}</li>)}
             </ul>
           )}
         </div>
         <div className="card p-6">
           <h2 className="font-medium">Technical details</h2>
-          <dl className="mt-3 space-y-2 text-sm text-slate-300">
+          <dl className="mt-3 space-y-2 text-sm text-ink-soft">
             <div className="flex justify-between gap-4"><dt>Domain</dt><dd className="font-mono">{tech.domain || "—"}</dd></div>
             <div className="flex justify-between gap-4"><dt>Domain exists</dt><dd>{formatExists(tech.domain_exists)}</dd></div>
             <div className="flex justify-between gap-4"><dt>HTTPS</dt><dd>{tech.https ? "Yes" : "No"}</dd></div>
@@ -118,7 +118,7 @@ export default function ScanResult() {
           {tags.length ? (
             <div className="mt-4 flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300">{tag}</span>
+                <span key={tag} className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-ink-soft">{tag}</span>
               ))}
             </div>
           ) : null}

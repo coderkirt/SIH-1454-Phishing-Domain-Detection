@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { getErrorMessage, getProfile } from "../services/api";
 
 export default function Settings() {
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState(user);
   const [error, setError] = useState("");
-  const [theme, setTheme] = useState(localStorage.getItem("cg_theme") || "dark");
+  const { theme, setTheme } = useTheme();
   const [notify, setNotify] = useState(localStorage.getItem("cg_notify") !== "false");
   const [strict, setStrict] = useState(localStorage.getItem("cg_strict") === "true");
   const navigate = useNavigate();
@@ -26,22 +27,22 @@ export default function Settings() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <p className="text-slate-400">Profile data comes from the backend. Preferences stay in this browser.</p>
+        <h1 className="text-2xl font-semibold text-ink">Settings</h1>
+        <p className="text-muted">Profile data comes from the backend. Preferences stay in this browser.</p>
       </div>
       <div className="card space-y-2 p-6">
         <h2 className="font-medium">Profile</h2>
         {error ? <p className="text-sm text-red-400">{error}</p> : null}
-        <p className="text-sm text-slate-300">Username: <span className="text-white">{profile?.username || "—"}</span></p>
-        <p className="text-sm text-slate-300">Email: <span className="text-white">{profile?.email || "Not returned until profile loads"}</span></p>
+        <p className="text-sm text-ink-soft">Username: <span className="text-ink">{profile?.username || "—"}</span></p>
+        <p className="text-sm text-ink-soft">Email: <span className="text-ink">{profile?.email || "Not returned until profile loads"}</span></p>
       </div>
       <div className="card space-y-4 p-6">
         <h2 className="font-medium">Preferences</h2>
         <label className="flex items-center justify-between text-sm">
           Theme
-          <select value={theme} onChange={(e) => persist("cg_theme", e.target.value, setTheme)} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-            <option value="dark">Dark (current product theme)</option>
-            <option value="light">Light (planned)</option>
+          <select value={theme} onChange={(e) => setTheme(e.target.value)} className="field w-auto min-w-40">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
           </select>
         </label>
         <label className="flex items-center justify-between text-sm">
@@ -52,7 +53,7 @@ export default function Settings() {
           Stricter detection preference
           <input type="checkbox" checked={strict} onChange={(e) => persist("cg_strict", e.target.checked, setStrict)} />
         </label>
-        <p className="text-xs text-slate-500">Stricter scoring is a UI preference for now. The live checker uses the backend rules.</p>
+        <p className="text-xs text-muted">Stricter scoring is a UI preference for now. The live checker uses the backend rules.</p>
       </div>
       <button
         onClick={() => { logout(); navigate("/"); }}

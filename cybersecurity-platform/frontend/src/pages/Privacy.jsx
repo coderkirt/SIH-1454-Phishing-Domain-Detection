@@ -42,16 +42,16 @@ export default function Privacy() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Privacy Center</h1>
-        <p className="text-slate-400">This page describes what the current MVP actually does. Planned ideas are labeled clearly.</p>
+        <h1 className="text-2xl font-semibold text-ink">Privacy Center</h1>
+        <p className="text-muted">This page describes what the current MVP actually does. Planned ideas are labeled clearly.</p>
       </div>
       <div className="card p-6">
         <h2 className="font-medium">What this application stores</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-300">
+        <ul className="mt-3 space-y-2 text-sm text-ink-soft">
           {stored.map((item) => (
-            <li key={item.name} className="flex flex-col gap-1 border-b border-slate-800 py-2 last:border-0 sm:flex-row sm:justify-between">
+            <li key={item.name} className="flex flex-col gap-1 border-b border-line py-2 last:border-0 sm:flex-row sm:justify-between">
               <span>{item.name}</span>
-              <span className="text-cyan-300">{item.status}</span>
+              <span className="text-accent">{item.status}</span>
             </li>
           ))}
         </ul>
@@ -59,13 +59,13 @@ export default function Privacy() {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="card p-6">
           <h2 className="font-medium">Sent to the backend</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-300">
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-soft">
             {sent.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </div>
         <div className="card p-6">
           <h2 className="font-medium">Stays locally</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-300">
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-soft">
             {local.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </div>
@@ -76,16 +76,16 @@ export default function Privacy() {
           Keep scan history on the server
           <input type="checkbox" checked={saveHistory} onChange={(e) => toggle("cg_save_history", e.target.checked, setSaveHistory)} />
         </label>
-        <p className="text-xs text-slate-500">The current backend always saves scans so the dashboard can show real statistics. This toggle is a UI preference for a future per-user setting.</p>
+        <p className="text-xs text-muted">The current backend always saves scans so the dashboard can show real statistics. This toggle is a UI preference for a future per-user setting.</p>
         <label className="flex items-center justify-between gap-4 text-sm">
           Allow community threat sharing
           <input type="checkbox" checked={shareHistory} onChange={(e) => toggle("cg_share_history", e.target.checked, setShareHistory)} />
         </label>
-        <p className="text-xs text-slate-500">Planned. Community sharing is not implemented yet.</p>
+        <p className="text-xs text-muted">Planned. Community sharing is not implemented yet.</p>
       </div>
       <div className="card p-6">
         <h2 className="font-medium">Planned (not implemented)</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-400">
+        <ul className="mt-3 space-y-2 text-sm text-muted">
           {planned.map((item) => (
             <li key={item} className="flex items-center justify-between gap-3">
               <span>{item}</span>
