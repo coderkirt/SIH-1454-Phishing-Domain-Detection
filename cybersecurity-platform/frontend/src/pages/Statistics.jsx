@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import ChartTooltip from "../components/ChartTooltip";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
 import StatCard from "../components/StatCard";
 import EmptyState from "../components/EmptyState";
 import { getDailySummary, getErrorMessage, getOverview, getRiskDistribution, getThreatTypes } from "../services/api";
@@ -27,7 +26,7 @@ export default function Statistics() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-muted">Loading statistics...</p>;
+  if (loading) return <p className="text-slate-400">Loading statistics...</p>;
   if (error) return <p className="text-red-400">{error}</p>;
 
   const riskData = Object.entries(risk?.risk_distribution || {}).map(([name, value]) => ({ name, value, fill: riskColor(name).hex }));
@@ -36,8 +35,8 @@ export default function Statistics() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Statistics</h1>
-        <p className="text-muted">Charts are generated from actual SQLite records.</p>
+        <h1 className="text-2xl font-semibold text-white">Statistics</h1>
+        <p className="text-slate-400">Charts are generated from actual SQLite records.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={ScanSearch} label="URLs scanned" value={overview?.total_urls_checked ?? 0} />
@@ -52,10 +51,10 @@ export default function Statistics() {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={riskData} dataKey="value" nameKey="name" outerRadius={90} stroke="var(--surface)" label={{ fill: "var(--chart-axis)", fontSize: 12 }}>
+                  <Pie data={riskData} dataKey="value" nameKey="name" outerRadius={90} label>
                     {riskData.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Pie>
-                  <Tooltip content={<ChartTooltip />} />
+                  <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -67,11 +66,10 @@ export default function Statistics() {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={typeData}>
-                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 12 }} />
-                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                  <XAxis dataKey="name" stroke="#94a3b8" />
+                  <YAxis stroke="#94a3b8" allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#22d3ee" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

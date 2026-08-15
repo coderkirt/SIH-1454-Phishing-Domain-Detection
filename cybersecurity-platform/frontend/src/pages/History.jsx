@@ -32,21 +32,21 @@ export default function History() {
     return list;
   }, [rows, query, level, sort]);
 
-  if (loading) return <p className="text-muted">Loading history...</p>;
+  if (loading) return <p className="text-slate-400">Loading history...</p>;
   if (error) return <p className="text-red-400">{error}</p>;
 
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Threat history</h1>
-        <p className="text-muted">Real checks stored in SQLite. Nothing here is invented.</p>
+        <h1 className="text-2xl font-semibold text-white">Threat history</h1>
+        <p className="text-slate-400">Real checks stored in SQLite. Nothing here is invented.</p>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search URL" className="field flex-1" />
-        <select value={level} onChange={(e) => setLevel(e.target.value)} className="field sm:w-40">
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search URL" className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5" />
+        <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5">
           {["ALL", "LOW", "MEDIUM", "HIGH", "CRITICAL"].map((opt) => <option key={opt}>{opt}</option>)}
         </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="field sm:w-44">
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5">
           <option value="newest">Newest</option>
           <option value="score">Highest score</option>
         </select>
@@ -56,7 +56,7 @@ export default function History() {
       ) : (
         <div className="card overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-line text-muted">
+            <thead className="border-b border-slate-800 text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-medium">URL</th>
                 <th className="px-4 py-3 font-medium">Risk score</th>
@@ -67,12 +67,12 @@ export default function History() {
             </thead>
             <tbody>
               {filtered.map((row, i) => (
-                <tr key={`${row.url}-${row.timestamp}-${i}`} className="border-b border-line last:border-0">
-                  <td className="max-w-[320px] truncate px-4 py-3 font-mono text-accent">{row.url}</td>
+                <tr key={`${row.url}-${row.timestamp}-${i}`} className="border-b border-slate-800/80 last:border-0">
+                  <td className="max-w-[320px] truncate px-4 py-3 font-mono text-cyan-200">{row.url}</td>
                   <td className="px-4 py-3">{row.risk_score ?? "—"}</td>
                   <td className="px-4 py-3"><RiskBadge level={row.risk_level} /></td>
                   <td className="px-4 py-3">{row.risk_level === "LOW" ? "Safe" : "Unsafe"}</td>
-                  <td className="px-4 py-3 text-muted">{row.timestamp}</td>
+                  <td className="px-4 py-3 text-slate-400">{row.timestamp}</td>
                 </tr>
               ))}
             </tbody>
