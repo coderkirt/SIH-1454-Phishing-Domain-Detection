@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicLayout from "./layouts/PublicLayout";
 import AppLayout from "./layouts/AppLayout";
@@ -21,45 +20,43 @@ import { useAuth } from "./context/AuthContext";
 function AdaptiveLayout() {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
-    return <div className="min-h-screen grid place-items-center bg-page text-muted">Loading...</div>;
+    return <div className="min-h-screen grid place-items-center text-slate-400">Loading...</div>;
   }
   return isAuthenticated ? <AppLayout /> : <PublicLayout />;
 }
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<PublicLayout />}>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-            </Route>
-            <Route element={<AdaptiveLayout />}>
-              <Route path="/scan-result" element={<ScanResult />} />
-            </Route>
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/scanner" element={<Scanner />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/advisor" element={<Advisor />} />
-            </Route>
-            <Route path="/home" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
+          <Route element={<AdaptiveLayout />}>
+            <Route path="/scan-result" element={<ScanResult />} />
+          </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scanner" element={<Scanner />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/advisor" element={<Advisor />} />
+          </Route>
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

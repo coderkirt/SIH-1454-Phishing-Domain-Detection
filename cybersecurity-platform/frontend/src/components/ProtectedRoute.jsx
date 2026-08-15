@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-page text-muted">
+      <div className="min-h-screen grid place-items-center text-slate-400">
         Checking your session...
       </div>
     );

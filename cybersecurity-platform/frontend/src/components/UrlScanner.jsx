@@ -37,20 +37,20 @@ export default function UrlScanner({ compact = false }) {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Enter website URL........................"
-          className="field w-full py-3.5"
+          className="w-full rounded-xl border border-slate-600/60 bg-slate-950/70 px-4 py-3.5 text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-400/20"
         />
         <button
           type="submit"
           disabled={loading}
-          className="btn-accent px-6 py-3.5"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
         >
           <ScanSearch size={18} />
           {loading ? "SCANNING" : "SCAN"}
         </button>
       </div>
       {loading ? (
-        <p className="mt-3 flex items-center gap-2 text-sm text-accent">
-          <span className="h-2 w-2 rounded-full bg-accent scan-pulse" />
+        <p className="mt-3 flex items-center gap-2 text-sm text-cyan-300">
+          <span className="h-2 w-2 rounded-full bg-cyan-300 scan-pulse" />
           Analyzing URL...
         </p>
       ) : null}
