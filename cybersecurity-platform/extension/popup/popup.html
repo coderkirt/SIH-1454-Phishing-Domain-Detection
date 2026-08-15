@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CyberGuard</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>CyberGuard</h1>
+      <p class="hint">This popup sends the URL you see here to the local FastAPI backend. It does not intercept pages automatically.</p>
+      <label for="url">Current URL</label>
+      <input id="url" type="text" />
+      <button id="scan">Scan</button>
+      <p id="status"></p>
+      <section id="result" hidden>
+        <p><strong>Score:</strong> <span id="score"></span></p>
+        <p><strong>Level:</strong> <span id="level"></span></p>
+        <p><strong>Safe:</strong> <span id="safe"></span></p>
+        <p><strong>Warning:</strong></p>
+        <p id="warning"></p>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
