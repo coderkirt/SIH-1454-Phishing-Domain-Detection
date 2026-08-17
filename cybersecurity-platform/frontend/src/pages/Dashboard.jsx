@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import ChartTooltip from "../components/ChartTooltip";
 import { Activity, ShieldAlert, Percent, ScanSearch } from "lucide-react";
 import StatCard from "../components/StatCard";
 import RiskBadge from "../components/RiskBadge";
@@ -31,7 +32,7 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-slate-400">Loading dashboard...</p>;
+  if (loading) return <p className="text-muted">Loading dashboard...</p>;
   if (error) return <p className="text-red-400">{error}</p>;
 
   const riskData = Object.entries(risk?.risk_distribution || {}).map(([name, value]) => ({
@@ -45,12 +46,12 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-        <p className="text-slate-400">Live numbers from your FastAPI + SQLite backend.</p>
+        <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
+        <p className="text-muted">Live numbers from your FastAPI + SQLite backend.</p>
       </div>
 
       <div className="card p-5">
-        <p className="mb-3 text-sm font-medium text-slate-300">Scan a URL</p>
+        <p className="mb-3 text-sm font-medium text-ink-soft">Scan a URL</p>
         <UrlScanner compact />
       </div>
 
@@ -70,10 +71,10 @@ export default function Dashboard() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={riskData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80}>
+                  <Pie data={riskData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} stroke="var(--surface)">
                     {riskData.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip content={<ChartTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -87,10 +88,11 @@ export default function Dashboard() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={typeData}>
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                  <YAxis stroke="#94a3b8" allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#22d3ee" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 12 }} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Bar dataKey="value" fill="var(--accent)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -102,15 +104,15 @@ export default function Dashboard() {
         <div className="card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-medium">Recent scans</h2>
-            <Link to="/history" className="text-sm text-cyan-300">View all</Link>
+            <Link to="/history" className="text-sm text-accent">View all</Link>
           </div>
           {recent.length === 0 ? (
             <EmptyState title="No scans yet" body="Your latest checks will show up here." />
           ) : (
             <ul className="space-y-3">
               {recent.map((item, i) => (
-                <li key={`${item.url}-${item.timestamp}-${i}`} className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3 last:border-0">
-                  <p className="truncate font-mono text-sm text-slate-300">{item.url}</p>
+                <li key={`${item.url}-${item.timestamp}-${i}`} className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-0">
+                  <p className="truncate font-mono text-sm text-accent">{item.url}</p>
                   <RiskBadge level={item.risk_level} />
                 </li>
               ))}
@@ -123,9 +125,9 @@ export default function Dashboard() {
             <EmptyState title="No scans yet" body="Scan a URL to see the latest result." />
           ) : (
             <div>
-              <p className="break-all font-mono text-sm text-cyan-200">{latest.url}</p>
+              <p className="break-all font-mono text-sm text-accent">{latest.url}</p>
               <div className="mt-3"><RiskBadge level={latest.risk_level} /></div>
-              <p className="mt-2 text-sm text-slate-400">{latest.timestamp}</p>
+              <p className="mt-2 text-sm text-muted">{latest.timestamp}</p>
             </div>
           )}
         </div>
