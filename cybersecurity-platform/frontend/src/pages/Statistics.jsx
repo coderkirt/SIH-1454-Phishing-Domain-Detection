@@ -3,6 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis
 import ChartTooltip from "../components/ChartTooltip";
 import StatCard from "../components/StatCard";
 import EmptyState from "../components/EmptyState";
+import PageHeader from "../components/PageHeader";
+import LoadingState from "../components/LoadingState";
+import TechnicalPanel from "../components/TechnicalPanel";
 import { getDailySummary, getErrorMessage, getOverview, getRiskDistribution, getThreatTypes } from "../services/api";
 import { riskColor } from "../utils/risk";
 import { Percent, ShieldAlert, ScanSearch, CalendarDays } from "lucide-react";
@@ -27,32 +30,46 @@ export default function Statistics() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-muted">Loading statistics...</p>;
-  if (error) return <p className="text-red-400">{error}</p>;
+  if (loading) return <LoadingState label="Loading statistics" />;
+
+  if (error) {
+    return (
+      <TechnicalPanel title="System error" accent>
+        <p className="flex items-center gap-2 text-sm text-[var(--risk-high)]">
+          <span className="dot dot-critical" aria-hidden="true" />
+          {error}
+        </p>
+      </TechnicalPanel>
+    );
+  }
 
   const riskData = Object.entries(risk?.risk_distribution || {}).map(([name, value]) => ({ name, value, fill: riskColor(name).hex }));
   const typeData = Object.entries(types?.threat_types || {}).map(([name, value]) => ({ name, value }));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Statistics</h1>
-        <p className="text-muted">Charts are generated from actual SQLite records.</p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-8">
+      <PageHeader
+        section="05 / Statistics"
+        title="Threat analytics"
+        subtitle="Charts are generated from actual SQLite records."
+      />
+
+      <div className="grid gap-px border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={ScanSearch} label="URLs scanned" value={overview?.total_urls_checked ?? 0} />
         <StatCard icon={ShieldAlert} label="Threats detected" value={overview?.threats_detected ?? 0} />
         <StatCard icon={Percent} label="Safety percentage" value={overview?.safety_rate || "0.0%"} />
         <StatCard icon={CalendarDays} label="Today" value={`${daily?.urls_checked_today ?? 0} scans`} hint={`${daily?.threats_blocked_today ?? 0} threats blocked`} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card p-5">
-          <h2 className="mb-4 font-medium">Risk distribution</h2>
-          {(risk?.total || 0) === 0 ? <EmptyState title="No scans yet" body="Charts appear after the first URL check." /> : (
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <TechnicalPanel title="Risk distribution">
+          {(risk?.total || 0) === 0 ? (
+            <EmptyState title="No scans yet" body="Charts appear after the first URL check." />
+          ) : (
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={riskData} dataKey="value" nameKey="name" outerRadius={90} stroke="var(--surface)" label={{ fill: "var(--chart-axis)", fontSize: 12 }}>
+                  <Pie data={riskData} dataKey="value" nameKey="name" outerRadius={90} stroke="var(--surface)" label={{ fill: "var(--chart-axis)", fontSize: 11 }}>
                     {riskData.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}
                   </Pie>
                   <Tooltip content={<ChartTooltip />} />
@@ -60,24 +77,25 @@ export default function Statistics() {
               </ResponsiveContainer>
             </div>
           )}
-        </div>
-        <div className="card p-5">
-          <h2 className="mb-4 font-medium">Threat types</h2>
-          {(types?.total || 0) === 0 ? <EmptyState title="No threat types yet" body="HIGH/CRITICAL scans create threat-type records." /> : (
+        </TechnicalPanel>
+        <TechnicalPanel title="Threat types">
+          {(types?.total || 0) === 0 ? (
+            <EmptyState title="No threat types yet" body="HIGH/CRITICAL scans create threat-type records." />
+          ) : (
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={typeData}>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 12 }} />
-                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 11 }} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 11 }} allowDecimals={false} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="value" fill="var(--muted)" radius={0} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
-        </div>
-      </div>
+        </TechnicalPanel>
+      </section>
     </div>
   );
 }

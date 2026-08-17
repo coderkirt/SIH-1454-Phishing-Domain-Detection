@@ -1,3 +1,6 @@
+import PageHeader from "../components/PageHeader";
+import TechnicalPanel from "../components/TechnicalPanel";
+
 const topics = [
   {
     q: "What does HIGH risk mean?",
@@ -24,15 +27,16 @@ const topics = [
 export default function Advisor() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Security Advisor</h1>
-        <p className="text-muted">Simple explanations. No technical jargon required.</p>
-      </div>
-      {topics.map((item) => (
-        <div key={item.q} className="card p-6">
-          <h2 className="font-medium text-ink">{item.q}</h2>
-          <p className="mt-2 text-sm leading-6 text-ink-soft">{item.a}</p>
-        </div>
+      <PageHeader
+        section="07 / Advisor"
+        title="Security advisor"
+        subtitle="Simple explanations. No technical jargon required."
+      />
+      {topics.map((item, index) => (
+        <TechnicalPanel key={item.q} title={`${String(index + 1).padStart(2, "0")} / Guidance`}>
+          <h2 className="font-display text-lg font-semibold text-ink">{item.q}</h2>
+          <p className="mt-3 text-sm leading-6 text-ink-soft">{item.a}</p>
+        </TechnicalPanel>
       ))}
     </div>
   );

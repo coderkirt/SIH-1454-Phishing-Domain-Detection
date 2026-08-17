@@ -1,4 +1,6 @@
 import { useState } from "react";
+import PageHeader from "../components/PageHeader";
+import TechnicalPanel from "../components/TechnicalPanel";
 
 const stored = [
   { name: "Account username, email, and password hash", status: "Stored on the server (SQLite)" },
@@ -41,59 +43,69 @@ export default function Privacy() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Privacy Center</h1>
-        <p className="text-muted">This page describes what the current MVP actually does. Planned ideas are labeled clearly.</p>
-      </div>
-      <div className="card p-6">
-        <h2 className="font-medium">What this application stores</h2>
-        <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+      <PageHeader
+        section="06 / Privacy"
+        title="Privacy center"
+        subtitle="This page describes what the current MVP actually does. Planned ideas are labeled clearly."
+      />
+
+      <TechnicalPanel title="01 / Stored data">
+        <ul className="space-y-0">
           {stored.map((item) => (
-            <li key={item.name} className="flex flex-col gap-1 border-b border-line py-2 last:border-0 sm:flex-row sm:justify-between">
-              <span>{item.name}</span>
-              <span className="text-accent">{item.status}</span>
+            <li key={item.name} className="grid gap-2 border-b border-line py-3 last:border-0 sm:grid-cols-[1fr_auto] sm:items-center">
+              <span className="text-sm text-ink-soft">{item.name}</span>
+              <span className="font-mono text-xs text-muted sm:text-right">{item.status}</span>
             </li>
           ))}
         </ul>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="card p-6">
-          <h2 className="font-medium">Sent to the backend</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-soft">
-            {sent.map((item) => <li key={item}>{item}</li>)}
+      </TechnicalPanel>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <TechnicalPanel title="02 / Sent to backend">
+          <ul className="space-y-2">
+            {sent.map((item, index) => (
+              <li key={item} className="flex items-start gap-3 text-sm text-ink-soft">
+                <span className="font-mono text-xs text-muted">{String(index + 1).padStart(2, "0")}</span>
+                {item}
+              </li>
+            ))}
           </ul>
-        </div>
-        <div className="card p-6">
-          <h2 className="font-medium">Stays locally</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-soft">
-            {local.map((item) => <li key={item}>{item}</li>)}
+        </TechnicalPanel>
+        <TechnicalPanel title="03 / Stays locally">
+          <ul className="space-y-2">
+            {local.map((item, index) => (
+              <li key={item} className="flex items-start gap-3 text-sm text-ink-soft">
+                <span className="font-mono text-xs text-muted">{String(index + 1).padStart(2, "0")}</span>
+                {item}
+              </li>
+            ))}
           </ul>
-        </div>
+        </TechnicalPanel>
       </div>
-      <div className="card p-6 space-y-4">
-        <h2 className="font-medium">Current privacy settings</h2>
-        <label className="flex items-center justify-between gap-4 text-sm">
+
+      <TechnicalPanel title="04 / Privacy settings">
+        <label className="flex items-center justify-between gap-4 border-b border-line pb-4 text-sm">
           Keep scan history on the server
           <input type="checkbox" checked={saveHistory} onChange={(e) => toggle("cg_save_history", e.target.checked, setSaveHistory)} />
         </label>
         <p className="text-xs text-muted">The current backend always saves scans so the dashboard can show real statistics. This toggle is a UI preference for a future per-user setting.</p>
-        <label className="flex items-center justify-between gap-4 text-sm">
+        <label className="mt-4 flex items-center justify-between gap-4 text-sm">
           Allow community threat sharing
           <input type="checkbox" checked={shareHistory} onChange={(e) => toggle("cg_share_history", e.target.checked, setShareHistory)} />
         </label>
-        <p className="text-xs text-muted">Planned. Community sharing is not implemented yet.</p>
-      </div>
-      <div className="card p-6">
-        <h2 className="font-medium">Planned (not implemented)</h2>
-        <ul className="mt-3 space-y-2 text-sm text-muted">
+        <p className="mt-2 text-xs text-muted">Planned. Community sharing is not implemented yet.</p>
+      </TechnicalPanel>
+
+      <TechnicalPanel title="05 / Planned">
+        <ul className="space-y-0">
           {planned.map((item) => (
-            <li key={item} className="flex items-center justify-between gap-3">
+            <li key={item} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-0 text-sm text-muted">
               <span>{item}</span>
-              <span className="rounded-full border border-amber-400/30 px-2 py-0.5 text-xs text-amber-300">Planned</span>
+              <span className="status-pill risk-medium">Planned</span>
             </li>
           ))}
         </ul>
-      </div>
+      </TechnicalPanel>
     </div>
   );
 }

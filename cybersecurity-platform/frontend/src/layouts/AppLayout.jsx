@@ -1,36 +1,46 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  ScanSearch,
-  History,
-  BarChart3,
-  Shield,
-  FileSearch,
-  Settings,
-  LifeBuoy,
-  LogOut,
-  Menu,
-  X,
-} from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "../components/ThemeToggle";
+import DotMatrixLogo from "../components/DotMatrixLogo";
+import SystemTopBar from "../components/SystemTopBar";
 
 const links = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/scanner", label: "URL Scanner", icon: ScanSearch },
-  { to: "/scan-result", label: "Last Result", icon: FileSearch },
-  { to: "/history", label: "Threat History", icon: History },
-  { to: "/statistics", label: "Statistics", icon: BarChart3 },
-  { to: "/privacy", label: "Privacy Center", icon: Shield },
-  { to: "/advisor", label: "Security Advisor", icon: LifeBuoy },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", num: "01", label: "Dashboard" },
+  { to: "/scanner", num: "02", label: "Scan URL" },
+  { to: "/scan-result", num: "03", label: "Reports" },
+  { to: "/history", num: "04", label: "History" },
+  { to: "/statistics", num: "05", label: "Statistics" },
+  { to: "/privacy", num: "06", label: "Privacy" },
+  { to: "/advisor", num: "07", label: "Advisor" },
+  { to: "/settings", num: "08", label: "Settings" },
 ];
+
+function NavItem({ to, num, label, onNavigate }) {
+  return (
+    <NavLink
+      to={to}
+      onClick={onNavigate}
+      className={({ isActive }) => `nav-item ${isActive ? "nav-item-active" : ""}`}
+    >
+      {({ isActive }) => (
+        <>
+          <span className={`nav-num font-mono text-xs ${isActive ? "text-accent" : "text-muted"}`}>{num}</span>
+          <span className="nav-label flex items-center gap-2">
+            <span className={`dot ${isActive ? "dot-critical" : "dot-inactive"}`} aria-hidden="true" />
+            {label}
+          </span>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const closeMenu = () => setOpen(false);
 
   const onLogout = () => {
     logout();
@@ -43,54 +53,50 @@ export default function AppLayout() {
         {open ? (
           <button
             type="button"
-            className="fixed inset-0 z-20 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-20 bg-black/50 lg:hidden"
             aria-label="Close menu overlay"
-            onClick={() => setOpen(false)}
+            onClick={closeMenu}
           />
         ) : null}
-        <aside className={`fixed z-30 flex h-screen w-64 flex-col border-r border-line bg-sidebar p-5 transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <p className="text-lg font-semibold tracking-wide text-ink">CyberGuard</p>
-              <p className="text-xs text-muted">Threat detection platform</p>
+        <aside className={`fixed z-30 flex h-screen w-72 flex-col border-r border-line bg-sidebar transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className="border-b border-line p-5">
+            <div className="flex items-center gap-3">
+              <DotMatrixLogo />
+              <div>
+                <p className="font-display text-base font-semibold tracking-[0.12em] text-ink">PHISHSHIELD</p>
+                <p className="label-tech">Security operating system</p>
+              </div>
             </div>
-            <button className="icon-btn lg:hidden" onClick={() => setOpen(false)} aria-label="Close menu">
-              <X size={18} />
-            </button>
           </div>
-          <nav className="space-y-1">
-            {links.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${isActive ? "bg-nav-active text-accent" : "text-ink-soft hover:bg-nav-active"}`
-                }
-              >
-                <Icon size={18} />
-                {label}
-              </NavLink>
+          <nav className="flex-1 overflow-y-auto p-3">
+            {links.map((link) => (
+              <NavItem key={link.to} {...link} onNavigate={closeMenu} />
             ))}
           </nav>
-          <div className="mt-auto pt-6">
-            <p className="mb-3 truncate text-sm text-muted">{user?.username || "User"}</p>
-            <button onClick={onLogout} className="flex w-full items-center gap-2 rounded-xl border border-line px-3 py-2 text-sm text-ink-soft hover:bg-nav-active">
-              <LogOut size={16} /> Logout
+          <div className="border-t border-line p-4">
+            <div className="space-y-3 meta-tech">
+              <div>
+                <p className="label-tech">Engine</p>
+                <p className="mt-1">Rule / threat intelligence</p>
+              </div>
+              <div>
+                <p className="label-tech">Operator</p>
+                <p className="mt-1 truncate">{user?.username || "Unknown"}</p>
+              </div>
+            </div>
+            <button onClick={onLogout} className="btn-secondary mt-4 w-full py-2 text-xs">
+              Logout
             </button>
           </div>
         </aside>
 
         <div className="min-h-screen min-w-0 flex-1">
-          <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-header px-4 py-3 backdrop-blur lg:px-8">
-            <button className="icon-btn lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
-              <Menu size={18} />
+          <SystemTopBar operator={user?.username}>
+            <button type="button" className="icon-btn lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+              <span className="font-mono text-xs">≡</span>
             </button>
-            <div className="ml-auto flex items-center gap-3">
-              <p className="text-sm text-muted">Signed in as <span className="font-medium text-ink">{user?.username}</span></p>
-              <ThemeToggle />
-            </div>
-          </header>
+            <ThemeToggle />
+          </SystemTopBar>
           <main className="px-4 py-6 lg:px-8">
             <Outlet />
           </main>
