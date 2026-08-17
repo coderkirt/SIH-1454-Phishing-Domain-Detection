@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ScanSearch } from "lucide-react";
 import { checkUrl, getErrorMessage } from "../services/api";
 import { saveLastScan } from "../utils/risk";
 
@@ -30,31 +29,61 @@ export default function UrlScanner({ compact = false }) {
     }
   };
 
+  const ready = url.trim().length > 0 && !loading;
+
   return (
     <form onSubmit={onSubmit} className={compact ? "" : "w-full"}>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter website URL........................"
-          className="field w-full py-3.5"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-accent px-6 py-3.5"
-        >
-          <ScanSearch size={18} />
-          {loading ? "SCANNING" : "SCAN"}
-        </button>
+      <div className="panel p-4">
+        <label htmlFor="target-url" className="label-tech">Target URL</label>
+        <div className="mt-3 border border-line">
+          <input
+            id="target-url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="field field-mono w-full border-0 bg-transparent px-3 py-3 focus:shadow-none"
+          />
+        </div>
+        <div className="mt-4 grid gap-3 border-t border-line pt-4 sm:grid-cols-2">
+          <div>
+            <p className="label-tech">Supported protocol</p>
+            <p className="mt-1 font-mono text-sm text-ink-soft">HTTPS</p>
+          </div>
+          <div>
+            <p className="label-tech">Analysis mode</p>
+            <p className="mt-1 font-mono text-sm text-ink-soft">Rule / threat intelligence</p>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted">
+            <span className={`dot ${loading ? "dot-critical scan-pulse" : ready ? "dot-active" : "dot-inactive"}`} aria-hidden="true" />
+            {loading ? "Analyzing" : ready ? "Ready" : "Awaiting input"}
+          </p>
+          <button type="submit" disabled={loading} className="btn-primary px-5 py-2.5">
+            {loading ? "Analyze" : "Analyze URL"}
+          </button>
+        </div>
       </div>
       {loading ? (
-        <p className="mt-3 flex items-center gap-2 text-sm text-accent">
-          <span className="h-2 w-2 rounded-full bg-accent scan-pulse" />
-          Analyzing URL...
-        </p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="scan-dots scan-pulse" aria-hidden="true">
+            <span className="dot dot-active" />
+            <span className="dot dot-active" />
+            <span className="dot dot-queued" />
+            <span className="dot dot-inactive" />
+            <span className="dot dot-inactive" />
+          </span>
+          <p className="label-tech">Analyzing domain</p>
+        </div>
       ) : null}
-      {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
+      {error ? (
+        <div className="mt-3 panel border border-[rgba(255,0,0,0.35)] p-3">
+          <p className="flex items-center gap-2 text-sm text-[var(--risk-high)]">
+            <span className="dot dot-critical" aria-hidden="true" />
+            {error}
+          </p>
+        </div>
+      ) : null}
     </form>
   );
 }

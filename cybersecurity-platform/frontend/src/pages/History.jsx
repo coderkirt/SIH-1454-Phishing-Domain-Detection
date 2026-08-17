@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import RiskBadge from "../components/RiskBadge";
 import EmptyState from "../components/EmptyState";
+import PageHeader from "../components/PageHeader";
+import LoadingState from "../components/LoadingState";
+import TechnicalPanel from "../components/TechnicalPanel";
 import { getErrorMessage, getRecentUrls } from "../services/api";
+import { riskColor } from "../utils/risk";
 
 export default function History() {
   const [rows, setRows] = useState([]);
@@ -32,17 +37,29 @@ export default function History() {
     return list;
   }, [rows, query, level, sort]);
 
-  if (loading) return <p className="text-muted">Loading history...</p>;
-  if (error) return <p className="text-red-400">{error}</p>;
+  if (loading) return <LoadingState label="Loading history" />;
+
+  if (error) {
+    return (
+      <TechnicalPanel title="System error" accent>
+        <p className="flex items-center gap-2 text-sm text-[var(--risk-high)]">
+          <span className="dot dot-critical" aria-hidden="true" />
+          {error}
+        </p>
+      </TechnicalPanel>
+    );
+  }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Threat history</h1>
-        <p className="text-muted">Real checks stored in SQLite. Nothing here is invented.</p>
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search URL" className="field flex-1" />
+    <div className="space-y-6">
+      <PageHeader
+        section="04 / History"
+        title="Report history"
+        subtitle="Real checks stored in SQLite. Nothing here is invented."
+      />
+
+      <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search URL" className="field field-mono" />
         <select value={level} onChange={(e) => setLevel(e.target.value)} className="field sm:w-40">
           {["ALL", "LOW", "MEDIUM", "HIGH", "CRITICAL"].map((opt) => <option key={opt}>{opt}</option>)}
         </select>
@@ -51,33 +68,48 @@ export default function History() {
           <option value="score">Highest score</option>
         </select>
       </div>
+
       {filtered.length === 0 ? (
-        <EmptyState title="No scans yet" body="Scan a URL to build your threat history." />
+        <EmptyState
+          title="No analyses yet"
+          body="Analyze a URL to build your threat history."
+          action={<Link to="/scanner" className="btn-primary px-4 py-2.5">Analyze URL</Link>}
+        />
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-line text-muted">
-              <tr>
-                <th className="px-4 py-3 font-medium">URL</th>
-                <th className="px-4 py-3 font-medium">Risk score</th>
-                <th className="px-4 py-3 font-medium">Risk level</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((row, i) => (
-                <tr key={`${row.url}-${row.timestamp}-${i}`} className="border-b border-line last:border-0">
-                  <td className="max-w-[320px] truncate px-4 py-3 font-mono text-accent">{row.url}</td>
-                  <td className="px-4 py-3">{row.risk_score ?? "—"}</td>
-                  <td className="px-4 py-3"><RiskBadge level={row.risk_level} /></td>
-                  <td className="px-4 py-3">{row.risk_level === "LOW" ? "Safe" : "Unsafe"}</td>
-                  <td className="px-4 py-3 text-muted">{row.timestamp}</td>
+        <TechnicalPanel title="Threat records">
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Target</th>
+                  <th>Score</th>
+                  <th>Risk</th>
+                  <th>Status</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map((row, i) => {
+                  const c = riskColor(row.risk_level);
+                  return (
+                    <tr key={`${row.url}-${row.timestamp}-${i}`}>
+                      <td className="max-w-[320px] truncate font-mono">{row.url}</td>
+                      <td className="font-mono">{row.risk_score ?? "—"}</td>
+                      <td><RiskBadge level={row.risk_level} /></td>
+                      <td>
+                        <span className="flex items-center gap-2">
+                          <span className={`dot ${c.dot}`} aria-hidden="true" />
+                          {row.risk_level === "LOW" ? "Controlled" : "Review"}
+                        </span>
+                      </td>
+                      <td className="meta-tech">{row.timestamp}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </TechnicalPanel>
       )}
     </div>
   );

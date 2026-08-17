@@ -3,13 +3,15 @@ export const LAST_SCAN_KEY = "cg_last_scan";
 export function riskColor(level) {
   switch ((level || "").toUpperCase()) {
     case "CRITICAL":
-      return { text: "text-red-400", bg: "bg-red-500/15", border: "border-red-500/30", hex: "#f87171" };
+      return { text: "text-[var(--risk-high)]", bg: "bg-[rgba(255,0,0,0.08)]", border: "border-[rgba(255,0,0,0.35)]", hex: "#ff0000", dot: "dot-critical", className: "risk-critical" };
     case "HIGH":
-      return { text: "text-orange-400", bg: "bg-orange-500/15", border: "border-orange-500/30", hex: "#fb923c" };
+      return { text: "text-[var(--risk-high)]", bg: "bg-[rgba(255,0,0,0.06)]", border: "border-[rgba(255,0,0,0.3)]", hex: "#ff0000", dot: "dot-critical", className: "risk-high" };
     case "MEDIUM":
-      return { text: "text-amber-300", bg: "bg-amber-400/15", border: "border-amber-400/30", hex: "#fbbf24" };
+      return { text: "text-[var(--risk-medium)]", bg: "bg-[rgba(196,160,0,0.08)]", border: "border-[rgba(196,160,0,0.35)]", hex: "#c4a000", dot: "dot-active", className: "risk-medium" };
+    case "LOW":
+      return { text: "text-[var(--risk-low)]", bg: "bg-transparent", border: "border-[var(--line)]", hex: "#808080", dot: "dot-active", className: "risk-low" };
     default:
-      return { text: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/30", hex: "#34d399" };
+      return { text: "text-[var(--risk-unknown)]", bg: "bg-transparent", border: "border-[var(--line)]", hex: "#606060", dot: "dot-inactive", className: "risk-unknown" };
   }
 }
 

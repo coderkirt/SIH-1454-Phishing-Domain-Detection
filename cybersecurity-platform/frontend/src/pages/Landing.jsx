@@ -1,59 +1,101 @@
 import { Link } from "react-router-dom";
-import { Shield, Activity, History, BarChart3, Lock, Sparkles } from "lucide-react";
 import UrlScanner from "../components/UrlScanner";
+import DotMatrixLogo from "../components/DotMatrixLogo";
 
-const features = [
-  { icon: Shield, title: "Real-time URL threat detection", body: "Analyze a suspicious link against phishing, brand-fake, and piracy patterns." },
-  { icon: Activity, title: "Risk scoring", body: "Every scan returns a 0–100 score and a LOW, MEDIUM, HIGH, or CRITICAL level." },
-  { icon: History, title: "Threat history", body: "Previous checks are stored in the backend database so you can review them later." },
-  { icon: BarChart3, title: "Security analytics", body: "Dashboard charts are built from real scan records, not sample numbers." },
-  { icon: Lock, title: "Privacy-first approach", body: "We only send the URL you choose to scan. Passwords stay on your device." },
-  { icon: Sparkles, title: "AI-powered protection", body: "Rule-based threat analysis with brand impersonation and urgency-language detection." },
+const pipeline = [
+  "URL",
+  "Domain",
+  "Threat intelligence",
+  "Analysis",
+  "Risk",
 ];
 
-const steps = ["Enter URL", "Analyze", "Understand Risk", "Stay Protected"];
+const capabilities = [
+  { title: "URL threat detection", body: "Analyze suspicious links against phishing, brand-fake, and piracy patterns." },
+  { title: "Risk scoring", body: "Every scan returns a 0–100 score and a LOW, MEDIUM, HIGH, or CRITICAL level." },
+  { title: "Threat history", body: "Previous checks are stored in the backend database so you can review them later." },
+  { title: "Security analytics", body: "Dashboard charts are built from real scan records, not sample numbers." },
+  { title: "Privacy-first approach", body: "We only send the URL you choose to scan. Passwords stay on your device." },
+  { title: "Rule-based analysis", body: "Brand impersonation and urgency-language detection with explainable signals." },
+];
+
+const steps = ["Enter URL", "Analyze", "Understand risk", "Stay protected"];
 
 export default function Landing() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-20">
-      <section className="grid items-center gap-10 py-10 lg:grid-cols-2 lg:py-16">
+      <section className="grid items-start gap-12 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:py-16">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-accent">CyberGuard</p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-            AI-Powered Protection Against Phishing
+          <div className="flex items-center gap-3">
+            <DotMatrixLogo />
+            <p className="label-tech">PhishShield</p>
+          </div>
+          <h1 className="mt-6 font-display text-4xl font-semibold uppercase leading-[1.05] tracking-tight text-ink sm:text-5xl">
+            Web threat
+            <br />
+            analysis system
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-ink-soft">
-            Check a suspicious website before you sign in. CyberGuard analyzes the URL, explains the risk in plain English, and keeps a history of what you scanned.
+          <p className="mt-5 max-w-xl text-lg text-ink-soft">
+            Detect phishing domains, brand impersonation, and malicious web behavior before you sign in.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a href="#scan" className="btn-accent px-5 py-3">Scan a URL</a>
-            <Link to="/dashboard" className="rounded-xl border border-line px-5 py-3 font-medium text-ink-soft hover:bg-nav-active">View Dashboard</Link>
+            <a href="#scan" className="btn-primary px-5 py-3">Analyze URL</a>
+            <Link to="/dashboard" className="btn-secondary px-5 py-3">View overview</Link>
+          </div>
+          <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-2">
+            <div className="bg-surface p-4">
+              <p className="label-tech">System</p>
+              <p className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
+                <span className="dot dot-active" aria-hidden="true" />
+                Online
+              </p>
+            </div>
+            <div className="bg-surface p-4">
+              <p className="label-tech">Engine</p>
+              <p className="mt-2 font-mono text-sm text-ink-soft">Rule / threat intelligence</p>
+            </div>
           </div>
         </div>
-        <div id="scan" className="card glow p-6">
-          <p className="mb-4 text-sm font-medium text-ink-soft">Scan a URL</p>
+
+        <div id="scan" className="space-y-6">
+          <div className="panel-accent panel p-5">
+            <p className="label-tech">Analysis pipeline</p>
+            <div className="mt-5 space-y-3">
+              {pipeline.map((step, index) => (
+                <div key={step} className="flex items-center gap-3">
+                  <span className={`dot ${index === 0 ? "dot-critical" : "dot-inactive"}`} aria-hidden="true" />
+                  <span className="font-mono text-xs uppercase tracking-[0.14em] text-ink-soft">{step}</span>
+                  {index < pipeline.length - 1 ? (
+                    <span className="ml-auto font-mono text-xs text-muted">↓</span>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
           <UrlScanner />
-          <p className="mt-4 text-xs text-muted">Uses the live FastAPI backend. Sign in to keep using the full dashboard.</p>
+          <p className="meta-tech">Uses the live FastAPI backend. Sign in to access the full console.</p>
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="card p-5">
-            <Icon className="text-accent" size={22} />
-            <h3 className="mt-3 font-semibold text-ink">{title}</h3>
-            <p className="mt-2 text-sm text-muted">{body}</p>
-          </div>
-        ))}
+      <section className="rule pt-12">
+        <p className="label-tech">Capabilities</p>
+        <div className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+          {capabilities.map(({ title, body }) => (
+            <div key={title} className="bg-surface p-5">
+              <p className="font-display text-base font-semibold text-ink">{title}</p>
+              <p className="mt-2 text-sm text-muted">{body}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mt-14">
-        <h2 className="text-2xl font-semibold text-ink">How it works</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-4">
+        <p className="label-tech">Process</p>
+        <div className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
-            <div key={step} className="card p-5">
-              <p className="text-xs text-accent">0{i + 1}</p>
-              <p className="mt-2 font-medium">{step}</p>
+            <div key={step} className="bg-surface p-5">
+              <p className="font-mono text-xs text-muted">{String(i + 1).padStart(2, "0")}</p>
+              <p className="mt-2 font-display text-base font-medium text-ink">{step}</p>
             </div>
           ))}
         </div>

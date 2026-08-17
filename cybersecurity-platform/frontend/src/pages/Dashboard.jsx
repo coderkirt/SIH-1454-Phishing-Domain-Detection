@@ -7,6 +7,9 @@ import StatCard from "../components/StatCard";
 import RiskBadge from "../components/RiskBadge";
 import EmptyState from "../components/EmptyState";
 import UrlScanner from "../components/UrlScanner";
+import PageHeader from "../components/PageHeader";
+import LoadingState from "../components/LoadingState";
+import TechnicalPanel from "../components/TechnicalPanel";
 import { getDailySummary, getErrorMessage, getOverview, getRecentUrls, getRiskDistribution, getThreatTypes } from "../services/api";
 import { riskColor } from "../utils/risk";
 
@@ -32,8 +35,18 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-muted">Loading dashboard...</p>;
-  if (error) return <p className="text-red-400">{error}</p>;
+  if (loading) return <LoadingState label="Loading console" />;
+
+  if (error) {
+    return (
+      <TechnicalPanel title="System error" accent>
+        <p className="flex items-center gap-2 text-sm text-[var(--risk-high)]">
+          <span className="dot dot-critical" aria-hidden="true" />
+          {error}
+        </p>
+      </TechnicalPanel>
+    );
+  }
 
   const riskData = Object.entries(risk?.risk_distribution || {}).map(([name, value]) => ({
     name,
@@ -44,29 +57,37 @@ export default function Dashboard() {
   const latest = recent[0];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
-        <p className="text-muted">Live numbers from your FastAPI + SQLite backend.</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        section="01 / Dashboard"
+        title="Security console"
+        subtitle="Live metrics from your FastAPI + SQLite backend."
+      />
 
-      <div className="card p-5">
-        <p className="mb-3 text-sm font-medium text-ink-soft">Scan a URL</p>
-        <UrlScanner compact />
-      </div>
+      <section>
+        <p className="label-tech">Quick analysis</p>
+        <div className="mt-4">
+          <UrlScanner compact />
+        </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={ScanSearch} label="Total URLs checked" value={overview?.total_urls_checked ?? 0} />
-        <StatCard icon={ShieldAlert} label="Threats detected" value={overview?.threats_detected ?? 0} />
-        <StatCard icon={Percent} label="Safety rate" value={overview?.safety_rate || "0.0%"} />
-        <StatCard icon={Activity} label="Checked today" value={daily?.urls_checked_today ?? 0} hint={`${daily?.threats_blocked_today ?? 0} threats today`} />
-      </div>
+      <TechnicalPanel title="System status" accent>
+        <div className="flex items-center gap-2 text-sm text-ink-soft">
+          <span className="dot dot-active" aria-hidden="true" />
+          Protection active
+        </div>
+        <div className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard icon={ScanSearch} label="Total scans" value={overview?.total_urls_checked ?? 0} />
+          <StatCard icon={ShieldAlert} label="Threats detected" value={overview?.threats_detected ?? 0} />
+          <StatCard icon={Percent} label="Safety rate" value={overview?.safety_rate || "0.0%"} />
+          <StatCard icon={Activity} label="Checked today" value={daily?.urls_checked_today ?? 0} hint={`${daily?.threats_blocked_today ?? 0} threats today`} />
+        </div>
+      </TechnicalPanel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card p-5">
-          <h2 className="mb-4 font-medium">Risk distribution</h2>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <TechnicalPanel title="Risk distribution">
           {(risk?.total || 0) === 0 ? (
-            <EmptyState title="No scans yet" body="Run a URL scan to populate this chart." />
+            <EmptyState title="No scans yet" body="Run a URL analysis to populate this chart." />
           ) : (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -79,9 +100,8 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           )}
-        </div>
-        <div className="card p-5">
-          <h2 className="mb-4 font-medium">Threat types</h2>
+        </TechnicalPanel>
+        <TechnicalPanel title="Threat types">
           {(types?.total || 0) === 0 ? (
             <EmptyState title="No threats recorded" body="HIGH and CRITICAL scans appear here." />
           ) : (
@@ -89,49 +109,60 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={typeData}>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 12 }} />
-                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 11 }} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)", fontSize: 11 }} allowDecimals={false} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="value" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="value" fill="var(--muted)" radius={0} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
-        </div>
-      </div>
+        </TechnicalPanel>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-medium">Recent scans</h2>
-            <Link to="/history" className="text-sm text-accent">View all</Link>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <TechnicalPanel title="Recent analysis">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <span className="meta-tech">{recent.length} records</span>
+            <Link to="/history" className="meta-tech hover:text-ink">View all</Link>
           </div>
           {recent.length === 0 ? (
             <EmptyState title="No scans yet" body="Your latest checks will show up here." />
           ) : (
-            <ul className="space-y-3">
-              {recent.map((item, i) => (
-                <li key={`${item.url}-${item.timestamp}-${i}`} className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-0">
-                  <p className="truncate font-mono text-sm text-accent">{item.url}</p>
-                  <RiskBadge level={item.risk_level} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="card p-5">
-          <h2 className="mb-4 font-medium">Latest scan</h2>
-          {!latest ? (
-            <EmptyState title="No scans yet" body="Scan a URL to see the latest result." />
-          ) : (
-            <div>
-              <p className="break-all font-mono text-sm text-accent">{latest.url}</p>
-              <div className="mt-3"><RiskBadge level={latest.risk_level} /></div>
-              <p className="mt-2 text-sm text-muted">{latest.timestamp}</p>
+            <div className="overflow-x-auto">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Target</th>
+                    <th>Risk</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recent.map((item, i) => (
+                    <tr key={`${item.url}-${item.timestamp}-${i}`}>
+                      <td className="max-w-[240px] truncate font-mono">{item.url}</td>
+                      <td><RiskBadge level={item.risk_level} /></td>
+                      <td className="meta-tech">{item.timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
-        </div>
-      </div>
+        </TechnicalPanel>
+        <TechnicalPanel title="Latest scan">
+          {!latest ? (
+            <EmptyState title="No scans yet" body="Analyze a URL to see the latest result." />
+          ) : (
+            <div>
+              <p className="break-all font-mono text-sm text-ink-soft">{latest.url}</p>
+              <div className="mt-3"><RiskBadge level={latest.risk_level} /></div>
+              <p className="mt-3 meta-tech">{latest.timestamp}</p>
+            </div>
+          )}
+        </TechnicalPanel>
+      </section>
     </div>
   );
 }
