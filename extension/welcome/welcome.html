@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to PHISHEYE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles/phishshield.css" />
+    <link rel="stylesheet" href="welcome.css" />
+  </head>
+  <body>
+    <main class="page panel panel-accent">
+      <p class="label-tech">00 / Welcome</p>
+      <div class="logo-eye lg" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 3L27 8.2v8.1c0 7.2-5.3 12.4-11 14.7C10.3 28.7 5 23.5 5 16.3V8.2L16 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M8.5 16c2.4-4.2 5.2-6.3 7.5-6.3S21.1 11.8 23.5 16c-2.4 4.2-5.2 6.3-7.5 6.3S10.9 20.2 8.5 16z" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="16" cy="16" r="2.6" fill="#ff0000"/>
+          <circle cx="16.8" cy="15.2" r="0.7" fill="#fff"/>
+        </svg>
+      </div>
+      <h1 class="font-display">PHISHEYE</h1>
+      <p class="lead">Real-time browser protection using the same detection engine as the dashboard.</p>
+      <ol>
+        <li>PHISHEYE checks websites for phishing threats.</li>
+        <li>It uses the same FastAPI threat engine as the dashboard.</li>
+        <li>It warns you about HIGH and CRITICAL websites.</li>
+      </ol>
+      <p class="note">The extension sends the page URL to your backend. It does not collect passwords, OTPs, or card numbers.</p>
+      <div id="start-panel">
+        <button id="get-started" class="btn-primary" type="button">Get started</button>
+      </div>
+      <section id="next-panel" hidden>
+        <form id="login-form" class="stack">
+          <h2 class="font-display">Log in</h2>
+          <label class="label-tech">Username <input id="username" class="field" required /></label>
+          <label class="label-tech">Password <input id="password" class="field" type="password" required /></label>
+          <button class="btn-primary" type="submit">Log in</button>
+          <p id="auth-status" class="note" role="status"></p>
+        </form>
+        <button id="continue" class="btn-secondary" type="button">Continue without account</button>
+        <p class="note">Anonymous scanning works because the backend URL check does not require a login.</p>
+      </section>
+    </main>
+    <script type="module" src="welcome.js"></script>
+  </body>
+</html>

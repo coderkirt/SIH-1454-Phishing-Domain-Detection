@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>PhishShield AI — Tech Stack &amp; Team Learning Guide</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm 14mm;
+    @bottom-center {
+      content: "PhishShield AI  ·  Tech Stack & Team Learning Guide  ·  " counter(page);
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748b;
+    }
+  }
+  @page :first {
+    margin: 0;
+    @bottom-center { content: none; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 10.2pt;
+    line-height: 1.38;
+    color: #0f172a;
+    background: #fff;
+  }
+  .cover {
+    page-break-after: always;
+    min-height: 297mm;
+    background: linear-gradient(165deg, #06101c 0%, #0b1f33 55%, #083344 100%);
+    color: #e2e8f0;
+    padding: 32mm 18mm 18mm 18mm;
+    margin: 0;
+  }
+  .cover .kicker {
+    letter-spacing: 0.28em;
+    font-size: 9pt;
+    color: #67e8f9;
+    font-weight: 700;
+  }
+  .cover h1 {
+    font-size: 28pt;
+    line-height: 1.15;
+    margin: 18px 0 8px;
+    color: #fff;
+    border: 0;
+  }
+  .cover .sub { font-size: 13pt; color: #cbd5e1; max-width: 150mm; }
+  .cover .meta {
+    margin-top: 28mm;
+    border-left: 3px solid #67e8f9;
+    padding-left: 14px;
+    font-size: 10pt;
+    color: #94a3b8;
+  }
+  .badge {
+    display: inline-block;
+    border: 1px solid #22d3ee;
+    color: #a5f3fc;
+    padding: 3px 10px;
+    font-size: 8pt;
+    letter-spacing: 0.12em;
+    margin-right: 8px;
+  }
+  h1 { font-size: 18pt; color: #0b1220; border-bottom: 2px solid #0e7490; padding-bottom: 6px; page-break-after: avoid; }
+  h2 { font-size: 13.5pt; color: #083344; background: #0b1220; color: #67e8f9; padding: 7px 10px; margin-top: 18px; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; color: #155e75; margin-top: 14px; page-break-after: avoid; }
+  p { margin: 6px 0 8px; orphans: 3; widows: 3; }
+  ul, ol { margin: 4px 0 10px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  hr { border: 0; border-top: 1px solid #cbd5e1; margin: 14px 0; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.6pt; background: #f1f5f9; padding: 0 3px; }
+  pre {
+    background: #0b1220;
+    color: #e2e8f0;
+    padding: 10px 12px;
+    font-size: 8pt;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    word-break: break-word;
+    page-break-inside: avoid;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  .table-wrap { width: 100%; overflow: visible; margin: 8px 0 12px; }
+  table { width: 100%; border-collapse: collapse; table-layout: auto; font-size: 8pt; page-break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th {
+    background: #0b1220;
+    color: #67e8f9;
+    text-align: left;
+    padding: 5px 6px;
+    font-weight: 600;
+    word-wrap: break-word;
+  }
+  td {
+    border: 1px solid #cbd5e1;
+    padding: 4px 5px;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+  .st-impl { background: #d1fae5 !important; font-weight: 600; color: #065f46; }
+  .st-part { background: #fef3c7 !important; font-weight: 600; color: #92400e; }
+  .st-plan { background: #dbeafe !important; font-weight: 600; color: #1e40af; }
+  .st-no { background: #fecaca !important; font-weight: 600; color: #991b1b; }
+  .warnbox {
+    border-left: 4px solid #be123c;
+    background: #fff1f2;
+    padding: 10px 12px;
+    margin: 12px 0 16px;
+    page-break-inside: avoid;
+  }
+  tbody tr:nth-child(even) td { background: #f8fafc; }
+  .callout {
+    border-left: 4px solid #be123c;
+    background: #fff1f2;
+    padding: 8px 10px;
+    margin: 10px 0;
+    page-break-inside: avoid;
+  }
+  .footer-note { color: #64748b; font-size: 8.5pt; }
+  strong { color: #0f172a; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="kicker">TECHNICAL TRAINING LEAD · INTERNAL HANDBOOK</div>
+  <p><span class="badge">CYBERSECURITY</span><span class="badge">SIH TRACK</span><span class="badge">CODE-TRUE</span></p>
+  <h1>PHISHSHiELD AI</h1>
+  <h1 style="font-size:20pt;margin-top:0">Tech Stack &amp; Team Learning Guide</h1>
+  <p class="sub">Everything the team needs to learn to build, explain and defend the project — taken from the <em>current repository</em>, not from the idea note.</p>
+  <div class="meta">
+    <div>Running product name in code: <strong style="color:#fff">CyberGuard API 2.0</strong></div>
+    <div>SIH product name: <strong style="color:#fff">PhishShield AI</strong></div>
+    <div>Stack in one line: React 19 + Vite 8 + FastAPI + SQLite + Manifest V3 + weighted fusion (no trained CNN)</div>
+    <div>Generated from repository inspection · 17 August 2026</div>
+  </div>
+</div>
+<div class="warnbox"><strong>Honesty rule for every viva answer:</strong> FastAPI not Flask. SQLite not live PostgreSQL. Weighted fusion, not a trained CNN. Confidence is signal agreement, not accuracy. The extension does not read native SMS.</div><p><strong>Subtitle:</strong> Everything the team needs to learn to build, explain and defend the project</p>
+<p><strong>Product names in this repo:</strong> code and API title use <strong>CyberGuard</strong>; SIH materials use <strong>PhishShield AI</strong>. Say both in the viva: “PhishShield AI is the product name; the running API is CyberGuard 2.0.”</p>
+<p><strong>Source of truth:</strong> this document is based on the <strong>current codebase</strong>, not the original idea note. If README wording and code disagree, <strong>code wins</strong>.</p>
+<p><strong>Inspection date:</strong> 17 August 2026</p>
+<hr/>
+<h2 id="s5">Table of contents</h2>
+<ol>
+<li>How this guide was built</li>
+<li>Exact tech stack (inventory)</li>
+<li>Technology categories</li>
+<li>Explain every major technology</li>
+<li>Team learning roadmap</li>
+<li>Role-based learning plan</li>
+<li>Architecture (as implemented)</li>
+<li>Trace one complete request</li>
+<li>AI / ML (honest)</li>
+<li>Psychological threat detection</li>
+<li>Multi-channel analysis</li>
+<li>Risk score</li>
+<li>Security</li>
+<li>Database (SQLite, not live PostgreSQL)</li>
+<li>API catalogue</li>
+<li>Browser extension</li>
+<li>Jury questions</li>
+<li>Explain this to the jury</li>
+<li>Technology difficulty</li>
+<li>Five-day crash course</li>
+<li>One-page cheat sheet</li>
+<li>Code vs documentation discrepancies</li>
+</ol>
+<hr/>
+<h2 id="s31">1. How this guide was built</h2>
+<p>The repository was inspected: <code>frontend/package.json</code>, <code>backend/requirements.txt</code>, <code>backend/app/main.py</code>, all routers under <code>backend/app/routes/</code>, services under <code>backend/app/services/</code>, <code>backend/app/database/connection.py</code>, <code>backend/app/models/</code>, <code>frontend/src/</code>, <code>extension/</code>, <code>backend/tests/</code>, <code>README.md</code>, <code>frontend/.env.example</code>, <code>backend/app/config.py</code>.</p>
+<p><strong>Not found in this repo (do not claim them as implemented):</strong> Flask, live PostgreSQL, Alembic, Docker, scikit-learn, TensorFlow, Keras, a trained <code>.pkl</code>/<code>.h5</code> model, spaCy, BERT, SlowAPI rate limiting, Gmail/Outlook OAuth, native Android SMS.</p>
+<hr/>
+<h2 id="s35">2. Exact tech stack</h2>
+<p>STATUS values:</p>
+<ul>
+<li><strong>Implemented</strong> — used by live code paths</li>
+<li><strong>Partial</strong> — optional, incomplete, or weakly configured</li>
+<li><strong>Planned</strong> — mentioned or stubbed, not a working product feature</li>
+<li><strong>Not implemented</strong> — absent</li>
+<li><strong>Dependency present, usage not confirmed</strong> — listed in requirements or models, not used by the live request path</li>
+</ul>
+<div class="table-wrap"><table>
+<thead><tr><th>Domain</th><th>Technology</th><th>Actual use</th><th>Files / location</th><th>Status</th><th>Learning priority</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>React 19.2.8</td><td>Dashboard UI: Scanner, History, Reports, Statistics, auth pages</td><td>frontend/src/App.jsx, pages/, components/</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Frontend</td><td>React Router DOM 7</td><td>Client-side routes and ProtectedRoute for dashboard pages</td><td>frontend/src/App.jsx, components/ProtectedRoute.jsx</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Frontend</td><td>Axios</td><td>HTTP client to FastAPI; attaches JWT from localStorage</td><td>frontend/src/services/api.js</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Frontend</td><td>Lucide React</td><td>Icons in layouts and pages</td><td>frontend/src/layouts/, pages/</td><td class="st-impl">Implemented</td><td>LOW</td></tr>
+<tr><td>Frontend</td><td>Recharts</td><td>Charts on Statistics / Dashboard</td><td>frontend/src/pages/Statistics.jsx, Dashboard.jsx</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Frontend</td><td>Vite 8</td><td>Dev server on 127.0.0.1:5173 and production bundler</td><td>frontend/vite.config.js, package.json</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Frontend</td><td>Tailwind CSS 4 (@tailwindcss/vite)</td><td>Utility CSS styling</td><td>frontend/src (className), vite.config.js</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Frontend</td><td>oxlint</td><td>JS/JSX lint (npm run lint)</td><td>frontend/.oxlintrc.json</td><td class="st-impl">Implemented</td><td>LOW</td></tr>
+<tr><td>Backend</td><td>Python 3</td><td>Language of FastAPI services and tests</td><td>backend/app/**/*.py, backend/tests/</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>FastAPI</td><td>REST API: analyze, threat, user, stats, scans, reports</td><td>backend/app/main.py, routes/</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>Uvicorn</td><td>ASGI server, host 0.0.0.0 port 8000</td><td>backend/app/main.py, README.md</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>Pydantic v2</td><td>Request body validation (ContentRequest, UserRegister, etc.)</td><td>backend/app/routes/*.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>pydantic-settings</td><td>Settings object (SECRET_KEY, DATABASE_URL string)</td><td>backend/app/config.py</td><td class="st-part">Partial</td><td>MEDIUM</td></tr>
+<tr><td>Backend</td><td>python-dotenv</td><td>Load backend/.env (SECRET_KEY, GSB key)</td><td>backend/app/services/auth.py, external_intel.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>requests</td><td>Outbound HTTP: Safe Browsing, OpenPhish, RDAP, redirects</td><td>backend/app/services/external_intel.py, redirects.py, ad_signals.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Backend</td><td>httpx</td><td>Listed for tests / HTTP client</td><td>backend/requirements.txt, tests/</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Backend</td><td>python-multipart</td><td>QR/screenshot file uploads</td><td>backend/app/routes/analyze.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Backend</td><td>SQLAlchemy 2</td><td>ORM model files exist (User, UrlCheck, Threat)</td><td>backend/app/models/, requirements.txt</td><td>Dependency present, usage not confirmed in live routes</td><td>LOW</td></tr>
+<tr><td>Database</td><td>SQLite (sqlite3)</td><td>Live persistence: users, url_checks, content_scans, reports</td><td>backend/app/database/connection.py, backend/threats.db</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Database</td><td>PostgreSQL</td><td>Not connected. config.py default is sqlite URL, not Postgres</td><td>backend/app/config.py comment only</td><td class="st-plan">Planned</td><td>MEDIUM</td></tr>
+<tr><td>Database</td><td>Alembic</td><td>No alembic.ini or migrations folder</td><td>not in repo</td><td class="st-no">Not implemented</td><td>LOW</td></tr>
+<tr><td>AI / Fusion</td><td>Weighted signal fusion (not a trained model)</td><td>Combines url/domain/ml/nlp/psych/intel/brand/redirect/sender/community</td><td>backend/app/services/risk_engine.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>AI / Fusion</td><td>Rule-based URL checker</td><td>Heuristics: TLD, brand typos, shorteners, keywords, trusted list</td><td>backend/app/services/url_checker.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>AI / Fusion</td><td>scikit-learn / TensorFlow / Keras CNN</td><td>No .pkl/.h5, no train script, no dataset in repo</td><td>absent</td><td class="st-no">Not implemented</td><td>LOW</td></tr>
+<tr><td>NLP</td><td>Keyword / substring psychological detector</td><td>Urgency, fear, OTP, countdown, greed, secrecy, Hinglish phrases</td><td>backend/app/services/psychology.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>NLP</td><td>Language heuristic</td><td>Devanagari count + Hinglish tokens → en / hi / en-hi</td><td>backend/app/services/content_normalizer.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>NLP</td><td>spaCy / transformers / BERT</td><td>Not in requirements or imports</td><td>absent</td><td class="st-no">Not implemented</td><td>LOW</td></tr>
+<tr><td>Vision</td><td>OpenCV QRCodeDetector + NumPy</td><td>Decode QR URLs from uploaded images; does not visit destination</td><td>backend/app/services/qr_analyzer.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Vision</td><td>Pillow</td><td>Open screenshot bytes if OCR path runs</td><td>backend/app/routes/analyze.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Vision</td><td>Tesseract / pytesseract</td><td>Optional OCR on screenshots; not in requirements.txt</td><td>analyze.py try/except import</td><td class="st-part">Partial</td><td>MEDIUM</td></tr>
+<tr><td>Browser</td><td>Chrome Extension Manifest V3</td><td>Popup, service worker, content script, settings, welcome</td><td>extension/manifest.json and subfolders</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Browser</td><td>chrome.storage (local/session)</td><td>API URL, auto-scan, cache of scan results</td><td>extension/utils/api.js, background/</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>SSRF guard</td><td>Blocks fetch to localhost, private IPs, cloud metadata</td><td>backend/app/services/ssrf.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>Parameterized SQL (? placeholders)</td><td>All sqlite3 execute calls use bound parameters</td><td>connection.py, routes/, reputation.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>bcrypt via passlib</td><td>Password hashing at signup/login</td><td>backend/app/services/auth.py, routes/user.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>JWT HS256 (python-jose)</td><td>Bearer token; sub=username; login/signup pass 7-day expiry</td><td>auth.py, user.py, ProtectedRoute</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>CORS allow_origins=[&#x27;*&#x27;]</td><td>Dev convenience; credentials=True with * is weak</td><td>backend/app/main.py</td><td class="st-part">Partial</td><td>HIGH</td></tr>
+<tr><td>Cybersecurity</td><td>Report flood caps</td><td>1 same URL / 24h and 20 reports / day per user</td><td>backend/app/services/reputation.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Cybersecurity</td><td>Global API rate limiting</td><td>No SlowAPI/middleware in main.py</td><td>absent</td><td class="st-plan">Planned</td><td>MEDIUM</td></tr>
+<tr><td>Cybersecurity</td><td>Upload size cap 5 MB</td><td>QR and screenshot endpoints</td><td>backend/app/routes/analyze.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>APIs</td><td>REST JSON (FastAPI)</td><td>Primary integration for web + extension</td><td>backend/app/main.py routers</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>APIs</td><td>Google Safe Browsing v4</td><td>If GOOGLE_SAFE_BROWSING_API_KEY set in .env</td><td>backend/app/services/external_intel.py</td><td class="st-part">Partial (key-dependent)</td><td>HIGH</td></tr>
+<tr><td>APIs</td><td>OpenPhish feed</td><td>Fallback feed when GSB key not used / as coded fallback</td><td>external_intel.py OPENPHISH_FEED</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>APIs</td><td>RDAP / DNS</td><td>Domain existence and approximate age</td><td>external_intel.py</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>AuthZ</td><td>HTTPBearer optional vs required</td><td>Scans public; reports require login; profile requires JWT</td><td>analyze.py, reports.py, scans.py, user.py</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Testing</td><td>pytest</td><td>API, psychology, URL, multi-channel tests</td><td>backend/tests/*.py, requirements.txt</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Dev tools</td><td>Git</td><td>Version control of this repository</td><td>.git, .gitignore</td><td class="st-impl">Implemented</td><td>HIGH</td></tr>
+<tr><td>Dev tools</td><td>npm / Node</td><td>Frontend install and Vite scripts</td><td>frontend/package.json</td><td class="st-impl">Implemented</td><td>MEDIUM</td></tr>
+<tr><td>Deployment</td><td>Local uvicorn + Vite only</td><td>No Dockerfile, no compose, no cloud config in repo</td><td>README.md</td><td class="st-part">Partial (local only)</td><td>MEDIUM</td></tr>
+<tr><td>Mobile</td><td>Native Android SMS ingest</td><td>Stub / planned path</td><td>backend/app/services/mobile_source.py</td><td class="st-plan">Planned</td><td>LOW</td></tr>
+</tbody></table></div>
+<hr/>
+<h2 id="s98">3. Technology categories</h2>
+<h3>A. Frontend</h3>
+<p>React 19, React Router 7, Axios, Lucide, Recharts, Vite 8, Tailwind 4, oxlint.</p>
+<h3>B. Backend</h3>
+<p>Python, FastAPI, Uvicorn, Pydantic, python-dotenv, requests, python-multipart, Pillow. SQLAlchemy is in <code>requirements.txt</code> and <code>backend/app/models/</code> but <strong>live routes use <code>sqlite3</code></strong>, not the ORM.</p>
+<h3>C. Database</h3>
+<p><strong>SQLite file</strong> <code>backend/threats.db</code> via <code>sqlite3</code>. <strong>PostgreSQL is planned, not live.</strong> <code>Settings.database_url</code> in <code>config.py</code> defaults to <code>sqlite:///./threats.db</code> and is <strong>not</strong> what <code>connection.py</code> uses (that module builds a filesystem path to <code>threats.db</code>).</p>
+<h3>D. AI / machine learning</h3>
+<p>There is <strong>no trained classifier</strong>. Detection is <strong>heuristics + optional threat intel + weighted fusion</strong> in <code>risk_engine.fuse</code>. The fusion key <code>&quot;ml&quot;</code> is currently <strong>a copy of the URL risk score</strong> (<code>content_analyzer.py</code>).</p>
+<h3>E. NLP / text analysis</h3>
+<p><strong>Substring / keyword matching</strong> in <code>psychology.py</code> (English + some Hinglish). Language tag in <code>content_normalizer.detect_language</code> (Devanagari count + a few tokens). <strong>Not</strong> transformer NLP.</p>
+<h3>F. Browser extension</h3>
+<p>Manifest V3 Chrome extension: service worker, content script, popup, settings. Talks to the same FastAPI process.</p>
+<h3>G. Cybersecurity</h3>
+<p>SSRF block on outbound fetches, parameterized SQL, bcrypt, JWT, trusted-domain allowlist, 5 MB upload cap, community report caps. CORS is open (<code>*</code>). No global API rate limit.</p>
+<h3>H. APIs</h3>
+<p>REST JSON. Optional Google Safe Browsing. OpenPhish feed fallback. DNS + RDAP. Frontend Axios; extension <code>fetch</code>.</p>
+<h3>I. Authentication / authorization</h3>
+<p>Signup/login JWT. Dashboard routes wrapped in <code>ProtectedRoute</code>. Scan APIs are <strong>usable without login</strong>. Community report requires login.</p>
+<h3>J. Development tools</h3>
+<p>Git, npm, Vite, oxlint, python-dotenv, uvicorn.</p>
+<h3>K. Testing</h3>
+<p>pytest modules: <code>test_api.py</code>, <code>test_threat_detection.py</code>, <code>test_psychology.py</code>, <code>test_multichannel.py</code>. <strong>No frontend test suite</strong> in <code>package.json</code>.</p>
+<h3>L. Deployment</h3>
+<p>Local only (Uvicorn :8000, Vite :5173). No Dockerfile in the repo.</p>
+<h3>M. Version control</h3>
+<p>Git. <code>.gitignore</code> excludes <code>.env</code>, venv, and typical junk. Treat <code>backend/.env</code> as secret (Safe Browsing key if present).</p>
+<hr/>
+<h2 id="s126">4. Explain every major technology</h2>
+<h3>4.1 React</h3>
+<ol>
+<li><strong>What is it?</strong> A JavaScript library for building the dashboard UI as components.</li>
+<li><strong>Why?</strong> Interactive scanner, history, charts, and auth screens without full page reloads.</li>
+<li><strong>Where?</strong> <code>frontend/src/</code> — <code>App.jsx</code>, <code>pages/Scanner.jsx</code>, <code>Dashboard.jsx</code>, <code>History.jsx</code>, <code>Reports.jsx</code>, <code>Statistics.jsx</code>, <code>Login.jsx</code>, <code>Signup.jsx</code>, <code>context/AuthContext.jsx</code>.</li>
+<li><strong>Problem solved?</strong> Users need a usable console, not only a raw JSON API.</li>
+<li><strong>Concepts:</strong> components, JSX, props, state, hooks (<code>useState</code>, <code>useEffect</code>), context, conditional rendering.</li>
+<li><strong>Learn:</strong> build one page that calls <code>analyzeContent</code> and shows <code>risk_score</code>.</li>
+<li><strong>Jury:</strong> Why React? What is a SPA? How does <code>ProtectedRoute</code> work?</li>
+</ol>
+<h3>4.2 JavaScript (ES modules)</h3>
+<p>The frontend and extension are JS modules (<code>&quot;type&quot;: &quot;module&quot;</code> in <code>package.json</code> and extension service worker). Learn: <code>import</code>/<code>export</code>, promises/<code>async</code>, <code>fetch</code> vs Axios, <code>localStorage</code>.</p>
+<h3>4.3 React Router DOM 7</h3>
+<p>Maps URLs to pages in <code>App.jsx</code>. Public: <code>/</code>, <code>/login</code>, <code>/signup</code>. Protected: <code>/dashboard</code>, <code>/scanner</code>, <code>/history</code>, <code>/reports</code>, <code>/statistics</code>, <code>/privacy</code>, <code>/settings</code>, <code>/advisor</code>. <code>/scan-result</code> uses <code>AdaptiveLayout</code> (works logged-in or out).</p>
+<p><strong>Jury:</strong> Difference between client routing and FastAPI routing.</p>
+<h3>4.4 Axios</h3>
+<p><code>frontend/src/services/api.js</code> — <code>baseURL</code> from <code>VITE_API_URL</code> or <code>http://localhost:8000</code>. Request interceptor adds <code>Authorization: Bearer</code> from <code>localStorage</code> key <code>cg_token</code>.</p>
+<p><strong>Discrepancy:</strong> Vite is bound to <code>127.0.0.1</code> (<code>vite.config.js</code>) while <code>.env.example</code> still says <code>localhost</code>. On this machine IPv6 <code>localhost</code> has bitten the team before — prefer <code>127.0.0.1</code>.</p>
+<h3>4.5 Tailwind CSS 4</h3>
+<p>Utility classes on JSX. Plugin <code>@tailwindcss/vite</code>. No separate <code>tailwind.config</code> required in this setup.</p>
+<h3>4.6 Vite 8</h3>
+<p>Dev server and bundler. Scripts: <code>dev</code>, <code>build</code>, <code>preview</code>, <code>lint</code>.</p>
+<h3>4.7 Recharts</h3>
+<p>Charts fed by <code>/api/v1/stats/*</code> JSON. If the API is down, the dashboard cannot invent numbers — it should fail visibly.</p>
+<h3>4.8 FastAPI</h3>
+<ol>
+<li><strong>What?</strong> Python web framework for REST APIs with automatic OpenAPI at <code>/docs</code>.</li>
+<li><strong>Why?</strong> Typed request models, async endpoints, easy routers.</li>
+<li><strong>Where?</strong> <code>backend/app/main.py</code> mounts <code>threat_detection</code>, <code>user</code>, <code>stats</code>, <code>analyze</code>, <code>reports</code>, <code>scans</code>. Title: “CyberGuard API” version <strong>2.0.0</strong>.</li>
+<li><strong>Solves:</strong> one HTTP contract for React and the extension.</li>
+<li><strong>Concepts:</strong> router, path/query/body, <code>Depends</code>, <code>HTTPException</code>, CORS middleware, Pydantic.</li>
+<li><strong>Learn:</strong> add a GET that returns <code>{status: ok}</code> and call it from Axios.</li>
+<li><strong>Jury:</strong> Why not Flask? (Flask is <strong>not</strong> in this repo.) What is OpenAPI? What is CORS?</li>
+</ol>
+<h3>4.9 Uvicorn</h3>
+<p>ASGI server. Run: <code>python -m uvicorn app.main:app --host 0.0.0.0 --port 8000</code> from <code>backend/</code> with venv on.</p>
+<h3>4.10 Pydantic</h3>
+<p>Validates JSON bodies (<code>UserRegister</code>, <code>ContentRequest</code>, <code>URLCheckRequest</code>). Invalid bodies become 422, not silent bad data.</p>
+<h3>4.11 SQLite</h3>
+<ol>
+<li><strong>What?</strong> File-based relational SQL database.</li>
+<li><strong>Why (today)?</strong> Zero-ops persistence for a local/demo app.</li>
+<li><strong>Where?</strong> <code>backend/app/database/connection.py</code> → <code>backend/threats.db</code>. <code>init_db()</code> on API startup.</li>
+<li><strong>Solves:</strong> remember users, URL checks, content scans, extracted links, community reports, domain reputation, scan feedback.</li>
+<li><strong>Concepts:</strong> tables, INTEGER PK AUTOINCREMENT, UNIQUE, FOREIGN KEY, indexes, <code>PRAGMA foreign_keys = ON</code>, parameterized queries.</li>
+<li><strong>Learn:</strong> draw the ER diagram in section 14 and write one <code>SELECT</code> with a JOIN.</li>
+<li><strong>Jury:</strong> Why not MongoDB? Why not PostgreSQL yet? What happens if <code>threats.db</code> is locked or missing? (<code>init_db</code> recreates schema; data loss if the file is deleted.)</li>
+</ol>
+<h3>4.12 PostgreSQL (PLANNED)</h3>
+<p>Not running. Do not say “we use PostgreSQL” unless you show a live connection. v2 argument: concurrent writers, managed hosting, backups, roles.</p>
+<h3>4.13 python-jose JWT + passlib bcrypt</h3>
+<ul>
+<li>Passwords stored as <code>users.password_hash</code>.</li>
+<li>Token payload <code>{&quot;sub&quot;: username, &quot;exp&quot;: ...}</code>.</li>
+<li>Algorithm <strong>HS256</strong>, secret from <code>SECRET_KEY</code> env (defaults are <strong>dev secrets</strong> — say this in viva).</li>
+<li>Signup/login pass <code>expires_delta=timedelta(days=7)</code>.</li>
+<li><code>ACCESS_TOKEN_EXPIRE_MINUTES = 30</code> in <code>auth.py</code> is <strong>unused</strong> when those routes pass an explicit delta.</li>
+</ul>
+<h3>4.14 Weighted fusion “AI”</h3>
+<p>See sections 9 and 12. This is the thing the team must explain better than “we used a neural network.”</p>
+<h3>4.15 OpenCV + NumPy</h3>
+<p>QR decode only. <code>cv2.QRCodeDetector</code>. Only payloads starting with <code>http</code> are kept. <strong>Does not open the QR destination.</strong> Then the URL goes through <code>analyze_content</code>.</p>
+<h3>4.16 Chrome Extension (Manifest V3)</h3>
+<p>See section 16.</p>
+<h3>4.17 pytest</h3>
+<p>Backend tests hit FastAPI TestClient and service functions. Frontend has no Jest/Vitest script.</p>
+<h3>4.18 Git</h3>
+<p>Team must know: what is committed, what is secret, how to explain a diff of <code>risk_engine.py</code>.</p>
+<h3>4.19 requests / external intel</h3>
+<p>DNS (<code>socket.getaddrinfo</code>), RDAP domain age, Google Safe Browsing if key present, otherwise OpenPhish feed (<code>OPENPHISH_FEED</code>). Timeouts and in-memory caches. <strong>Fail soft:</strong> if the internet is down, heuristics still return a score.</p>
+<p><strong>Docstring discrepancy:</strong> <code>external_intel.py</code> module comment mentions URLhaus; the constant in code is <strong>OpenPhish</strong>. In viva, describe <strong>the code</strong>.</p>
+<h3>4.20 SQLAlchemy models (unused on the live path)</h3>
+<p><code>backend/app/models/user.py</code>, <code>url_check.py</code>, <code>threat.py</code> exist. Routers never import them for queries. Honest line: “ORM models were sketched; production path is sqlite3.”</p>
+<hr/>
+<h2 id="s201">5. Team learning roadmap</h2>
+<h3>LEVEL 1 — MUST KNOW (everyone)</h3>
+<p><strong>The product in one sentence:</strong> a multi-channel scam intelligence API plus React dashboard plus Chrome extension that scores links and pasted messages using heuristics, optional threat intel, psychology keywords, community reports, and a weighted fusion engine.</p>
+<p><strong>Must know without code:</strong></p>
+<ul>
+<li>Ports: API <strong>8000</strong>, UI <strong>5173</strong></li>
+<li>Two scan pipelines: <code>POST /api/v1/threat/check-url</code> (URLChecker + <code>url_checks</code> table) and <code>POST /api/v1/analyze/content</code> (full fusion + <code>content_scans</code>)</li>
+<li>Risk 0–100; LOW &lt; 30, MEDIUM &lt; 50, HIGH &lt; 70, else CRITICAL</li>
+<li>Psychology <strong>cannot</strong> alone produce HIGH/CRITICAL (cap 35)</li>
+<li><code>model_confidence</code> is <strong>signal agreement, not accuracy</strong></li>
+<li>Database is <strong>SQLite</strong>, not live Postgres</li>
+<li>No trained CNN/sklearn model file</li>
+<li>Extension does not read passwords, OTP, cookies, or phone SMS</li>
+</ul>
+<h3>React — levels</h3>
+<ul>
+<li>MUST: components, props, state, hooks, Axios calls, conditional rendering, <code>localStorage</code> token</li>
+<li>SHOULD: <code>AuthContext</code>, <code>ProtectedRoute</code>, error messages in <code>getErrorMessage</code></li>
+<li>JURY: SPA, why JWT in header, what happens on 401</li>
+</ul>
+<h3>FastAPI — levels</h3>
+<ul>
+<li>MUST: route, JSON body, status codes, <code>/docs</code></li>
+<li>SHOULD: routers, Pydantic, optional Bearer, CORS</li>
+<li>JURY: ASGI, why OpenAPI, difference between 400/401/422/500</li>
+</ul>
+<h3>SQLite — levels</h3>
+<ul>
+<li>MUST: table vs row, PK, <code>users</code> / <code>content_scans</code> / <code>user_reports</code></li>
+<li>SHOULD: FK <code>extracted_links.scan_id</code>, indexes, parameterized SQL</li>
+<li>JURY: SQLite vs Postgres vs Mongo; file locking; backups</li>
+</ul>
+<h3>Fusion engine — levels</h3>
+<ul>
+<li>MUST: ten signal keys and DEFAULT_WEIGHTS</li>
+<li>SHOULD: psych-only cap, <code>_level()</code> thresholds, confidence formula <code>min(95, 35 + fired*10)</code></li>
+<li>JURY: <code>&quot;ml&quot;: url_risk</code> means no separate ML model; weights are <strong>starting defaults, not proven-optimal</strong> (comment in <code>risk_engine.py</code>)</li>
+</ul>
+<h3>Psychology — levels</h3>
+<ul>
+<li>MUST: keyword categories and “not a verdict by itself”</li>
+<li>SHOULD: <code>analyze_message</code> vs <code>analyze_text</code> (URL path scales psych by 0.4, cap 40)</li>
+<li>JURY: substring false positives (“urgent” in news)</li>
+</ul>
+<h3>Extension — levels</h3>
+<ul>
+<li>MUST: MV3 pieces, default API <code>http://127.0.0.1:8000</code></li>
+<li>SHOULD: message passing, overlay on HIGH/CRITICAL, visible-links only</li>
+<li>JURY: host_permissions, why SMS impossible in Chrome</li>
+</ul>
+<h3>Security — levels</h3>
+<ul>
+<li>MUST: bcrypt, JWT, <code>?</code> SQL, SSRF helper</li>
+<li>SHOULD: CORS <code>*</code>, no global rate limit, report caps</li>
+<li>JURY: SSRF to 169.254.169.254; XSS (React escapes text; do not <code>dangerouslySetInnerHTML</code> — not used in core pages inspected)</li>
+</ul>
+<hr/>
+<h2 id="s258">6. Role-based learning plan</h2>
+<p><strong>Team member names are not in the repository.</strong> Do not invent names. Use roles.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Role</th><th>Primary domain</th><th>Secondary</th><th>Must learn</th><th>Viva priority</th></tr></thead><tbody>
+<tr><td>Backend Developer</td><td>FastAPI, services, sqlite3</td><td>Auth, intel APIs</td><td>Python, FastAPI, Pydantic, parameterized SQL, JWT, <code>analyze_content</code> flow</td><td>HIGH</td></tr>
+<tr><td>Frontend Developer</td><td>React dashboard</td><td>UX copy for Simple View</td><td>React, Router, Axios, Tailwind, AuthContext, Scanner tabs</td><td>HIGH</td></tr>
+<tr><td>ML / Detection Developer</td><td>Fusion + heuristics + psychology</td><td>QR/OpenCV</td><td><code>url_checker.py</code>, <code>risk_engine.py</code>, <code>psychology.py</code>, honesty about no trained model</td><td>HIGH</td></tr>
+<tr><td>Database Developer</td><td>SQLite schema</td><td>Future Postgres</td><td><code>connection.py</code> tables, indexes, what is NOT migrated</td><td>MEDIUM</td></tr>
+<tr><td>Extension Developer</td><td>Manifest V3</td><td>Privacy</td><td>service worker, content script, <code>utils/api.js</code>, permissions</td><td>HIGH</td></tr>
+<tr><td>Security / Research Lead</td><td>SSRF, auth, threat intel, limitations</td><td>Roadmap</td><td><code>ssrf.py</code>, CORS gap, GSB vs OpenPhish, false positive policy</td><td>HIGH</td></tr>
+</tbody></table></div>
+<p>Shared for all roles: one full request trace (section 8), risk-score story (section 12), cheat sheet (section 21).</p>
+<hr/>
+<h2 id="s271">7. Project architecture (as implemented)</h2>
+<p>This is <strong>not</strong> “URL in → CNN out.” Two client types share one API process.</p>
+<pre><code> USER
+  |  types URL / pastes message / uploads QR  |  visits a webpage
+  v                                            v
+ REACT DASHBOARD (Vite :5173)          CHROME EXTENSION (MV3)
+  |  JSON + optional Bearer JWT         |  fetch JSON (same endpoints)
+  v                                     v
+ FASTAPI (Uvicorn :8000)  --- CORS * ---
+  |  routers: /api/v1/analyze/*  /threat/*  /user/*  /stats/*  /scans  /report
+  v
+ OPTIONAL AUTH  (verify JWT → user_id or None)
+  v
+ CONTENT NORMALIZER  (source_type, extract URLs, language heuristic)
+  +------------------+------------------+
+  v                  v                  v
+ URLChecker       psychology         brand + sender
+ (heuristics,     (keywords)         + community reputation
+  redirects,
+  ads/SSRF-gated
+  fetch, DNS,
+  RDAP, GSB/OpenPhish)
+  v
+ RISK ENGINE fuse(signals, DEFAULT_WEIGHTS)
+  |  psych-only cap 35; levels LOW/MEDIUM/HIGH/CRITICAL
+  v
+ explanation.py + Simple View + Technical View
+  v
+ SQLITE  content_scans + extracted_links   (analyze path)
+         url_checks + threats              (legacy check-url path)
+  v
+ JSON RESPONSE
+  v
+ UI: score, level, reasons, Simple View, Technical View
+ EXT: badge, toast, overlay if HIGH/CRITICAL</code></pre>
+<h3>What moves on each arrow</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>From → To</th><th>Data</th><th>Format</th><th>Why</th></tr></thead><tbody>
+<tr><td>Scanner → FastAPI</td><td><code>source_type</code>, <code>text</code>, <code>urls[]</code>, optional <code>sender</code></td><td>JSON POST</td><td>User content must be normalized server-side</td></tr>
+<tr><td>Extension popup → FastAPI</td><td>page URL or <code>{source_type:&quot;webpage&quot;, urls:[...]}</code></td><td>JSON POST</td><td>Same engine as dashboard</td></tr>
+<tr><td>FastAPI → URLChecker</td><td>one URL string</td><td>Python str</td><td>Link reputation / heuristics</td></tr>
+<tr><td>FastAPI → psychology</td><td>raw text</td><td>str</td><td>Social-engineering language</td></tr>
+<tr><td>URLChecker → external_intel</td><td>host/URL</td><td>HTTPS/DNS</td><td>Optional live intel</td></tr>
+<tr><td>URLChecker → ad_signals / redirects</td><td>URL</td><td>HTTP GET only after <code>assert_public_http_url</code></td><td>Expand short links / look at page signals without hitting private IPs</td></tr>
+<tr><td>All signals → fuse</td><td>dict of 0–100 floats</td><td>Python dict</td><td>Single score</td></tr>
+<tr><td>fuse → sqlite</td><td>score, level, source_type, urls</td><td>SQL INSERT</td><td>History / dashboard</td></tr>
+<tr><td>FastAPI → clients</td><td>risk_score, risk_level, signals, weights, explanation, simple_view, technical_view</td><td>JSON</td><td>Human + technical UI</td></tr>
+</tbody></table></div>
+<hr/>
+<h2 id="s288">8. Trace one complete request</h2>
+<p><strong>Example A — user pastes a URL in the dashboard Scanner (URL tab).</strong></p>
+<p>Today the Scanner uses <strong><code>analyzeContent</code></strong> (<code>POST /api/v1/analyze/content</code>), not only the legacy checker. Extension page scan still uses <strong><code>checkUrl</code></strong> → <code>POST /api/v1/threat/check-url</code>. <strong>Know both.</strong></p>
+<h3>Path A — unified analysis (dashboard message/URL tabs)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>File</th><th>Function</th><th>Input</th><th>Output</th></tr></thead><tbody>
+<tr><td>1. User types URL</td><td><code>frontend/src/pages/Scanner.jsx</code></td><td>form submit</td><td>string</td><td>state</td></tr>
+<tr><td>2. HTTP</td><td><code>frontend/src/services/api.js</code></td><td><code>analyzeContent</code></td><td><code>{source_type, text, urls}</code> + Bearer if logged in</td><td>Axios POST</td></tr>
+<tr><td>3. Route</td><td><code>backend/app/routes/analyze.py</code></td><td><code>analyze_any</code></td><td><code>ContentRequest</code></td><td>400 if empty; else service</td></tr>
+<tr><td>4. Optional user</td><td><code>analyze.py</code></td><td><code>_user_id</code></td><td>JWT</td><td><code>users.id</code> or <code>None</code></td></tr>
+<tr><td>5. Pipeline</td><td><code>content_analyzer.py</code></td><td><code>analyze_content</code></td><td>source, text, urls, sender, language, user_id</td><td>payload dict</td></tr>
+<tr><td>6. Normalize</td><td><code>content_normalizer.py</code></td><td><code>normalize_content</code></td><td>raw text/urls</td><td><code>raw_text</code>, <code>urls[]</code>, <code>domains</code>, <code>language</code>, <code>source_type</code></td></tr>
+<tr><td>7. Extract links</td><td><code>url_extractor.py</code></td><td><code>extract_urls</code></td><td>text</td><td>URL list</td></tr>
+<tr><td>8. Each link</td><td><code>url_checker.py</code></td><td><code>URLChecker.analyze</code></td><td>URL</td><td>risk_score, tags, details, simple/technical views</td></tr>
+<tr><td>9. Psych</td><td><code>psychology.py</code></td><td><code>analyze_message</code></td><td>raw_text</td><td>score 0–100, tags, findings</td></tr>
+<tr><td>10. Brand</td><td><code>brand_detector.py</code></td><td><code>detect_impersonation</code></td><td>text + urls + extra flags</td><td>score, impersonated</td></tr>
+<tr><td>11. Sender</td><td><code>sender_analyzer.py</code></td><td><code>analyze_sender</code></td><td>sender dict + text</td><td>score, mismatch</td></tr>
+<tr><td>12. Community</td><td><code>reputation.py</code></td><td><code>get_reputation</code></td><td>domain</td><td>reputation_score from <code>domain_reputation</code></td></tr>
+<tr><td>13. Fuse</td><td><code>risk_engine.py</code></td><td><code>fuse</code></td><td>ten signals</td><td>risk_score, level, confidence, weights</td></tr>
+<tr><td>14. Explain</td><td><code>explanation.py</code>, <code>warnings.py</code></td><td><code>build_explanation</code>, <code>build_simple_view</code>, <code>build_technical_view</code></td><td>payload</td><td>user-facing text</td></tr>
+<tr><td>15. Persist</td><td><code>content_analyzer.py</code> (DB inserts)</td><td>sqlite</td><td>scan row + extracted_links</td><td><code>content_scans.id</code></td></tr>
+<tr><td>16. Response</td><td>FastAPI</td><td>JSON</td><td>—</td><td>frontend state</td></tr>
+<tr><td>17. UI</td><td><code>ScanResult.jsx</code> / Scanner result panel</td><td>render</td><td>JSON</td><td>score, Simple View, Technical View</td></tr>
+</tbody></table></div>
+<p><strong>Fusion inputs actually passed</strong> (<code>content_analyzer.py</code>):</p>
+<pre><code>url        = max URLChecker scores (url_risk)
+domain     = _domain_risk(top link)
+ml         = url_risk          # COPY — not a separate model
+nlp        = psych[&quot;score&quot;]    # SAME number as psychological
+psychological = psych[&quot;score&quot;]
+threat_intel  = intel from URL details / GSB
+brand      = brand detector score
+redirect   = redirect_risk
+sender     = sender_info[&quot;score&quot;]
+community  = reputation_score</code></pre>
+<h3>Path B — extension / legacy URL check</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>File</th><th>Function</th></tr></thead><tbody>
+<tr><td>Popup or auto-scan</td><td><code>extension/popup/popup.js</code>, <code>background/service-worker.js</code></td><td><code>checkUrl</code></td></tr>
+<tr><td>HTTP</td><td><code>extension/utils/api.js</code></td><td><code>POST /api/v1/threat/check-url</code> <code>{url, view:&quot;both&quot;}</code></td></tr>
+<tr><td>Route</td><td><code>threat_detection.py</code></td><td><code>check_url</code> — prepends <code>https://</code> if missing scheme</td></tr>
+<tr><td>Engine</td><td><code>URLChecker.analyze</code> only (not full ten-signal fuse)</td><td>heuristics + psych via <code>analyze_text</code> (scaled)</td></tr>
+<tr><td>Persist</td><td>INSERT <code>url_checks</code>; if HIGH/CRITICAL also <code>threats</code></td><td>sqlite</td></tr>
+<tr><td>UI</td><td>badge / toast / overlay</td><td>content script</td></tr>
+</tbody></table></div>
+<p><strong>Jury trap:</strong> “Is every scan using the fusion engine?” <strong>No.</strong> <code>check-url</code> is the older URLChecker path. Dashboard multi-channel uses <code>analyze/content</code>.</p>
+<hr/>
+<h2 id="s326">9. AI / ML explanation (honest)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Question</th><th>Answer from code</th></tr></thead><tbody>
+<tr><td>What model is used?</td><td><strong>No trained model.</strong> Weighted sum in <code>fuse()</code>.</td></tr>
+<tr><td>Why selected?</td><td>Explainable, works without a labelled dataset in-repo, suitable for a prototype.</td></tr>
+<tr><td>Input features?</td><td>Heuristic URL features (TLD, brand typo, keywords, IP URL, shortener, domain age, DNS, intel, ads) + psych tags + sender + community counts. Not a numeric sklearn feature vector.</td></tr>
+<tr><td>How is data processed?</td><td>Normalize → per-link <code>URLChecker.analyze</code> → keyword psych → fuse.</td></tr>
+<tr><td>How is the model trained?</td><td><strong>It is not.</strong> No train script, no dataset file, no train/test split.</td></tr>
+<tr><td>How is it loaded?</td><td>N/A. Python imports <code>risk_engine.py</code>.</td></tr>
+<tr><td>Prediction?</td><td><code>int(round(weighted sum))</code> then optional cap 35.</td></tr>
+<tr><td>Output meaning?</td><td><code>risk_score</code> 0–100 evidence score; <code>risk_level</code> band; <code>model_probability</code> <strong>equals the score</strong> (not a calibrated probability).</td></tr>
+<tr><td>Confidence?</td><td><code>min(95, 35 + 10 * count(signals &gt;= 20))</code> — agreement, <strong>not accuracy</strong>.</td></tr>
+<tr><td>False positives?</td><td>Trusted domain list; psych-only cap; Simple View explains “marketing language”. Still possible on new legitimate domains / keyword collisions.</td></tr>
+<tr><td>False negatives?</td><td>New brands, obfuscated text, image-only lures without QR, intel timeout.</td></tr>
+<tr><td>Evaluation metrics?</td><td><strong>None in repo</strong> (no F1/accuracy/ROC). pytest checks behaviour, not ML quality.</td></tr>
+<tr><td>Production-ready?</td><td><strong>Prototype / demo.</strong> Weights are documented as starting defaults.</td></tr>
+</tbody></table></div>
+<p><strong>CNN / deep learning / sklearn:</strong> <strong>not implemented.</strong> NumPy is used to reshape image bytes for OpenCV, not for neural nets.</p>
+<hr/>
+<h2 id="s345">10. Psychological threat detection</h2>
+<p><strong>Implemented</strong> in <code>backend/app/services/psychology.py</code> as <strong>case-insensitive substring</strong> checks.</p>
+<p>Categories (names in <code>CATEGORIES</code>): urgency, fear/coercion, authority, financial pressure, credential pressure (OTP/KYC), countdown, greed/reward bait, secrecy, emotional manipulation. Patterns include English and some Hinglish (<code>mandatory kyc</code>, <code>please beta</code>, <code>inaam</code>, etc.).</p>
+<p><code>analyze_message</code>: add <code>points</code> per matched category, cap 100.  </p>
+<p><code>analyze_text</code> (used by URLChecker): <code>min(int(score * 0.4), 40)</code> so page-text psych cannot dominate a URL-only check.</p>
+<p><strong>Fusion guard:</strong> if psychological ≥ 20 and no strong url/domain/intel/brand/community signal (≥ 40), <strong>score is capped at 35</strong> → at most MEDIUM.</p>
+<p><strong>Difference vs URL-only phishing:</strong> URL checkers look at the destination. This looks at <strong>how the message tries to rush or scare the human</strong>. A legitimate bank domain can still show psych tags; a message with no link can still score MEDIUM from language alone.</p>
+<p><strong>Not implemented:</strong> trained emotion classifier, transformer sentiment, full Hindi morphology, conversation context across messages.</p>
+<p><strong>PLANNED / not this file:</strong> treating psych as a legal verdict; auto-reading WhatsApp.</p>
+<hr/>
+<h2 id="s355">11. Multi-channel analysis</h2>
+<p><code>VALID_SOURCES</code> in <code>content_normalizer.py</code>: <code>url</code>, <code>text</code>, <code>email</code>, <code>whatsapp</code>, <code>sms</code>, <code>webpage</code>, <code>screenshot</code>, <code>qr</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Channel</th><th>Current support</th><th>How it works</th><th>Technology</th><th>Limitation</th></tr></thead><tbody>
+<tr><td>URL</td><td class="st-impl">Implemented</td><td>Dashboard + <code>analyze/url</code> + <code>check-url</code> + extension</td><td>URLChecker + optional intel</td><td>Two pipelines (fusion vs URLChecker)</td></tr>
+<tr><td>Pasted text</td><td class="st-impl">Implemented</td><td>Scanner paste tab → <code>source_type: text</code></td><td>extractor + psych + fusion</td><td>User must paste; no inbox access</td></tr>
+<tr><td>Email <strong>text</strong></td><td class="st-impl">Implemented</td><td>User pastes headers/body + optional sender object</td><td><code>analyze/email</code>, <code>sender_analyzer</code></td><td><strong>No Gmail OAuth</strong></td></tr>
+<tr><td>WhatsApp</td><td class="st-part">Partial</td><td>Paste conversation text, <code>source_type: whatsapp</code></td><td>same as text</td><td><strong>Does not read WhatsApp</strong></td></tr>
+<tr><td>SMS</td><td class="st-part">Partial</td><td>Paste SMS text</td><td>same as text</td><td><strong>No native SMS</strong>; <code>mobile_source.py</code> planned</td></tr>
+<tr><td>Webpage</td><td>Implemented (extension)</td><td>Visible <code>http(s)</code> links + current URL</td><td>content script + API</td><td>Does not rewrite hrefs; no password fields</td></tr>
+<tr><td>QR</td><td class="st-impl">Implemented</td><td>Upload image → OpenCV decode → analyze URLs</td><td>opencv-python-headless</td><td>Only http(s) payloads; needs a readable QR</td></tr>
+<tr><td>Screenshot</td><td class="st-part">Partial</td><td>QR always; OCR if <code>pytesseract</code> + Tesseract installed</td><td>Pillow + optional Tesseract</td><td>Tesseract <strong>not</strong> in <code>requirements.txt</code>; error tells user to paste text</td></tr>
+<tr><td>Native Android SMS</td><td class="st-plan">Planned</td><td><code>mobile_source.py</code></td><td>—</td><td>Do not demo as working</td></tr>
+</tbody></table></div>
+<hr/>
+<h2 id="s370">12. Risk score</h2>
+<p><strong>Range:</strong> 0–100 integer after rounding.</p>
+<p><strong>Formula:</strong>  </p>
+<p><code>raw = Σ signal[k] * DEFAULT_WEIGHTS[k]</code>  </p>
+<p>then <code>score = min(round(raw), 100)</code>  </p>
+<p>then if psych-only: <code>score = min(score, 35)</code>.</p>
+<p><strong>Default weights</strong> (sum 1.0): url 0.22, domain 0.16, ml 0.10, nlp 0.10, psychological 0.10, threat_intel 0.10, brand 0.08, redirect 0.04, sender 0.05, community 0.05.</p>
+<p><strong>Is it ML probability?</strong> <strong>No.</strong> <code>model_probability</code> is set to the same fused score.</p>
+<p><strong>What does 35/100 mean?</strong> Borderline MEDIUM (MEDIUM starts at 30). If it was psych-only, 35 is the <strong>ceiling</strong>, not “35% chance of fraud.”</p>
+<p><strong>Levels:</strong> LOW 0–29, MEDIUM 30–49, HIGH 50–69, CRITICAL 70–100 (<code>_level</code> in <code>risk_engine.py</code>). URLChecker has its own score/level for path B.</p>
+<p><strong>Confidence ≠ accuracy.</strong> Many signals ≥ 20 → higher confidence even if all are wrong together.</p>
+<p><strong>Thresholds:</strong> chosen as documented starting defaults in source comments — <strong>not</strong> from a ROC curve in this repo.</p>
+<p><strong>Scam risk:</strong> same integer as <code>risk_score</code> (<code>scam_risk: score</code>).</p>
+<hr/>
+<h2 id="s384">13. Security</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Control</th><th>Status</th><th>Where</th></tr></thead><tbody>
+<tr><td>Input validation</td><td class="st-impl">Implemented</td><td>Pydantic models; empty URL/message 400; username ≥ 3, password ≥ 6</td></tr>
+<tr><td>URL scheme</td><td class="st-impl">Implemented</td><td><code>check-url</code> prefixes <code>https://</code> if missing</td></tr>
+<tr><td>SSRF prevention</td><td>Implemented on outbound fetch</td><td><code>ssrf.assert_public_http_url</code> — localhost, private, link-local, multicast, reserved, metadata IPs</td></tr>
+<tr><td>SQL injection</td><td class="st-impl">Implemented</td><td>sqlite3 <code>?</code> placeholders</td></tr>
+<tr><td>XSS</td><td>Partial / framework default</td><td>React text interpolation; no sanitizer library; do not claim a dedicated XSS gateway</td></tr>
+<tr><td>CSRF</td><td>Not implemented as tokens</td><td>JWT in Authorization header (not cookie-auth). CORS <code>*</code> is the real issue</td></tr>
+<tr><td>Authentication</td><td class="st-impl">Implemented</td><td>bcrypt + JWT</td></tr>
+<tr><td>Authorization</td><td class="st-part">Partial</td><td>Reports/feedback/delete-all-scans need login; <strong>GET /scans is public</strong>; analyze is optional auth</td></tr>
+<tr><td>Password security</td><td class="st-impl">Implemented</td><td>bcrypt via passlib; plaintext never stored</td></tr>
+<tr><td>Rate limiting</td><td class="st-part">Partial</td><td>Report 24h/URL and 20/day; <strong>no global API limiter</strong></td></tr>
+<tr><td>API security</td><td class="st-part">Partial</td><td>No API keys for scan; open CORS</td></tr>
+<tr><td>Secrets</td><td>Implemented pattern</td><td><code>.env</code> + <code>python-dotenv</code>; <strong>default SECRET_KEY is unsafe</strong></td></tr>
+<tr><td>CORS</td><td>Partial (weak)</td><td><code>allow_origins=[&quot;*&quot;]</code>, <code>allow_credentials=True</code></td></tr>
+<tr><td>HTTPS</td><td>Not enforced in app</td><td>Local HTTP demo</td></tr>
+<tr><td>Upload cap</td><td class="st-impl">Implemented</td><td>5 MB</td></tr>
+<tr><td>Privacy / minimization</td><td>Documented + extension copy</td><td>Extension description: no passwords/OTP/cookies/SMS; scans may store URL strings in SQLite</td></tr>
+<tr><td>Trusted allowlist</td><td class="st-impl">Implemented</td><td><code>TRUSTED_DOMAINS</code> in <code>url_checker.py</code></td></tr>
+</tbody></table></div>
+<hr/>
+<h2 id="s406">14. Database</h2>
+<p><strong>Engine:</strong> SQLite. <strong>File:</strong> <code>backend/threats.db</code>. <strong>Created by:</strong> <code>init_db()</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Table</th><th>Purpose</th><th>Important columns</th><th>PK</th><th>FKs / relationships</th></tr></thead><tbody>
+<tr><td>users</td><td>Accounts</td><td>username UNIQUE, email UNIQUE, password_hash, created_at</td><td>id</td><td>url_checks.user_id references users (nullable)</td></tr>
+<tr><td>url_checks</td><td>Legacy URL scan log</td><td>url, risk_level, risk_score, ml_confidence, timestamp, user_id</td><td>id</td><td>user_id → users.id</td></tr>
+<tr><td>threats</td><td>High/critical URL events from check-url</td><td>threat_type, threat_data, severity, last_updated</td><td>id</td><td>none</td></tr>
+<tr><td>content_scans</td><td>Multi-channel scan log</td><td>user_id, source_type, url, risk_level, risk_score, scam_risk, confidence, created_at</td><td>id</td><td>user_id not declared FK in SQL</td></tr>
+<tr><td>extracted_links</td><td>Links found in a content scan</td><td>scan_id, url, domain, risk_score, classification</td><td>id</td><td>scan_id → content_scans.id</td></tr>
+<tr><td>user_reports</td><td>Community labels</td><td>user_id, url, domain, user_label, reason, created_at</td><td>id</td><td>user_id not declared FK</td></tr>
+<tr><td>domain_reputation</td><td>Aggregated votes</td><td>domain, scam_reports, risky_reports, safe_reports, last_reported</td><td>domain (text PK)</td><td>none</td></tr>
+<tr><td>scan_feedback</td><td>Helpful flag</td><td>scan_id, helpful, created_at</td><td>id</td><td>scan_id not declared FK</td></tr>
+</tbody></table></div>
+<p>Indexes: url_checks(url, user_id, timestamp); reports(url, user_id, domain, created_at); scans(created_at, source_type, risk_score); extracted_links(domain, url, classification).</p>
+<h3>ER (actual)</h3>
+<pre><code>users 1---0..* url_checks
+users     (logical) 0..* content_scans, user_reports   [no FK in CREATE TABLE]
+content_scans 1---0..* extracted_links
+domain_reputation 1---0..* user_reports.domain   [logical only]</code></pre>
+<p><strong>SQLAlchemy models</strong> (<code>User</code>, <code>UrlCheck</code>, <code>Threat</code>) do not define the 2.0 tables.</p>
+<hr/>
+<h2 id="s424">15. API catalogue</h2>
+<p>Auth column: Public = no token required. Optional = token used only to attach user_id. Required = 401 without valid JWT.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th><th>Request</th><th>Auth</th><th>Used by</th></tr></thead><tbody>
+<tr><td>GET</td><td><code>/</code></td><td>Health + endpoint list</td><td>—</td><td>Public</td><td>browsers, debugging</td></tr>
+<tr><td>GET</td><td><code>/health</code></td><td><code>{status: ok}</code></td><td>—</td><td>Public</td><td>frontend <code>healthCheck</code>, extension</td></tr>
+<tr><td>POST</td><td><code>/api/v1/user/signup</code></td><td>Register</td><td><code>{username,email,password}</code></td><td>Public</td><td>Signup.jsx</td></tr>
+<tr><td>POST</td><td><code>/api/v1/user/login</code></td><td>JWT</td><td><code>{username,password}</code></td><td>Public</td><td>Login.jsx, extension login</td></tr>
+<tr><td>GET</td><td><code>/api/v1/user/profile</code></td><td>Current user</td><td>Bearer</td><td>Required</td><td>AuthContext</td></tr>
+<tr><td>POST</td><td><code>/api/v1/threat/check-url</code></td><td>URLChecker pipeline</td><td><code>{url, view}</code></td><td>Public</td><td>UrlScanner, extension <code>checkUrl</code></td></tr>
+<tr><td>POST</td><td><code>/api/v1/threat/check-message</code></td><td>Wrapper over analyze_content text</td><td><code>{message, url?}</code></td><td>Public</td><td>api.js <code>checkMessage</code></td></tr>
+<tr><td>GET</td><td><code>/api/v1/threat/stats</code></td><td>Counts from url_checks/threats</td><td>—</td><td>Public</td><td>Dashboard</td></tr>
+<tr><td>GET</td><td><code>/api/v1/threat/recent-urls</code></td><td>Recent url_checks</td><td>limit</td><td>Public</td><td>History-related</td></tr>
+<tr><td>POST</td><td><code>/api/v1/analyze/content</code></td><td>Full fusion pipeline</td><td><code>{source_type,text,urls,sender,language}</code></td><td>Optional</td><td>Scanner, extension <code>analyzeContent</code></td></tr>
+<tr><td>POST</td><td><code>/api/v1/analyze/url</code></td><td>Fusion with source url</td><td>same</td><td>Optional</td><td>Scanner URL helper</td></tr>
+<tr><td>POST</td><td><code>/api/v1/analyze/email</code></td><td>Fusion source email</td><td>same</td><td>Optional</td><td>Scanner email tab</td></tr>
+<tr><td>POST</td><td><code>/api/v1/analyze/qr</code></td><td>multipart image</td><td>file ≤ 5 MB</td><td>Optional</td><td>Scanner QR</td></tr>
+<tr><td>POST</td><td><code>/api/v1/analyze/screenshot</code></td><td>QR + optional OCR</td><td>file ≤ 5 MB</td><td>Optional</td><td>Scanner screenshot</td></tr>
+<tr><td>POST</td><td><code>/api/v1/report</code></td><td>Community label scam/risky/safe</td><td>JSON url/domain/label/reason</td><td>Required</td><td>Reports.jsx</td></tr>
+<tr><td>GET</td><td><code>/api/v1/reputation/domain/{domain}</code></td><td>Vote tallies</td><td>—</td><td>Public</td><td>Reports / result UI</td></tr>
+<tr><td>POST</td><td><code>/api/v1/feedback</code></td><td>helpful flag</td><td>scan_id, helpful</td><td>Public (check route)</td><td>Scan result</td></tr>
+<tr><td>GET</td><td><code>/api/v1/reports/mine</code></td><td>Current user reports</td><td>Bearer</td><td>Required</td><td>Reports.jsx</td></tr>
+<tr><td>GET</td><td><code>/api/v1/scans</code></td><td>Recent content_scans</td><td>limit</td><td><strong>Public</strong></td><td>History.jsx</td></tr>
+<tr><td>GET</td><td><code>/api/v1/scans/{id}</code></td><td>One scan</td><td>—</td><td>Public</td><td>History detail</td></tr>
+<tr><td>DELETE</td><td><code>/api/v1/scans/{id}</code></td><td>Delete one</td><td>Bearer (see scans.py)</td><td>Required for destructive</td><td>History</td></tr>
+<tr><td>DELETE</td><td><code>/api/v1/scans</code></td><td>Clear history</td><td>Bearer</td><td>Required</td><td>History</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/overview</code></td><td>Aggregates</td><td>—</td><td>Public</td><td>Dashboard</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/threat-types</code></td><td>from threats table</td><td>—</td><td>Public</td><td>Statistics</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/risk-distribution</code></td><td>buckets</td><td>—</td><td>Public</td><td>Statistics</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/daily-summary</code></td><td>per day</td><td>—</td><td>Public</td><td>Statistics</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/sources</code></td><td>source_type counts</td><td>—</td><td>Public</td><td>Dashboard</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/timeline</code></td><td>time series</td><td>—</td><td>Public</td><td>Statistics</td></tr>
+<tr><td>GET</td><td><code>/api/v1/stats/reports-summary</code></td><td>community totals</td><td>—</td><td>Public</td><td>Reports</td></tr>
+</tbody></table></div>
+<p>Interactive docs: <code>http://127.0.0.1:8000/docs</code> (Swagger) and <code>/redoc</code>.</p>
+<hr/>
+<h2 id="s460">16. Browser extension</h2>
+<p><strong>Status: Implemented</strong> (Manifest V3), folder <code>extension/</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Piece</th><th>File</th><th>Role</th></tr></thead><tbody>
+<tr><td>Manifest</td><td><code>extension/manifest.json</code></td><td>MV3, version 1.2.0, name CyberGuard</td></tr>
+<tr><td>Service worker</td><td><code>background/service-worker.js</code></td><td>auto-scan, badge, cache</td></tr>
+<tr><td>Content script</td><td><code>content/content.js</code></td><td>toast, HIGH/CRITICAL overlay, collect visible links</td></tr>
+<tr><td>Popup</td><td><code>popup/popup.html</code> + <code>popup.js</code></td><td>scan page / visible links</td></tr>
+<tr><td>Settings</td><td><code>settings/</code></td><td>API base URL, auto-scan</td></tr>
+<tr><td>API helper</td><td><code>utils/api.js</code></td><td><code>checkUrl</code>, <code>analyzeContent</code>, login, cache</td></tr>
+<tr><td>Config</td><td><code>utils/config.js</code></td><td>defaults</td></tr>
+<tr><td>Welcome</td><td><code>welcome/</code></td><td>first-run</td></tr>
+</tbody></table></div>
+<p><strong>Permissions:</strong> <code>tabs</code>, <code>storage</code>. <strong>Host permissions:</strong> <code>127.0.0.1</code>, <code>localhost</code>, <code>http://<em>/</em></code>, <code>https://<em>/</em></code> (needed to call local API and to run on pages).</p>
+<p><strong>Communication:</strong> <code>fetch</code> to FastAPI (same JSON as React). Results cached in <code>chrome.storage</code>. Content script ↔ worker via <code>chrome.runtime.sendMessage</code> (inspect those files for exact message types before viva).</p>
+<p><strong>Does not:</strong> read passwords, OTP, cookies, or phone SMS (stated in manifest description).</p>
+<p><strong>Requires:</strong> backend running; user may set API URL in settings if not 127.0.0.1:8000.</p>
+<hr/>
+<h2 id="s478">17. Jury questions you must be ready for</h2>
+<p>Format: <strong>Q / SHORT / DEEPER / WHERE</strong>.</p>
+<h3>17.1 BASIC (20)</h3>
+<p><strong>Q1. What is PhishShield AI / CyberGuard?</strong>  </p>
+<p>SHORT: A prototype that scores scam risk in links and pasted messages.  </p>
+<p>DEEPER: FastAPI engine + React console + MV3 extension; fusion of heuristics, intel, psychology, community.  </p>
+<p>WHERE: <code>README.md</code>, <code>main.py</code>.</p>
+<p><strong>Q2. What problem does it solve?</strong>  </p>
+<p>SHORT: People click scam links in SMS/WhatsApp/email, not only in the browser address bar.  </p>
+<p>DEEPER: Multi-channel paste + QR + visible page links.  </p>
+<p>WHERE: Scanner.jsx, analyze.py.</p>
+<p><strong>Q3. What is phishing?</strong>  </p>
+<p>SHORT: A social-engineering attack that tricks a human into acting (login, OTP, payment).  </p>
+<p>DEEPER: May use fake domains, stolen brands, or real-looking language.  </p>
+<p>WHERE: url_checker.py, psychology.py.</p>
+<p><strong>Q4. Frontend vs backend?</strong>  </p>
+<p>SHORT: React UI vs FastAPI JSON API.  </p>
+<p>DEEPER: UI never computes the official score; the server does.  </p>
+<p>WHERE: frontend/src, backend/app.</p>
+<p><strong>Q5. Why Python?</strong>  </p>
+<p>SHORT: Fast services, string/URL parsing, OpenCV, tests.  </p>
+<p>DEEPER: Team speed; not because Python is “more secure.”  </p>
+<p>WHERE: backend/.</p>
+<p><strong>Q6. Why React?</strong>  </p>
+<p>SHORT: Component UI for scanner, charts, auth.  </p>
+<p>DEEPER: SPA with Router and Axios.  </p>
+<p>WHERE: frontend/package.json.</p>
+<p><strong>Q7. What is an API?</strong>  </p>
+<p>SHORT: HTTP contract: method + path + JSON.  </p>
+<p>DEEPER: Clients are React and the extension.  </p>
+<p>WHERE: main.py routers.</p>
+<p><strong>Q8. What is REST?</strong>  </p>
+<p>SHORT: Resource-style HTTP (GET scans, POST analyze).  </p>
+<p>DEEPER: We use JSON REST, not GraphQL.  </p>
+<p>WHERE: routes/.</p>
+<p><strong>Q9. What is JSON?</strong>  </p>
+<p>SHORT: The request/response body format.  </p>
+<p>DEEPER: Pydantic parses it.  </p>
+<p>WHERE: all POST routes.</p>
+<p><strong>Q10. What is SQLite?</strong>  </p>
+<p>SHORT: A SQL database in one file.  </p>
+<p>DEEPER: Good for demo; weaker for many concurrent writers.  </p>
+<p>WHERE: connection.py.</p>
+<p><strong>Q11. What is a primary key?</strong>  </p>
+<p>SHORT: Unique row id.  </p>
+<p>DEEPER: AUTOINCREMENT integers; domain_reputation uses domain text PK.  </p>
+<p>WHERE: connection.py.</p>
+<p><strong>Q12. What is a foreign key?</strong>  </p>
+<p>SHORT: A column pointing at another table’s PK.  </p>
+<p>DEEPER: <code>extracted_links.scan_id</code> → <code>content_scans.id</code>; PRAGMA foreign_keys ON.  </p>
+<p>WHERE: connection.py.</p>
+<p><strong>Q13. HTTP vs HTTPS?</strong>  </p>
+<p>SHORT: HTTPS encrypts the pipe.  </p>
+<p>DEEPER: Local demo is HTTP; production must use HTTPS.  </p>
+<p>WHERE: local uvicorn.</p>
+<p><strong>Q14. What is a JWT?</strong>  </p>
+<p>SHORT: Signed token proving login.  </p>
+<p>DEEPER: HS256, <code>sub</code>=username, sent as Bearer.  </p>
+<p>WHERE: auth.py.</p>
+<p><strong>Q15. GET vs POST?</strong>  </p>
+<p>SHORT: GET reads; POST sends a body (scan, login).  </p>
+<p>DEEPER: Scans are POST so URLs are not stuck in server logs as query strings as often (still stored in DB).  </p>
+<p>WHERE: analyze.py.</p>
+<p><strong>Q16. What is a risk score?</strong>  </p>
+<p>SHORT: 0–100 fused evidence, not a probability of crime.  </p>
+<p>DEEPER: See section 12.  </p>
+<p>WHERE: risk_engine.py.</p>
+<p><strong>Q17. Chrome extension vs website?</strong>  </p>
+<p>SHORT: Extension runs in the browser on other sites; website is our React app.  </p>
+<p>DEEPER: MV3 service worker + content script.  </p>
+<p>WHERE: extension/.</p>
+<p><strong>Q18. What is CORS?</strong>  </p>
+<p>SHORT: Browser rule for cross-origin API calls.  </p>
+<p>DEEPER: We currently allow <code>*</code>.  </p>
+<p>WHERE: main.py.</p>
+<p><strong>Q19. What is bcrypt?</strong>  </p>
+<p>SHORT: Password hashing.  </p>
+<p>DEEPER: One-way; salt included; not reversible encryption.  </p>
+<p>WHERE: auth.py.</p>
+<p><strong>Q20. How do you start the project?</strong>  </p>
+<p>SHORT: uvicorn :8000 and <code>npm run dev</code> :5173.  </p>
+<p>DEEPER: venv, .env, SQLite init on startup.  </p>
+<p>WHERE: README.md.</p>
+<h3>17.2 INTERMEDIATE (20)</h3>
+<p><strong>Q21. Why FastAPI instead of Flask?</strong>  </p>
+<p>SHORT: FastAPI is what we implemented; Flask is not in the repo.  </p>
+<p>DEEPER: Type hints, OpenAPI, async-ready, Pydantic validation.  </p>
+<p>WHERE: requirements.txt.</p>
+<p><strong>Q22. Why SQLite instead of PostgreSQL?</strong>  </p>
+<p>SHORT: Local prototype speed.  </p>
+<p>DEEPER: Postgres is the likely v2 store for concurrency and hosting.  </p>
+<p>WHERE: connection.py vs config.py.</p>
+<p><strong>Q23. How is SQL injection prevented?</strong>  </p>
+<p>SHORT: Bound parameters, never f-string SQL with user text.  </p>
+<p>DEEPER: <code>cursor.execute(&quot;... ?&quot;, (value,))</code>.  </p>
+<p>WHERE: user.py, reputation.py.</p>
+<p><strong>Q24. How does login work end-to-end?</strong>  </p>
+<p>SHORT: POST login → bcrypt verify → JWT → localStorage → Axios header.  </p>
+<p>DEEPER: profile uses HTTPBearer.  </p>
+<p>WHERE: user.py, api.js, AuthContext.jsx.</p>
+<p><strong>Q25. Why can scans be anonymous?</strong>  </p>
+<p>SHORT: Lower friction for checking a link.  </p>
+<p>DEEPER: Reports are authenticated to reduce vandalism.  </p>
+<p>WHERE: analyze.py optional_bearer; reports.py.</p>
+<p><strong>Q26. What is SSRF and how do you block it?</strong>  </p>
+<p>SHORT: Tricking the server to fetch internal URLs.  </p>
+<p>DEEPER: Block private IPs and metadata hosts before GET.  </p>
+<p>WHERE: ssrf.py.</p>
+<p><strong>Q27. How are shortened URLs handled?</strong>  </p>
+<p>SHORT: Redirect expansion with public-URL checks.  </p>
+<p>DEEPER: <code>redirects.py</code> + shortener list in url_checker.  </p>
+<p>WHERE: redirects.py.</p>
+<p><strong>Q28. What does Simple View vs Technical View mean?</strong>  </p>
+<p>SHORT: Plain language vs metrics.  </p>
+<p>DEEPER: <code>warnings.build_simple_view</code> / <code>build_technical_view</code>.  </p>
+<p>WHERE: warnings.py, ScanResult.jsx.</p>
+<p><strong>Q29. How does community reputation work?</strong>  </p>
+<p>SHORT: Logged-in users mark scam/risky/safe; domain tallies feed a fusion signal.  </p>
+<p>DEEPER: 1 URL/24h and 20/day; not proof.  </p>
+<p>WHERE: reputation.py.</p>
+<p><strong>Q30. Why OpenCV?</strong>  </p>
+<p>SHORT: Decode QR images.  </p>
+<p>DEEPER: Not a phishing CNN.  </p>
+<p>WHERE: qr_analyzer.py.</p>
+<p><strong>Q31. What if Google Safe Browsing is missing?</strong>  </p>
+<p>SHORT: Key empty → skip GSB; use other signals + OpenPhish path.  </p>
+<p>DEEPER: Fail soft.  </p>
+<p>WHERE: external_intel.py.</p>
+<p><strong>Q32. What is Pydantic validation?</strong>  </p>
+<p>SHORT: Reject malformed JSON before business logic.  </p>
+<p>DEEPER: 422 vs 400 we raise ourselves.  </p>
+<p>WHERE: ContentRequest.</p>
+<p><strong>Q33. How does the dashboard get chart data?</strong>  </p>
+<p>SHORT: GET <code>/api/v1/stats/*</code> then Recharts.  </p>
+<p>DEEPER: Aggregates from SQLite, not from a warehouse.  </p>
+<p>WHERE: stats.py, Statistics.jsx.</p>
+<p><strong>Q34. Manifest V3 vs V2?</strong>  </p>
+<p>SHORT: V3 uses a service worker, not a persistent background page.  </p>
+<p>DEEPER: Our <code>background.service_worker</code> field.  </p>
+<p>WHERE: manifest.json.</p>
+<p><strong>Q35. How do you stop report flooding?</strong>  </p>
+<p>SHORT: Per-user caps.  </p>
+<p>DEEPER: Not a substitute for global rate limits.  </p>
+<p>WHERE: reputation.py.</p>
+<p><strong>Q36. What is stored from a scan?</strong>  </p>
+<p>SHORT: source_type, url, scores, extracted links — not full message body in content_scans columns.  </p>
+<p>DEEPER: Read INSERT in content_analyzer; raw text may still appear in other fields depending on path — verify before claiming minimization.  </p>
+<p>WHERE: connection.py, content_analyzer.py.</p>
+<p><strong>Q37. Trusted domains?</strong>  </p>
+<p>SHORT: Allowlist reduces false positives on google.com etc.  </p>
+<p>DEEPER: Can hide attacks on compromised popular sites — limitation.  </p>
+<p>WHERE: TRUSTED_DOMAINS.</p>
+<p><strong>Q38. Two scan APIs?</strong>  </p>
+<p>SHORT: check-url vs analyze/content.  </p>
+<p>DEEPER: Extension page scan vs dashboard fusion.  </p>
+<p>WHERE: threat_detection.py vs analyze.py.</p>
+<p><strong>Q39. How are tests run?</strong>  </p>
+<p>SHORT: <code>pytest</code> in backend.  </p>
+<p>DEEPER: They assert API/service behaviour, not ML accuracy.  </p>
+<p>WHERE: backend/tests/.</p>
+<p><strong>Q40. What is an index?</strong>  </p>
+<p>SHORT: Speeds lookups on url, domain, timestamp.  </p>
+<p>DEEPER: <code>CREATE INDEX IF NOT EXISTS</code> in init_db.  </p>
+<p>WHERE: connection.py.</p>
+<h3>17.3 ADVANCED (20)</h3>
+<p><strong>Q41. Is your system machine learning?</strong>  </p>
+<p>SHORT: Marketing “AI”; technically <strong>rule fusion</strong>, not a fitted model.  </p>
+<p>DEEPER: <code>&quot;ml&quot;</code> copies URL risk.  </p>
+<p>WHERE: content_analyzer.py line assigning <code>&quot;ml&quot;: url_risk</code>.</p>
+<p><strong>Q42. Why not a CNN on screenshots?</strong>  </p>
+<p>SHORT: We did not train one; OCR is optional Tesseract.  </p>
+<p>DEEPER: Need labelled data, compute, and still fail on new kits.  </p>
+<p>WHERE: analyze.py screenshot handler.</p>
+<p><strong>Q43. How would you add a real sklearn model?</strong>  </p>
+<p>SHORT: Extract features, train, dump joblib, load in fuse as the ml signal.  </p>
+<p>DEEPER: Version the model; keep heuristics as fallback.  </p>
+<p>WHERE: risk_engine.py weights already have an <code>ml</code> slot.</p>
+<p><strong>Q44. Are weights scientifically optimal?</strong>  </p>
+<p>SHORT: No — comments say starting defaults.  </p>
+<p>DEEPER: Would need labelled outcomes and calibration.  </p>
+<p>WHERE: risk_engine.py docstring.</p>
+<p><strong>Q45. Confidence vs accuracy vs precision?</strong>  </p>
+<p>SHORT: Confidence here is agreement count.  </p>
+<p>DEEPER: Accuracy needs ground truth we do not store as a metric table.  </p>
+<p>WHERE: fuse().</p>
+<p><strong>Q46. How do you calibrate probability?</strong>  </p>
+<p>SHORT: We do not. <code>model_probability</code> is the score.  </p>
+<p>DEEPER: Do not tell the jury “87% chance this is phishing.”  </p>
+<p>WHERE: fuse return dict.</p>
+<p><strong>Q47. SQLite write concurrency?</strong>  </p>
+<p>SHORT: File DB can lock under parallel extension + dashboard.  </p>
+<p>DEEPER: Reason to move to Postgres.  </p>
+<p>WHERE: threats.db.</p>
+<p><strong>Q48. JWT HS256 vs RS256?</strong>  </p>
+<p>SHORT: We use a shared secret HS256.  </p>
+<p>DEEPER: RS256 would allow the API to verify with a public key; overkill for one process.  </p>
+<p>WHERE: auth.py ALGORITHM.</p>
+<p>**Q49. CORS * with credentials True?**  </p>
+<p>SHORT: Browser-inconsistent / unsafe pattern.  </p>
+<p>DEEPER: Production: explicit origin list.  </p>
+<p>WHERE: main.py.</p>
+<p><strong>Q50. Authorization gap on GET /scans?</strong>  </p>
+<p>SHORT: History listing is public at the API.  </p>
+<p>DEEPER: UI may hide it behind login but the endpoint is still callable.  </p>
+<p>WHERE: scans.py <code>list_scans</code>.</p>
+<p><strong>Q51. How to prevent XSS in Simple View strings?</strong>  </p>
+<p>SHORT: React escapes; never inject HTML from reasons.  </p>
+<p>DEEPER: Reasons come from our templates + snippets of user text.  </p>
+<p>WHERE: warnings.py, ScanResult.jsx.</p>
+<p><strong>Q52. DNS rebinding vs your SSRF check?</strong>  </p>
+<p>SHORT: We resolve and block private IPs at check time.  </p>
+<p>DEEPER: Classic bypass is TOCTOU / rebinding — not fully closed. Honest limitation.  </p>
+<p>WHERE: ssrf.py.</p>
+<p><strong>Q53. Unicode / homograph domains?</strong>  </p>
+<p>SHORT: Partial via brand detector / parsing; not a full IDN homograph engine.  </p>
+<p>DEEPER: Do not claim Punycode mastery unless you show code.  </p>
+<p>WHERE: url_checker.py, brand_detector.py.</p>
+<p><strong>Q54. Hinglish coverage?</strong>  </p>
+<p>SHORT: A few substrings, not a language model.  </p>
+<p>DEEPER: Easy to evade with spelling changes.  </p>
+<p>WHERE: psychology.py.</p>
+<p><strong>Q55. Adversarial ML?</strong>  </p>
+<p>SHORT: Not applicable until we have a fitted model; attackers already evade keywords.  </p>
+<p>DEEPER: Obfuscation, images, new TLDs.  </p>
+<p>WHERE: psychology + url_checker.</p>
+<p><strong>Q56. How would you evaluate detection quality?</strong>  </p>
+<p>SHORT: Labelled dataset, precision/recall by channel, confusion matrix, live false-positive review.  </p>
+<p>DEEPER: Not in repo today.  </p>
+<p>WHERE: tests only.</p>
+<p><strong>Q57. Secrets in git?</strong>  </p>
+<p>SHORT: <code>.env</code> gitignored; defaults in code are weak.  </p>
+<p>DEEPER: Rotate any key that was ever pasted in chat.  </p>
+<p>WHERE: .gitignore, auth.py defaults.</p>
+<p><strong>Q58. Why optional numpy/opencv import errors?</strong>  </p>
+<p>SHORT: QR returns a clear error if OpenCV missing.  </p>
+<p>DEEPER: requirements include opencv-python-headless so install should work.  </p>
+<p>WHERE: qr_analyzer.py.</p>
+<p><strong>Q59. Stateless API + SQLite?</strong>  </p>
+<p>SHORT: API processes are stateless; state is the file DB.  </p>
+<p>DEEPER: Two uvicorn workers would share the file with locking.  </p>
+<p>WHERE: connection.py.</p>
+<p><strong>Q60. What is explainability?</strong>  </p>
+<p>SHORT: We return weights, per-signal scores, tags, Simple View.  </p>
+<p>DEEPER: That is why fusion beats a black-box CNN for a student viva.  </p>
+<p>WHERE: explanation.py, fuse methodology string.</p>
+<h3>17.4 PROJECT-SPECIFIC (20)</h3>
+<p><strong>Q61. Why is the API named CyberGuard?</strong>  </p>
+<p>SHORT: Historical code name; SIH title is PhishShield AI.  </p>
+<p>DEEPER: <code>FastAPI(title=&quot;CyberGuard API&quot;)</code>.  </p>
+<p>WHERE: main.py.</p>
+<p><strong>Q62. What does <code>ml_confidence</code> on url_checks mean?</strong>  </p>
+<p>SHORT: Column default 0.0; check-url insert may not set it.  </p>
+<p>DEEPER: Do not confuse with <code>model_confidence</code> from fusion.  </p>
+<p>WHERE: connection.py, threat_detection insert.</p>
+<p><strong>Q63. Does check-message use fusion?</strong>  </p>
+<p>SHORT: Yes — it calls <code>analyze_content</code>.  </p>
+<p>DEEPER: Unlike check-url.  </p>
+<p>WHERE: threat_detection.py <code>check_message</code>.</p>
+<p><strong>Q64. How is language detected?</strong>  </p>
+<p>SHORT: Devanagari count and a few Hinglish tokens.  </p>
+<p>DEEPER: Returns <code>hi</code>, <code>en-hi</code>, or <code>en</code>.  </p>
+<p>WHERE: content_normalizer.py.</p>
+<p><strong>Q65. Brand impersonation vs trusted domain?</strong>  </p>
+<p>SHORT: Brand detector looks at text/links; trusted list skips many URL heuristics.  </p>
+<p>DEEPER: A trusted domain can still carry a scam <strong>message</strong>.  </p>
+<p>WHERE: brand_detector.py, TRUSTED_DOMAINS.</p>
+<p><strong>Q66. What is <code>scam_risk</code>?</strong>  </p>
+<p>SHORT: Alias of fused score.  </p>
+<p>DEEPER: Not a second model.  </p>
+<p>WHERE: fuse().</p>
+<p><strong>Q67. Screenshot without QR?</strong>  </p>
+<p>SHORT: Tries Tesseract; if no text and no QR → 400 with paste instruction.  </p>
+<p>DEEPER: pytesseract not in requirements.  </p>
+<p>WHERE: analyze.py <code>analyze_screenshot</code>.</p>
+<p><strong>Q68. Does the extension send every URL on a page?</strong>  </p>
+<p>SHORT: Visible http(s) links / current page — not hidden password fields.  </p>
+<p>DEEPER: Popup copy says hrefs are not rewritten.  </p>
+<p>WHERE: popup.html, content.js.</p>
+<p><strong>Q69. Who can delete scan history?</strong>  </p>
+<p>SHORT: DELETE <code>/api/v1/scans</code> requires auth.  </p>
+<p>DEEPER: GET list does not.  </p>
+<p>WHERE: scans.py.</p>
+<p><strong>Q70. What is Advisor page?</strong>  </p>
+<p>SHORT: Frontend route <code>/advisor</code> — explain from the page, do not overclaim backend intelligence.  </p>
+<p>DEEPER: Open <code>Advisor.jsx</code> before viva and describe only what it renders.  </p>
+<p>WHERE: frontend/src/pages/Advisor.jsx.</p>
+<p><strong>Q71. config.py DATABASE_URL vs connection.py?</strong>  </p>
+<p>SHORT: Settings string is unused by get_db_connection.  </p>
+<p>DEEPER: Changing DATABASE_URL in env will <strong>not</strong> move SQLite unless you change connection.py.  </p>
+<p>WHERE: config.py, connection.py.</p>
+<p><strong>Q72. ACCESS_TOKEN_EXPIRE_MINUTES?</strong>  </p>
+<p>SHORT: 30 in auth.py but routes pass 7 days.  </p>
+<p>DEEPER: Dead constant.  </p>
+<p>WHERE: auth.py vs user.py.</p>
+<p><strong>Q73. OpenPhish vs URLhaus?</strong>  </p>
+<p>SHORT: Code fetches OpenPhish feed.  </p>
+<p>DEEPER: File header comment is stale if it says URLhaus.  </p>
+<p>WHERE: external_intel.py.</p>
+<p><strong>Q74. What tests cover psychology?</strong>  </p>
+<p>SHORT: <code>backend/tests/test_psychology.py</code>.  </p>
+<p>DEEPER: Keyword presence, not linguistic theory.  </p>
+<p>WHERE: tests/.</p>
+<p><strong>Q75. Can psychology alone be CRITICAL?</strong>  </p>
+<p>SHORT: No — cap 35 in fuse.  </p>
+<p>DEEPER: By design to cut marketing false positives.  </p>
+<p>WHERE: risk_engine.py.</p>
+<p><strong>Q76. What is <code>safe</code> in the JSON?</strong>  </p>
+<p>SHORT: <code>risk_level == &quot;LOW&quot;</code> on analyze payload.  </p>
+<p>DEEPER: LOW is not “proven safe.”  </p>
+<p>WHERE: content_analyzer.py payload.</p>
+<p><strong>Q77. How are piracy sites treated?</strong>  </p>
+<p>SHORT: PIRACY_DOMAINS list in URLChecker.  </p>
+<p>DEEPER: Heuristic, not a court judgement.  </p>
+<p>WHERE: url_checker.py.</p>
+<p><strong>Q78. Feedback table?</strong>  </p>
+<p>SHORT: <code>scan_feedback</code> + POST <code>/api/v1/feedback</code>.  </p>
+<p>DEEPER: Does not retrain any model.  </p>
+<p>WHERE: reports.py, connection.py.</p>
+<p><strong>Q79. Biggest limitation?</strong>  </p>
+<p>SHORT: No trained detector, SQLite, open CORS, paste-only messaging, keyword evasion.  </p>
+<p>DEEPER: See section 18.  </p>
+<p>WHERE: whole repo.</p>
+<p><strong>Q80. What is version 2?</strong>  </p>
+<p>SHORT: Postgres, real ML slot, OCR packaged, origin-restricted CORS, global rate limit, Android SMS companion, calibrate scores.  </p>
+<p>DEEPER: Do not present v2 as done.  </p>
+<p>WHERE: mobile_source.py, FEATURE_ROADMAP.md if present.</p>
+<h3>17.5 TRICK QUESTIONS</h3>
+<p><strong>T1. “Show me your CNN accuracy.”</strong>  </p>
+<p>There is no CNN and no accuracy metric in the repo.</p>
+<p><strong>T2. “You use PostgreSQL, right?”</strong>  </p>
+<p>No. SQLite file <code>threats.db</code>.</p>
+<p><strong>T3. “Is 92 confidence 92% accurate?”</strong>  </p>
+<p>No. Agreement heuristic.</p>
+<p><strong>T4. “Does the extension read WhatsApp?”</strong>  </p>
+<p>Only if the user is on a web page and visible links are collected, or they paste text in the dashboard. It does not hook the WhatsApp app.</p>
+<p><strong>T5. “Prove you prevent all XSS/SQLi/SSRF.”</strong>  </p>
+<p>We have specific controls; CORS and DNS-rebinding remain gaps. Never say “all.”</p>
+<p><strong>T6. “Where is Flask?”</strong>  </p>
+<p>Not used.</p>
+<p><strong>T7. “Is community report ground truth?”</strong>  </p>
+<p>No. It is a 5% weight signal with caps.</p>
+<p><strong>T8. “What if the model file is missing?”</strong>  </p>
+<p>There is no model file to miss; fusion still runs.</p>
+<hr/>
+<h2 id="s822">18. Explain this to the jury</h2>
+<p><strong>What is your project?</strong>  </p>
+<p>PhishShield AI (code name CyberGuard) is a multi-channel scam intelligence prototype: a FastAPI engine scores URLs and pasted messages using heuristics, optional threat-intel lookups, psychological keyword signals, sender checks, QR decode, and community reports; a React dashboard and a Manifest V3 extension display Simple and Technical views.</p>
+<p><strong>Why is it different?</strong>  </p>
+<p>It is not only a URL blacklist. It fuses message language and community votes, and it refuses to let fear-words alone become HIGH/CRITICAL.</p>
+<p><strong>Why AI?</strong>  </p>
+<p>We use “AI” as assisted decisioning: explainable fusion. We do <strong>not</strong> ship a trained neural phishing classifier in this repository.</p>
+<p><strong>Why PostgreSQL?</strong>  </p>
+<p>We <strong>do not use it yet</strong>. We use SQLite. Postgres is a planned production store.</p>
+<p><strong>Why React?</strong>  </p>
+<p>To ship a scanner, history, reports, and charts quickly as a SPA.</p>
+<p><strong>Why Python?</strong>  </p>
+<p>FastAPI, urllib, OpenCV, pytest — one language for API and detection logic.</p>
+<p><strong>How does phishing detection work?</strong>  </p>
+<p>Parse URL/text → heuristic URLChecker + intel → keyword psychology → brand/sender/community → weighted sum → persist → explain.</p>
+<p><strong>How does the risk score work?</strong>  </p>
+<p>Weighted average of ten signals, cap 100, psych-only cap 35, then banded into four levels.</p>
+<p><strong>What happens when your model is wrong?</strong>  </p>
+<p>There is no model to be wrong in the ML sense. Heuristics misfire: we show reasons, allow feedback, and keep psych from over-firing. Users should still think.</p>
+<p><strong>How do you prevent false positives?</strong>  </p>
+<p>Trusted domains, psych cap, explainability, human reports of “safe.” Still imperfect.</p>
+<p><strong>How do you handle new phishing attacks?</strong>  </p>
+<p>New domains: age/DNS/TLD/intel may catch some; brand-new kits evade lists. v2 would add a trained model and faster intel.</p>
+<p><strong>How do you protect user data?</strong>  </p>
+<p>Password hashes, JWT, gitignored .env, extension doesn’t scrape passwords. Scan URLs <strong>are</strong> stored. Default JWT secret is a known weakness.</p>
+<p><strong>How does the browser extension work?</strong>  </p>
+<p>MV3 worker + content script + popup; <code>fetch</code> to FastAPI; badge/overlay; visible links only.</p>
+<p><strong>How does frontend communicate with backend?</strong>  </p>
+<p>Axios JSON to <code>VITE_API_URL</code>.</p>
+<p><strong>How does backend communicate with the database?</strong>  </p>
+<p><code>sqlite3.connect</code>, row factory, parameterized SQL.</p>
+<p><strong>What if the database goes down / file missing?</strong>  </p>
+<p>Startup <code>init_db()</code> creates tables. If the disk is broken, APIs that write fail with 500. Reads fail. UI shows connection/server errors.</p>
+<p><strong>What if ML fails?</strong>  </p>
+<p>Fusion is in-process Python. If a dependency throws, the route returns 500. Intel failures are fail-soft (None).</p>
+<p><strong>What makes this scalable?</strong>  </p>
+<p>Today: not really (SQLite, single local server, CORS *). Scaling story is Postgres + workers + restricted CORS + caching intel.</p>
+<p><strong>Biggest limitation?</strong>  </p>
+<p>No labelled ML, paste-only messengers, keyword evasion, public scan listing, local-only deploy.</p>
+<p><strong>Version 2?</strong>  </p>
+<p>PostgreSQL, packaged OCR, real ml signal, rate limits, HTTPS, Android companion, evaluation set, tighter authz on GET /scans.</p>
+<hr/>
+<h2 id="s864">19. Technology difficulty</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Technology</th><th>Difficulty</th><th>Estimated learning time (for this project, not mastery)</th><th>Priority</th></tr></thead><tbody>
+<tr><td>Git basics</td><td>Easy</td><td>3–4 hours</td><td>HIGH</td></tr>
+<tr><td>HTTP/JSON/REST</td><td>Easy</td><td>4–6 hours</td><td>HIGH</td></tr>
+<tr><td>React components + hooks</td><td>Medium</td><td>2–3 days</td><td>HIGH</td></tr>
+<tr><td>React Router + Axios auth</td><td>Medium</td><td>1 day</td><td>HIGH</td></tr>
+<tr><td>Tailwind usage</td><td>Easy</td><td>4 hours</td><td>MEDIUM</td></tr>
+<tr><td>Vite workflow</td><td>Easy</td><td>2 hours</td><td>MEDIUM</td></tr>
+<tr><td>Python functions/modules</td><td>Easy–Medium</td><td>1–2 days</td><td>HIGH</td></tr>
+<tr><td>FastAPI routers + Pydantic</td><td>Medium</td><td>1–2 days</td><td>HIGH</td></tr>
+<tr><td>JWT + bcrypt concepts</td><td>Medium</td><td>4–6 hours</td><td>HIGH</td></tr>
+<tr><td>SQLite + SQL</td><td>Medium</td><td>1–2 days</td><td>HIGH</td></tr>
+<tr><td>URL heuristics (url_checker)</td><td>Medium</td><td>1 day reading code</td><td>HIGH</td></tr>
+<tr><td>Fusion + risk bands</td><td>Medium</td><td>3–4 hours</td><td>HIGH</td></tr>
+<tr><td>Psychology keywords</td><td>Easy</td><td>2 hours</td><td>HIGH</td></tr>
+<tr><td>SSRF/SQLi/CORS concepts</td><td>Medium–Hard</td><td>1 day</td><td>HIGH</td></tr>
+<tr><td>OpenCV QR</td><td>Medium</td><td>2–3 hours</td><td>MEDIUM</td></tr>
+<tr><td>Manifest V3 messaging</td><td>Hard</td><td>1–2 days</td><td>HIGH</td></tr>
+<tr><td>Threat intel APIs</td><td>Medium</td><td>3 hours</td><td>MEDIUM</td></tr>
+<tr><td>pytest</td><td>Easy–Medium</td><td>3–4 hours</td><td>HIGH</td></tr>
+<tr><td>Real sklearn/CNN (future)</td><td>Advanced</td><td>weeks</td><td>LOW now</td></tr>
+<tr><td>PostgreSQL (future)</td><td>Medium</td><td>1–2 days</td><td>MEDIUM</td></tr>
+</tbody></table></div>
+<hr/>
+<h2 id="s889">20. Five-day crash course</h2>
+<h3>Day 1 — Architecture + UI/API basics</h3>
+<p>Morning: read README, start uvicorn + Vite, hit <code>/health</code> and <code>/docs</code>. Draw the architecture in section 7 from memory.  </p>
+<p>Afternoon: walk <code>App.jsx</code> routes; log in; open Scanner. Read <code>api.js</code>.  </p>
+<p>Homework: explain CyberGuard vs PhishShield naming.</p>
+<h3>Day 2 — Backend + SQLite</h3>
+<p>Morning: <code>main.py</code> routers; <code>user.py</code> signup/login; <code>auth.py</code>.  </p>
+<p>Afternoon: <code>connection.py</code> every table; run a few SQL SELECTs on <code>threats.db</code> (copy first). Trace <code>POST /report</code>.  </p>
+<p>Homework: answer Q22–Q25 and Q71.</p>
+<h3>Day 3 — Detection + risk</h3>
+<p>Morning: <code>url_checker.py</code> lists (trusted, piracy, TLD, brands). <code>external_intel.py</code> fail-soft.  </p>
+<p>Afternoon: <code>psychology.py</code> + <code>risk_engine.py</code> with a calculator: plug fake signals, hit the psych cap. Read <code>content_analyzer.py</code> including <code>&quot;ml&quot;: url_risk</code>.  </p>
+<p>Homework: 2-minute speech “we do not have a CNN.”</p>
+<h3>Day 4 — Extension + security + full trace</h3>
+<p>Morning: load unpacked extension; watch Network tab to :8000. Read manifest permissions.  </p>
+<p>Afternoon: <code>ssrf.py</code>, CORS line, report caps, screenshot 5 MB. Rehearse Path A and Path B in section 8.  </p>
+<p>Homework: trick questions T1–T8.</p>
+<h3>Day 5 — Viva</h3>
+<p>Morning: cheat sheet + section 18 answers out loud.  </p>
+<p>Afternoon: mock jury — one person only asks trick questions. No laptops for the first 20 minutes. Then open <code>/docs</code> and <code>risk_engine.py</code> only.</p>
+<hr/>
+<h2 id="s910">21. One-page cheat sheet (printable)</h2>
+<p><strong>PROJECT:</strong> PhishShield AI (code: CyberGuard API 2.0)</p>
+<p><strong>PROBLEM:</strong> Scams arrive as links <strong>and</strong> as messages (SMS/WhatsApp/email). People need an explainable risk check, not a black box.</p>
+<p><strong>SOLUTION:</strong> FastAPI fusion engine + React dashboard + Chrome MV3 extension.</p>
+<p><strong>FRONTEND:</strong> React 19, Router 7, Axios, Tailwind 4, Vite 8, Recharts — <code>frontend/src/</code></p>
+<p><strong>BACKEND:</strong> FastAPI + Uvicorn :8000 — <code>backend/app/</code></p>
+<p><strong>DATABASE:</strong> SQLite <code>backend/threats.db</code> (PostgreSQL <strong>planned</strong>)</p>
+<p><strong>AI/ML:</strong> <strong>No trained model.</strong> <code>risk_engine.fuse</code> weighted signals. <code>&quot;ml&quot;</code> copies URL risk.</p>
+<p><strong>EXTENSION:</strong> Manifest V3 — <code>extension/</code> — <code>check-url</code> + <code>analyze/content</code></p>
+<p><strong>KEY FEATURES:</strong> URL + paste + email fields + QR + optional screenshot OCR; Simple/Technical views; community reports; dashboard stats.</p>
+<p><strong>KEY NOVELTY:</strong> Multi-channel normalize → fuse; psych <strong>cannot</strong> solo HIGH/CRITICAL; confidence = agreement.</p>
+<p><strong>RISK SCORE:</strong> 0–100 weighted sum; LOW&amp;lt;30, MEDIUM&amp;lt;50, HIGH&amp;lt;70, else CRITICAL; psych-only cap 35.</p>
+<p><strong>IMPORTANT APIs:</strong> <code>POST /api/v1/analyze/content</code>, <code>POST /api/v1/threat/check-url</code>, <code>POST /api/v1/user/login</code>, <code>POST /api/v1/report</code>, <code>GET /api/v1/stats/overview</code></p>
+<p><strong>IMPORTANT TABLES:</strong> users, url_checks, threats, content_scans, extracted_links, user_reports, domain_reputation, scan_feedback</p>
+<p><strong>TOP 10 VIVA QUESTIONS:</strong>  </p>
+<ol>
+<li>Why not Flask/Postgres/CNN? Because they are not in the running system.</li>
+<li>How is the score calculated? Weighted fusion.</li>
+<li>What is confidence? Signal agreement.</li>
+<li>Can psychology be CRITICAL? No.</li>
+<li>How do you stop SQL injection? Bound parameters.</li>
+<li>How do you stop SSRF? Public-URL assertion.</li>
+<li>Two scan pipelines? check-url vs analyze/content.</li>
+<li>Does the extension read SMS? No.</li>
+<li>What if intel is down? Fail soft, heuristics remain.</li>
+<li>Biggest limitation? Prototype: no trained model, SQLite, open CORS, paste-only.</li>
+</ol>
+<hr/>
+<h2 id="s938">22. Code vs documentation discrepancies (memorize)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Claim you might hear</th><th>Code reality</th></tr></thead><tbody>
+<tr><td>Flask backend</td><td>FastAPI</td></tr>
+<tr><td>PostgreSQL in production</td><td>SQLite <code>threats.db</code></td></tr>
+<tr><td>Trained CNN / sklearn</td><td>Absent; numpy for QR</td></tr>
+<tr><td>URLhaus</td><td>OpenPhish feed in code</td></tr>
+<tr><td>DATABASE_URL drives the DB</td><td><code>connection.py</code> ignores it</td></tr>
+<tr><td>JWT expires in 30 minutes</td><td>Routes issue 7-day tokens</td></tr>
+<tr><td>Global rate limit</td><td>Only report caps</td></tr>
+<tr><td>Native SMS</td><td>Planned (<code>mobile_source.py</code>)</td></tr>
+<tr><td>Screenshot always OCRs</td><td>Optional Tesseract</td></tr>
+<tr><td>GET /scans is private</td><td>Public API</td></tr>
+<tr><td><code>model_probability</code> is ML</td><td>Equals fused score</td></tr>
+<tr><td>SQLAlchemy is the data layer</td><td>Models unused by live routes</td></tr>
+<tr><td>Product name CyberGuard only</td><td>SIH name PhishShield AI</td></tr>
+</tbody></table></div>
+<hr/>
+<p><em>End of guide. If the code changes, regenerate this document from the repository — do not edit the PDF by hand and drift.</em></p>
+</body>
+</html>

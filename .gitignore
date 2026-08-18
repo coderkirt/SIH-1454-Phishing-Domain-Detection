@@ -1,4 +1,8 @@
-node_modules/
-.env
-users.db
+venv/
+__pycache__/
+*.pyc
 *.db
+.env
+.pytest_cache/
+frontend/node_modules/
+frontend/dist/

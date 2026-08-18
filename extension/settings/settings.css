@@ -1,0 +1,46 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+.hero {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 6px 0 8px;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.panel {
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.stack { display: grid; gap: 12px; }
+label { display: grid; gap: 6px; }
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  color: var(--ink-soft);
+}
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.row .btn-primary,
+.row .btn-secondary { width: auto; }
+#logout { margin-top: 12px; width: auto; }

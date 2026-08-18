@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SIH-2026 Form Fill Sheet — HRITIK KUMAR</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13.5pt;
+    line-height: 1.45;
+    color: #111;
+    margin: 0;
+  }
+  h1 {
+    font-size: 20pt;
+    margin: 0 0 6px;
+    color: #111;
+  }
+  .sub { color: #444; margin: 0 0 18px; font-size: 11pt; }
+  h2 {
+    font-size: 13pt;
+    background: #111;
+    color: #fff;
+    padding: 8px 10px;
+    margin: 18px 0 8px;
+  }
+  p, li { margin: 0 0 8px; }
+  ol { padding-left: 22px; margin: 0 0 8px; }
+  .box {
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    margin: 0 0 8px;
+  }
+  .you { background: #fff8e1; border-color: #e6c200; }
+  .hint { font-size: 10.5pt; color: #555; }
+  .link { word-break: break-all; font-size: 10.5pt; color: #333; }
+</style>
+</head>
+<body>
+  <h1>SIH-2026 Form Fill Sheet</h1>
+  <p class="sub">Copy these answers into the Google Form on your phone. Do not write Flask, PostgreSQL or CNN.</p>
+  <p class="link">Form: https://docs.google.com/forms/d/1joANngfzID5rSXp9-erafprx-JfbYyuRRnzOVC7dNMM/viewform</p>
+
+  <h2>1. Name of Student</h2>
+  <div class="box"><strong>HRITIK KUMAR</strong> (select from dropdown)</div>
+
+  <h2>2–4. Fill yourself</h2>
+  <div class="box you">
+    <p><strong>Whatsapp no:</strong> __________________</p>
+    <p><strong>Email Id:</strong> __________________</p>
+    <p><strong>Branch:</strong> CSE / CS_AI / CS_AIML / CS_DS / IT / ECE / MCA / MBA</p>
+    <p><strong>Section:</strong> A–R or Other</p>
+    <p><strong>Year:</strong> II / III / IV</p>
+  </div>
+
+  <h2>5. Write Problem statement</h2>
+  <div class="box">
+    Phishing kits impersonate trusted domains and inject social-engineering payloads into SMS, WhatsApp and email. A URL-only checker fails when the attack is in-page or in-message. PhishShield AI is a real-time browser protection layer (Chrome Manifest V3) backed by a FastAPI threat engine. The extension intercepts the active tab, scores the URL and visible links against the same pipeline as the dashboard, and raises HIGH/CRITICAL overlays before credential entry.
+  </div>
+
+  <h2>6. Objective of the Problem Statement (5 points)</h2>
+  <div class="box">
+    <ol>
+      <li>Provide real-time in-browser protection so a phishing page is scored before the user enters a password, OTP or card detail.</li>
+      <li>Make the Chrome Manifest V3 extension the main defence layer: auto-scan the active tab, badge the risk (OK / MED / HIGH / CRIT), and block HIGH/CRITICAL sites with an overlay.</li>
+      <li>Detect impersonation not only from the address bar but also from visible page links, shortened URLs and QR-borne URLs, using one threat API.</li>
+      <li>Produce an explainable 0–100 risk score (heuristics + intel + psychological markers), with Simple View for users and Technical View for audit.</li>
+      <li>Keep dashboard and extension on the same FastAPI engine, so a URL scanned in Chrome and in the web app returns the same verdict.</li>
+    </ol>
+  </div>
+
+  <h2>7. Used Technology (min. 2 points)</h2>
+  <div class="box">
+    <ol>
+      <li>Chrome Extension — Manifest V3 (service worker, content script, popup, chrome.storage)</li>
+      <li>FastAPI + Uvicorn + Pydantic (REST threat engine)</li>
+      <li>React 19 + Vite 8 (operator dashboard)</li>
+      <li>SQLite (threats.db) for scans, users, reputation</li>
+      <li>JWT (HS256) + bcrypt; OpenCV QR decode; optional Google Safe Browsing / OpenPhish</li>
+    </ol>
+    <p class="hint">Do not write: Flask, live PostgreSQL, TensorFlow/Keras CNN, sklearn model.</p>
+  </div>
+
+  <h2>8. Methodology (10 points)</h2>
+  <div class="box">
+    <ol>
+      <li>Extension service worker reads the active-tab URL; skip chrome:// and edge:// pages.</li>
+      <li>Content script collects visible http(s) links only (no passwords, OTP, cookies, SMS).</li>
+      <li>Popup / auto-scan POSTs to FastAPI (/api/v1/threat/check-url or /api/v1/analyze/content).</li>
+      <li>URLChecker runs TLD, allowlist, brand-typo, shortener expansion and keyword heuristics.</li>
+      <li>Fail-soft intel: DNS + RDAP age; Google Safe Browsing if keyed, else OpenPhish feed.</li>
+      <li>Message path: substring psychology detector (urgency, fear, OTP/KYC, countdown).</li>
+      <li>Fusion engine: weighted signals (url 0.22, domain 0.16, intel 0.10, psych 0.10, …); psychology-only score capped at 35.</li>
+      <li>Persist url_checks / content_scans in SQLite; toolbar badge = OK / MED / HIGH / CRIT.</li>
+      <li>HIGH/CRITICAL → full-page overlay (Go back / Continue anyway); toast for other levels.</li>
+      <li>Dashboard consumes the same JSON for history, reports and Simple/Technical View.</li>
+    </ol>
+  </div>
+</body>
+</html>
