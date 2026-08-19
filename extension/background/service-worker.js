@@ -221,7 +221,7 @@ async function scanTab(tabId, url, { force = false, pageSignals = null } = {}) {
 
   const domain = domainOf(url);
   const scanEveryPage = settings.scanAllPages === true || scanAllPagesEnabled;
-  if (!force && !scanEveryPage && domain && allowedDomains.has(domain)) {
+  if (!force && !pageSignals && !scanEveryPage && domain && allowedDomains.has(domain)) {
     const prior = domainScan.get(domain);
     const state = prior
       ? { ...prior, url, host: displayHost(url) }
