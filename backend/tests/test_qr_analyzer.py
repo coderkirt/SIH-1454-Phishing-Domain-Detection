@@ -33,3 +33,16 @@ def test_analyze_qr_endpoint():
     data = response.json()
     assert data["source_type"] == "qr"
     assert data.get("url") or (data.get("links") or [])
+    assert any("paypa1.com" in (url or "") for url in (data.get("qr_urls") or [data.get("url")]))
+    assert data.get("decoded_text")
+
+
+def test_analyze_qr_plain_payload_is_returned():
+    response = client.post(
+        "/api/v1/analyze/qr",
+        files={"file": ("qr.png", _png_qr("UPI:merchant@okaxis"), "image/png")},
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert "UPI:merchant@okaxis" in (data.get("decoded_text") or "")
+    assert data.get("qr_payloads")

@@ -10,16 +10,17 @@ BARE_HOST = re.compile(r"(?i)^(?:www\.)?[a-z0-9][a-z0-9.-]+\.[a-z]{2,}(?:/[^\s]*
 
 
 def _normalize_payload(raw: str) -> Optional[str]:
-    text = (raw or "").strip().strip("\x00")
+    text = (raw or "").strip().strip("\x00").replace("\r", " ").replace("\n", "").strip()
     if not text:
         return None
     match = HTTP_IN_TEXT.search(text)
     if match:
         return match.group(0).rstrip(".,;:!?)")
-    if text.lower().startswith("www."):
-        return "https://" + text
-    if BARE_HOST.match(text):
-        return "https://" + text
+    lower = text.lower()
+    if lower.startswith("www."):
+        return "https://" + text.split()[0]
+    if BARE_HOST.match(text.split()[0]):
+        return "https://" + text.split()[0]
     return None
 
 
@@ -57,9 +58,16 @@ def _variants(image):
     yield cv2.bitwise_not(gray)
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
     yield blurred
+    try:
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        yield clahe.apply(gray)
+    except Exception:
+        pass
     _, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     yield otsu
     yield cv2.bitwise_not(otsu)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    yield cv2.morphologyEx(otsu, cv2.MORPH_CLOSE, kernel)
     try:
         adaptive = cv2.adaptiveThreshold(
             gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 5
@@ -76,10 +84,12 @@ def _scaled(image):
     height, width = image.shape[:2]
     longest = max(height, width)
     yield image
-    if longest < 480:
-        factor = 480 / max(longest, 1)
+    if longest < 720:
+        factor = 720 / max(longest, 1)
         yield cv2.resize(image, None, fx=factor, fy=factor, interpolation=cv2.INTER_NEAREST)
         yield cv2.resize(image, None, fx=factor, fy=factor, interpolation=cv2.INTER_CUBIC)
+    if 200 < longest < 900:
+        yield cv2.resize(image, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
     if longest > 1800:
         factor = 1400 / longest
         yield cv2.resize(image, None, fx=factor, fy=factor, interpolation=cv2.INTER_AREA)
@@ -105,21 +115,40 @@ def _decode_with_detector(image) -> List[str]:
     return payloads
 
 
+def _read_image(image_bytes: bytes):
+    import numpy as np
+    import cv2
+
+    array = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(array, cv2.IMREAD_COLOR)
+    if image is None:
+        image = cv2.imdecode(array, cv2.IMREAD_UNCHANGED)
+    if image is not None:
+        if len(image.shape) == 3 and image.shape[2] == 4:
+            image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+        return image
+    try:
+        from PIL import Image
+        import io
+
+        pil = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        rgb = np.array(pil)
+        return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+    except Exception:
+        return None
+
+
 def extract_qr_urls(image_bytes: bytes) -> Dict:
     payloads: List[str] = []
     error = None
     try:
-        import numpy as np
         import cv2
 
-        array = np.frombuffer(image_bytes, dtype=np.uint8)
-        image = cv2.imdecode(array, cv2.IMREAD_COLOR)
-        if image is None:
-            image = cv2.imdecode(array, cv2.IMREAD_UNCHANGED)
+        image = _read_image(image_bytes)
         if image is None:
             return {"urls": [], "payloads": [], "error": "Could not read that image."}
 
-        padded = cv2.copyMakeBorder(image, 16, 16, 16, 16, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        padded = cv2.copyMakeBorder(image, 24, 24, 24, 24, cv2.BORDER_CONSTANT, value=(255, 255, 255))
         seen = set()
         for scaled in _scaled(padded):
             for variant in _variants(scaled):
