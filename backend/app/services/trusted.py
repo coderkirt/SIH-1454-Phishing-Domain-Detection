@@ -61,6 +61,7 @@ TRUSTED_DOMAINS = {
     "notion.so", "atlassian.com", "bitbucket.org", "trello.com", "asana.com",
     "salesforce.com", "oracle.com", "ibm.com", "intel.com", "nvidia.com",
     "cloudflare.com", "cloudflare.net", "mozilla.org", "firefox.com",
+    "phishtank.com", "phishtank.net",
     "stackoverflow.com", "stackexchange.com", "quora.com",
     "bbc.com", "bbc.co.uk", "cnn.com", "nytimes.com", "reuters.com",
     "yahoo.com", "duckduckgo.com", "pinterest.com", "tumblr.com",
