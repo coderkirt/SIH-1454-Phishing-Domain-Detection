@@ -71,6 +71,93 @@ def _is_private_host(host: str) -> bool:
     return False
 
 
+def count_html_clutter(text: str) -> Dict:
+    """Count buttons, iframes, popup scripts, and overlay-style markup in HTML.
+
+    This is a string count, not a rendered DOM. Normal Google Ads snippets
+    do not match these thresholds by themselves.
+    """
+    blob = (text or "").lower()
+    return {
+        "buttons": (
+            blob.count("<button")
+            + blob.count('type="submit"')
+            + blob.count("type='submit'")
+            + blob.count('role="button"')
+            + blob.count("role='button'")
+        ),
+        "iframes": blob.count("<iframe"),
+        "popups": blob.count("window.open(") + blob.count("popunder") + blob.count("pop-under"),
+        "overlays": (
+            blob.count("position:fixed")
+            + blob.count("position: fixed")
+            + blob.count('aria-modal="true"')
+            + blob.count("<dialog")
+        ),
+        "links": blob.count("<a "),
+    }
+
+
+def merge_clutter_counts(html_counts: Dict = None, page_signals: Dict = None) -> Dict:
+    """Prefer the higher of fetched HTML counts and live page counts from the extension."""
+    keys = ("buttons", "iframes", "popups", "overlays", "links")
+    html_counts = html_counts or {}
+    page_signals = page_signals or {}
+    return {
+        key: max(int(html_counts.get(key) or 0), int(page_signals.get(key) or 0))
+        for key in keys
+    }
+
+
+def score_page_clutter(html_counts: Dict = None, page_signals: Dict = None) -> Dict:
+    """Turn clutter counts into a capped fishy score.
+
+    Busy legitimate shops can have many buttons. Thresholds stay high so
+    normal pages are not marked FISHY. Aggressive popup pages still score.
+    """
+    counts = merge_clutter_counts(html_counts, page_signals)
+    buttons = counts["buttons"]
+    iframes = counts["iframes"]
+    popups = counts["popups"]
+    overlays = counts["overlays"]
+    points = 0
+    reasons = []
+
+    if buttons >= 30:
+        points += 15
+        reasons.append(f"Unusually many buttons ({buttons}) — common on scam and prize pages")
+    elif buttons >= 18:
+        points += 8
+        reasons.append(f"Busy page with many clickable buttons ({buttons})")
+
+    if iframes >= 10:
+        points += 12
+        reasons.append(f"Many embedded frames ({iframes}) — often used for ads and popups")
+    elif iframes >= 5:
+        points += 6
+        reasons.append(f"Several embedded frames ({iframes})")
+
+    if popups >= 2:
+        points += 15
+        reasons.append("Page script tries to open extra windows or pop-unders")
+    elif popups == 1:
+        points += 8
+        reasons.append("Page script can open another window")
+
+    if overlays >= 8 and (buttons >= 10 or popups):
+        points += 8
+        reasons.append("Many overlay / modal popups on the page")
+
+    points = min(points, 32)
+    return {
+        "points": points,
+        "flagged": points >= 6,
+        "reasons": reasons,
+        "counts": counts,
+        "label": reasons[0] if reasons else "Page layout does not look like a popup farm",
+    }
+
+
 def scan_text_for_ads(text: str) -> Dict:
     """Score HTML or a URL string for aggressive ad networks. No page JS is run."""
     blob = (text or "").lower()
@@ -80,6 +167,7 @@ def scan_text_for_ads(text: str) -> Dict:
         "networks": networks,
         "popup_tricks": popups,
         "flagged": bool(networks or popups),
+        "clutter": count_html_clutter(text),
     }
 
 
@@ -93,6 +181,7 @@ def check_ad_signals(url: str) -> Dict:
         "flagged": False,
         "networks": [],
         "popup_tricks": [],
+        "clutter": count_html_clutter(""),
         "label": "Not checked",
     }
     if not url:
@@ -105,6 +194,7 @@ def check_ad_signals(url: str) -> Dict:
             "flagged": True,
             "networks": from_url["networks"],
             "popup_tricks": from_url["popup_tricks"],
+            "clutter": from_url.get("clutter") or count_html_clutter(url),
             "label": "Aggressive ad / popup network in the URL",
         })
         return result
@@ -137,12 +227,14 @@ def check_ad_signals(url: str) -> Dict:
         )
         html = (resp.text or "")[:150000]
         found = scan_text_for_ads(html)
+        clutter = found.get("clutter") or count_html_clutter(html)
         if found["flagged"]:
             result = {
                 "status": "flagged",
                 "flagged": True,
                 "networks": found["networks"],
                 "popup_tricks": found["popup_tricks"],
+                "clutter": clutter,
                 "label": "Page uses aggressive popup / malware-style ads",
             }
         else:
@@ -151,6 +243,7 @@ def check_ad_signals(url: str) -> Dict:
                 "flagged": False,
                 "networks": [],
                 "popup_tricks": [],
+                "clutter": clutter,
                 "label": "No aggressive ad networks found",
             }
     except requests.RequestException:
@@ -159,6 +252,7 @@ def check_ad_signals(url: str) -> Dict:
             "flagged": False,
             "networks": [],
             "popup_tricks": [],
+            "clutter": count_html_clutter(""),
             "label": "Could not read page ads",
         }
 

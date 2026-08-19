@@ -76,6 +76,16 @@ def test_recent_urls():
     assert "recent_urls" in response.json()
 
 
+def test_intel_status():
+    response = client.get("/api/v1/threat/intel-status")
+    assert response.status_code == 200
+    data = response.json()
+    assert "feeds" in data
+    assert "api_keys" in data
+    names = {row["name"] for row in data["feeds"]}
+    assert {"openphish", "urlhaus_online", "phishtank_dump", "phishing_army"} <= names
+
+
 def test_signup():
     response = client.post("/api/v1/user/signup", json={
         "username": TEST_USER,

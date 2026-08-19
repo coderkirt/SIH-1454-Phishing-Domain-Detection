@@ -13,6 +13,7 @@ const reasonsTitle = document.getElementById("reasons-title");
 const reasonsEl = document.getElementById("reasons");
 const scanBtn = document.getElementById("scan-again");
 const clockEl = document.getElementById("clock");
+const hostEl = document.getElementById("host");
 
 function tickClock() {
   clockEl.textContent = new Date().toLocaleTimeString(undefined, {
@@ -64,7 +65,7 @@ function render(payload) {
 
   const copy = {
     checking: ["Checking", "Asking the PHISHEYE backend about this page."],
-    safe: ["No threat", "This website looks clear. Still check the name in the address bar."],
+    safe: ["No threat", "No malicious indicators detected. That is not a guarantee of safety."],
     medium: ["Fishy", "Something looks off. Check the address before you sign in."],
     high: ["Threat detected", "Do not enter passwords, OTPs, or card details."],
     critical: ["Threat detected", "Do not enter passwords, OTPs, or card details."],
@@ -105,6 +106,8 @@ async function loadStatus(force = false) {
 scanBtn.addEventListener("click", () => loadStatus(true));
 document.getElementById("open-dashboard").addEventListener("click", () => send("OPEN_DASHBOARD"));
 document.getElementById("open-settings").addEventListener("click", () => send("OPEN_SETTINGS"));
+document.getElementById("open-full").addEventListener("click", () => send("OPEN_PANEL", { size: "full" }));
+document.getElementById("open-compact").addEventListener("click", () => send("OPEN_PANEL", { size: "compact" }));
 document.getElementById("analyze-links").addEventListener("click", analyzeLinks);
 
 async function analyzeLinks() {
