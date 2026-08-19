@@ -47,9 +47,12 @@
 
       <section class="panel">
         <h2 class="font-display">Protection</h2>
-        <label class="toggle"><input id="auto-scan" type="checkbox" /> Enable automatic scanning</label>
+        <label class="toggle"><input id="auto-scan" type="checkbox" /> Scan a website the first time it opens</label>
+        <label class="toggle"><input id="scan-all-pages" type="checkbox" /> Scan every page on a site after it is open</label>
+        <label class="toggle"><input id="pre-navigate" type="checkbox" /> Intercept every website, scan it first, open clear sites automatically, and keep the rest closed</label>
         <label class="toggle"><input id="page-popup" type="checkbox" /> Show risk level popup on the page (no click needed)</label>
         <label class="toggle"><input id="warnings" type="checkbox" /> Enable full warning page on HIGH / CRITICAL sites</label>
+        <p class="note">Leave “Scan every page” off after a site is clear — PHISHEYE will not re-scan Google, YouTube, GitHub, or other pages on that same site. Turn it on only if you want every click checked. When the gate is on, the destination stays hidden until the first scan finishes. Clear sites open automatically. Fishy sites need Open anyway. HIGH and CRITICAL stay closed.</p>
       </section>
 
       <section class="panel">
