@@ -191,6 +191,49 @@ def _free_host_signal(features: Dict) -> Optional[Dict]:
     return {"points": points, "reason": reason, "tag": "free_host_phish"}
 
 
+VENDOR_INTERSTITIAL_MARKERS = (
+    "suspected phishing",
+    "deceptive site ahead",
+    "dangerous site ahead",
+    "reported for potential phishing",
+    "this website has been reported for potential phishing",
+    "attackers on this site",
+    "the site ahead contains malware",
+    "phishing warning",
+    "reported as unsafe",
+)
+
+
+def _vendor_interstitial_signal(page_signals: Optional[Dict], features: Dict) -> Optional[Dict]:
+    """Flag Cloudflare / browser 'Suspected Phishing' block pages.
+
+    PhishTank suspected listings often show that interstitial while the
+    verified-only dump has no row yet. Skip official sites and PhishTank itself.
+    """
+    if not page_signals:
+        return None
+    if is_trusted_destination(
+        hostname=features.get("hostname"),
+        registered_domain=features.get("registered_domain"),
+    ):
+        return None
+    blob = " ".join([
+        str(page_signals.get("title") or ""),
+        str(page_signals.get("heading") or ""),
+        str(page_signals.get("snippet") or "")[:800],
+    ]).lower()
+    if not blob.strip():
+        return None
+    for marker in VENDOR_INTERSTITIAL_MARKERS:
+        if marker in blob:
+            return {
+                "points": 75,
+                "reason": "This page is a phishing warning interstitial (Cloudflare/browser block)",
+                "tag": "vendor_phishing_interstitial",
+            }
+    return None
+
+
 def _detect_brand(domain: str, label: str) -> Optional[str]:
     """Return the brand being impersonated, or None if it looks genuine."""
     normalized = _normalize_label(label)
@@ -450,6 +493,12 @@ class URLChecker:
                 risk_score += host_signal["points"]
                 reasons.append(host_signal["reason"])
                 tags.append(host_signal["tag"])
+
+            interstitial = _vendor_interstitial_signal(page_signals, features)
+            if interstitial:
+                risk_score += interstitial["points"]
+                reasons.append(interstitial["reason"])
+                tags.append(interstitial["tag"])
 
             # 4. Suspicious domain ending
             if tld in SUSPICIOUS_TLDS:
