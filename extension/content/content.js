@@ -379,12 +379,17 @@
     const onclickPopups = [...document.querySelectorAll("[onclick]")].filter((el) =>
       String(el.getAttribute("onclick") || "").toLowerCase().includes("window.open")
     ).length;
+    const heading = (document.querySelector("h1")?.innerText || "").trim().slice(0, 200);
+    const snippet = (document.body?.innerText || "").replace(/\s+/g, " ").trim().slice(0, 800);
     return {
       buttons: document.querySelectorAll("button, [role='button'], input[type='submit'], input[type='button']").length,
       iframes: document.querySelectorAll("iframe").length,
       popups: onclickPopups,
       overlays: document.querySelectorAll("dialog, [aria-modal='true']").length,
       links: document.querySelectorAll("a[href]").length,
+      title: (document.title || "").slice(0, 300),
+      heading,
+      snippet,
     };
   }
 
