@@ -102,6 +102,7 @@ def paths_related(user_path: str, feed_path: str, *, allow_parent: bool = True) 
 def build_feed_index(urls: Iterable[str]) -> Dict:
     normalized_map: Dict[str, list] = {}
     by_host: Dict[str, list] = {}
+    by_registered: Dict[str, list] = {}
     raw = set()
     for item in urls:
         text = (item or "").strip()
@@ -116,7 +117,15 @@ def build_feed_index(urls: Iterable[str]) -> Dict:
         host = info["hostname"]
         alt = host[4:] if host.startswith("www.") else f"www.{host}"
         by_host.setdefault(alt, []).append(info)
-    return {"raw": raw, "normalized": normalized_map, "by_host": by_host}
+        registered = info.get("registered_domain") or ""
+        if registered:
+            by_registered.setdefault(registered, []).append(info)
+    return {
+        "raw": raw,
+        "normalized": normalized_map,
+        "by_host": by_host,
+        "by_registered_domain": by_registered,
+    }
 
 
 def _trusted_entry_compatible(user_info: Dict, feed_info: Dict) -> bool:
@@ -193,6 +202,19 @@ def match_against_index(user_info: Dict, index: Dict) -> Dict:
             "confidence": 0.82,
             "matched_url": hit.get("normalized_full_url") or "",
         }
+
+    registered = user_info.get("registered_domain") or ""
+    if (not trusted) and registered:
+        domain_hits = list((index.get("by_registered_domain") or {}).get(registered) or [])
+        apex = {registered, f"www.{registered}"}
+        apex_hits = [hit for hit in domain_hits if (hit.get("hostname") or "") in apex]
+        if apex_hits:
+            hit = apex_hits[0]
+            return {
+                "match_type": "registered_domain",
+                "confidence": 0.78,
+                "matched_url": hit.get("normalized_full_url") or "",
+            }
 
     return {"match_type": "no_match", "confidence": 0.0, "matched_url": ""}
 
@@ -310,6 +332,20 @@ def lookup_openphish(url_info: Dict, *, fetch_lines=None, index: Optional[Dict] 
     )
 
 
+def _phishtank_flag(value) -> Optional[bool]:
+    """PhishTank uses true/false, y/n, yes/no, and 1/0 depending on the endpoint."""
+    if value is True or value is False:
+        return value
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text in {"true", "t", "y", "yes", "1", "valid", "verified"}:
+        return True
+    if text in {"false", "f", "n", "no", "0", "u", "unverified", "invalid"}:
+        return False
+    return None
+
+
 def _phishtank_from_payload(url_info: Dict, runner) -> Dict:
     provider = "PhishTank"
     cache_key = f"phishtank:{url_info['normalized_full_url']}"
@@ -329,24 +365,20 @@ def _phishtank_from_payload(url_info: Dict, runner) -> Dict:
             detail="PhishTank returned an invalid response",
         ), 60)
     results = payload.get("results") if isinstance(payload.get("results"), dict) else payload
-    in_database = results.get("in_database")
-    if in_database is True or str(in_database).lower() == "true":
-        valid = results.get("valid")
-        verified = results.get("verified")
-        if valid is False or str(valid).lower() in {"false", "n", "no"}:
+    in_database = _phishtank_flag(results.get("in_database"))
+    if in_database is True:
+        valid = _phishtank_flag(results.get("valid"))
+        verified = _phishtank_flag(results.get("verified"))
+        if valid is False:
             return _cache_set(cache_key, _provider_result(
                 provider, status="no_match", match_type="no_match",
                 detail="PhishTank entry is marked invalid",
             ), HIT_TTL_SEC)
-        unverified = (
-            verified is False
-            or str(verified).lower() in {"false", "n", "no", "u", "unverified"}
-        )
-        if unverified:
+        if verified is False:
             return _cache_set(cache_key, _provider_result(
                 provider, found=True, match_type="normalized_url", confidence=0.72,
                 status="reported_malicious",
-                detail="PhishTank has an unverified report for this URL",
+                detail="PhishTank has an unverified/suspected report for this URL",
                 matched_url=url_info["normalized_full_url"],
             ), HIT_TTL_SEC)
         return _cache_set(cache_key, _provider_result(
@@ -355,7 +387,7 @@ def _phishtank_from_payload(url_info: Dict, runner) -> Dict:
             detail="PhishTank confirmed this URL",
             matched_url=url_info["normalized_full_url"],
         ), HIT_TTL_SEC)
-    if in_database is False or str(in_database).lower() == "false":
+    if in_database is False:
         return _cache_set(cache_key, _provider_result(
             provider, status="no_match", match_type="no_match",
             detail="No match in PhishTank",
@@ -372,6 +404,46 @@ def _phishtank_dump_url() -> str:
     return "https://data.phishtank.com/data/online-valid.csv"
 
 
+def _phishtank_dump_candidates() -> List[str]:
+    primary = _phishtank_dump_url()
+    urls = [primary]
+    if PHISHTANK_API_KEY:
+        base = f"https://data.phishtank.com/data/{PHISHTANK_API_KEY}"
+        urls.extend([
+            f"{base}/online-valid.csv.gz",
+            f"{base}/online-valid.json",
+            f"{base}/online-valid.json.gz",
+        ])
+    else:
+        urls.extend([
+            "https://data.phishtank.com/data/online-valid.csv.gz",
+            "https://data.phishtank.com/data/online-valid.json",
+            "https://data.phishtank.com/data/online-valid.json.gz",
+        ])
+    seen = set()
+    unique = []
+    for item in urls:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return unique
+
+
+def _fetch_phishtank_dump_text() -> str:
+    from app.services.feed_cache import download_text, parse_phishtank_payload
+
+    last_error: Optional[Exception] = None
+    for url in _phishtank_dump_candidates():
+        try:
+            text = download_text(url, timeout=30)
+            if parse_phishtank_payload(text):
+                return text
+            last_error = ValueError(f"PhishTank dump at {url} had no URLs")
+        except Exception as exc:
+            last_error = exc
+    raise last_error or ValueError("PhishTank dump unavailable")
+
+
 def _phishtank_from_public_dump(url_info: Dict, index: Optional[Dict] = None) -> Dict:
     provider = "PhishTank"
     if index is None:
@@ -380,6 +452,7 @@ def _phishtank_from_public_dump(url_info: Dict, index: Optional[Dict] = None) ->
             "phishtank_dump",
             _phishtank_dump_url(),
             parser=parse_phishtank_payload,
+            fetch=_fetch_phishtank_dump_text,
             timeout=30,
         )
     if index is None:
@@ -389,13 +462,9 @@ def _phishtank_from_public_dump(url_info: Dict, index: Optional[Dict] = None) ->
         )
     hit = match_against_index(url_info, index)
     if hit["match_type"] == "no_match":
-        extra = (
-            " The public dump is verified-only; set PHISHTANK_API_KEY for live lookup of unverified reports."
-            if not PHISHTANK_API_KEY else ""
-        )
         return _provider_result(
             provider, status="no_match", match_type="no_match",
-            detail="No match in PhishTank dump." + extra,
+            detail="No match in PhishTank verified dump; checking live reports next if enabled",
         )
     return _provider_result(
         provider, found=True, match_type=hit["match_type"],
@@ -405,14 +474,31 @@ def _phishtank_from_public_dump(url_info: Dict, index: Optional[Dict] = None) ->
     )
 
 
+def _prefer_phishtank_hit(dump_hit: Dict, live_hit: Dict) -> Dict:
+    """Verified dump wins; otherwise keep live suspected/confirmed reports."""
+    if dump_hit.get("status") == "confirmed_malicious":
+        return dump_hit
+    if live_hit.get("status") in {"confirmed_malicious", "reported_malicious"}:
+        return live_hit
+    if dump_hit.get("status") == "unavailable":
+        return live_hit
+    if live_hit.get("status") == "unavailable":
+        return dump_hit
+    return live_hit
+
+
 def lookup_phishtank(url_info: Dict, *, query=None, index=None, allow_public: bool = True) -> Dict:
     provider = "PhishTank"
     if not url_info.get("valid"):
         return _provider_result(provider, match_type="unavailable", status="unavailable", detail="URL could not be normalized")
-    if query is not None:
+    if query is not None and index is None:
         return _phishtank_from_payload(url_info, query)
-    if index is not None:
+    if index is not None and query is None:
         return _phishtank_from_public_dump(url_info, index=index)
+    if query is not None and index is not None:
+        dump_hit = _phishtank_from_public_dump(url_info, index=index)
+        live_hit = _phishtank_from_payload(url_info, query)
+        return _prefer_phishtank_hit(dump_hit, live_hit)
     if not ENABLE_ONLINE_CHECKS:
         return _provider_result(provider, match_type="unavailable", status="unavailable", detail="Online checks disabled")
     if not allow_public:
@@ -420,31 +506,31 @@ def lookup_phishtank(url_info: Dict, *, query=None, index=None, allow_public: bo
             provider, match_type="unavailable", status="unavailable",
             detail="PhishTank public dump skipped",
         )
-    if PHISHTANK_API_KEY:
-        api_hit = _phishtank_from_payload(url_info, _query_phishtank)
-        if api_hit["status"] in {"confirmed_malicious", "reported_malicious"}:
-            return api_hit
-        dump_hit = _phishtank_from_public_dump(url_info)
-        if dump_hit["status"] == "confirmed_malicious":
-            return dump_hit
-        return api_hit
-    return _phishtank_from_public_dump(url_info)
+    dump_hit = _phishtank_from_public_dump(url_info)
+    if dump_hit["status"] == "confirmed_malicious":
+        return dump_hit
+    live_hit = _phishtank_from_payload(url_info, _query_phishtank)
+    return _prefer_phishtank_hit(dump_hit, live_hit)
 
 
 def _query_phishtank(url: str) -> Dict:
     data = {
         "url": url,
         "format": "json",
-        "app_key": PHISHTANK_API_KEY,
     }
+    if PHISHTANK_API_KEY:
+        data["app_key"] = PHISHTANK_API_KEY
     resp = requests.post(
         PHISHTANK_ENDPOINT,
         data=data,
         timeout=8,
-        headers={"User-Agent": "phisheye/1.4"},
+        headers={"User-Agent": "phisheye/1.8 (SIH-1454 academic phishing detector)"},
     )
     resp.raise_for_status()
-    return resp.json()
+    try:
+        return resp.json()
+    except ValueError as exc:
+        raise RuntimeError("PhishTank returned a non-JSON response") from exc
 
 
 def lookup_urlhaus(url_info: Dict, *, query=None, index=None, fetch_lines=None, allow_public: bool = True) -> Dict:
@@ -682,6 +768,7 @@ def warmup_feeds() -> Dict:
         "phishtank_dump",
         _phishtank_dump_url(),
         parser=parse_phishtank_payload,
+        fetch=_fetch_phishtank_dump_text,
         timeout=30,
     )
     get_domain_index("phishing_army", PHISHING_ARMY, timeout=20)
