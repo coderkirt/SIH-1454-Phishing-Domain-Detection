@@ -26,10 +26,33 @@ function formatSafeBrowsing(tech) {
   if (tech.safe_browsing_label) return tech.safe_browsing_label;
   const value = tech.google_safe_browsing;
   if (Array.isArray(value)) return value.join(", ");
-  if (value === "clean") return "Clean";
+  if (value === "flagged") return "Confirmed malicious";
+  if (value === "no_match") return "No match (not a safety guarantee)";
+  if (value === "partial") return "Partial — some feeds unavailable";
+  if (value === "clean") return "No match (legacy label)";
   if (value === "skipped") return "Skipped";
-  if (value === "unavailable") return "Unavailable";
+  if (value === "unavailable") return "Threat intelligence unavailable";
   return "Unknown";
+}
+
+function intelTile(tech) {
+  const overall = tech.threat_intelligence?.overall_status || tech.google_safe_browsing;
+  if (overall === "confirmed_malicious" || overall === "flagged" || Array.isArray(tech.google_safe_browsing)) {
+    return { status: "Confirmed", critical: true, detail: formatSafeBrowsing(tech) };
+  }
+  if (overall === "reported_malicious") {
+    return { status: "Reported", critical: true, detail: "Unverified threat-intelligence report — not safe to treat as clean" };
+  }
+  if (overall === "unavailable") {
+    return { status: "Unavailable", critical: false, detail: "Threat intelligence unavailable — unknown is not safe" };
+  }
+  if (overall === "partial") {
+    return { status: "Partial", critical: false, detail: formatSafeBrowsing(tech) };
+  }
+  if (overall === "no_match") {
+    return { status: "No match", critical: false, detail: "No match in queried feeds. That does not confirm the site is legitimate." };
+  }
+  return { status: "Unknown", critical: false, detail: formatSafeBrowsing(tech) };
 }
 
 function buildTechnicalRows(url, tech) {
@@ -46,6 +69,8 @@ function buildTechnicalRows(url, tech) {
     { label: "Brand impersonated", value: tech.brand_impersonated || "None" },
     { label: "Domain age", value: formatAge(tech.domain_age_days) },
     { label: "Safe browsing", value: formatSafeBrowsing(tech) },
+    { label: "Normalized URL", value: tech.debug?.normalized_url || tech.original_url || "Unknown" },
+    { label: "Classification", value: tech.classification || "Unknown" },
   ];
 }
 
@@ -59,11 +84,12 @@ function buildEvidence(tech, reasons, tags) {
   if (tech.shortened) infraBits.push("Shortened URL");
   if (hops > 1) infraBits.push(`${hops} redirect hops`);
   const manipulation = [...psychTags.slice(0, 3), ...infraBits];
+  const intel = intelTile(tech);
 
   return [
     {
       name: "URL analysis",
-      status: reasons.length ? "Detected" : "Clean",
+      status: reasons.length ? "Detected" : "No indicators",
       detail: reasons.length ? `${reasons.length} signal(s) in the URL and page path` : "No suspicious URL or path signals",
       critical: reasons.length > 0,
     },
@@ -85,9 +111,9 @@ function buildEvidence(tech, reasons, tags) {
     },
     {
       name: "Threat intelligence",
-      status: Array.isArray(tech.google_safe_browsing) ? "Detected" : tech.google_safe_browsing === "clean" ? "Clean" : "Unknown",
-      detail: formatSafeBrowsing(tech),
-      critical: Array.isArray(tech.google_safe_browsing),
+      status: intel.status,
+      detail: intel.detail,
+      critical: intel.critical,
     },
     {
       name: "Brand matching",
@@ -130,10 +156,16 @@ export default function ScanResult() {
   const score = result.risk_score ?? 0;
   const color = riskColor(result.risk_level);
   const warning = result.simple_view?.warning || result.simple_view?.warning_english;
+  const explanationText =
+    typeof result.explanation === "string"
+      ? result.explanation
+      : result.explanation?.what || result.explanation?.headline || "";
   const reasons = result.reasons || [];
   const tags = result.threat_tags || [];
   const tech = result.technical_view || {};
-  const targetUrl = result.url || result.links?.[0]?.url || tech.url || "";
+  const qrPayloads = result.qr_payloads || [];
+  const qrUrls = result.qr_urls || [];
+  const targetUrl = result.url || qrUrls[0] || result.links?.[0]?.url || tech.url || "";
   const technicalRows = buildTechnicalRows(targetUrl, tech);
   const evidence = buildEvidence(tech, reasons, tags);
 
@@ -167,10 +199,19 @@ export default function ScanResult() {
           <div className="flex flex-wrap items-center gap-3">
             <span className={`status-pill ${result.safe ? "risk-low" : "risk-high"}`}>
               <span className={`dot ${result.safe ? "dot-active" : "dot-critical"}`} aria-hidden="true" />
-              {result.safe ? "Controlled" : "Unsafe"}
+              {result.classification === "CONFIRMED_MALICIOUS"
+                ? "Confirmed malicious"
+                : result.classification === "SUSPICIOUS"
+                  ? "Suspicious"
+                  : result.safe
+                    ? "No malicious indicators"
+                    : "Unsafe"}
             </span>
             <span className="status-pill risk-unknown">{result.risk_level || "UNKNOWN"}</span>
           </div>
+          {explanationText ? (
+            <p className="mt-4 text-sm text-ink-soft">{explanationText}</p>
+          ) : null}
           <div className="mt-6 rule pt-6">
             <p className="label-tech">Recommendation</p>
             <p className="mt-3 text-sm leading-6 text-ink-soft">{recommendationFor(result.risk_level, warning)}</p>
@@ -198,6 +239,35 @@ export default function ScanResult() {
           </dl>
         </TechnicalPanel>
       </section>
+
+      {result.source_type === "qr" || qrPayloads.length || qrUrls.length ? (
+        <TechnicalPanel title="Decoded from QR" accent>
+          <p className="label-tech">Payload</p>
+          <p className="mt-2 break-all font-mono text-sm text-ink">{qrPayloads[0] || result.decoded_text || "No text payload"}</p>
+          {(qrUrls.length || result.links?.length) ? (
+            <ul className="mt-4 space-y-2">
+              {(qrUrls.length ? qrUrls : (result.links || []).map((link) => link.url)).map((url) => (
+                <li key={url} className="break-all font-mono text-sm text-accent">{url}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-muted">The QR did not contain an http(s) website. The raw payload is shown above.</p>
+          )}
+        </TechnicalPanel>
+      ) : null}
+
+      {(result.links || []).length ? (
+        <TechnicalPanel title="Scored links">
+          <ul className="space-y-3">
+            {result.links.map((link) => (
+              <li key={link.url} className="border-b border-line pb-3 last:border-0 last:pb-0">
+                <p className="break-all font-mono text-sm text-accent">{link.url}</p>
+                <p className="mt-1 text-xs text-muted">{link.classification} · {link.risk_score}/100</p>
+              </li>
+            ))}
+          </ul>
+        </TechnicalPanel>
+      ) : null}
 
       {targetUrl || result.links?.[0]?.url ? (
         <TechnicalPanel title="Flag this target">
@@ -246,6 +316,58 @@ export default function ScanResult() {
           </dl>
         </TechnicalPanel>
       </section>
+
+      {(tech.threat_intelligence?.providers || []).length ? (
+        <TechnicalPanel title="Threat-intelligence providers">
+          <ul className="space-y-3">
+            {tech.threat_intelligence.providers.map((row) => (
+              <li key={row.provider} className="flex items-start justify-between gap-4 border-b border-line pb-3 last:border-0 last:pb-0">
+                <div>
+                  <p className="label-tech">{row.provider}</p>
+                  <p className="mt-1 text-sm text-ink-soft">{row.detail || row.status}</p>
+                </div>
+                <span className={`status-pill ${row.status === "confirmed_malicious" || row.status === "reported_malicious" ? "risk-high" : "risk-unknown"}`}>
+                  {row.status === "confirmed_malicious"
+                    ? `Match · ${row.match_type}`
+                    : row.status === "reported_malicious"
+                      ? `Reported · ${row.match_type}`
+                      : row.status === "no_match"
+                        ? "No match"
+                        : "Unavailable"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-xs text-muted">
+            No match is not the same as confirmed legitimate. Unavailable is not the same as safe.
+          </p>
+        </TechnicalPanel>
+      ) : null}
+
+      {tech.debug?.normalized_url ? (
+        <TechnicalPanel title="Debug">
+          <dl>
+            {[
+              ["Original URL", tech.debug.original_url],
+              ["Normalized URL", tech.debug.normalized_url],
+              ["Hostname", tech.debug.hostname],
+              ["Registered domain", tech.debug.registered_domain],
+              ["PhishTank", tech.debug.phishtank],
+              ["OpenPhish", tech.debug.openphish],
+              ["URLhaus", tech.debug.urlhaus],
+              ["Phishing Army", tech.debug.phishing_army],
+              ["Google Safe Browsing", tech.debug.google_safe_browsing],
+              ["ML / lexical score", `${Math.round((tech.debug.ml_probability || 0) * 100)} / 100 (not a trained model)`],
+              ["Heuristic score", tech.debug.heuristic_score],
+              ["Final risk", tech.debug.final_risk_score],
+              ["Final classification", tech.debug.final_classification],
+              ["Why", tech.debug.reason_for_classification],
+            ].map(([label, value], index) => (
+              <TechnicalRow key={label} index={index + 1} label={label} value={value ?? "—"} />
+            ))}
+          </dl>
+        </TechnicalPanel>
+      ) : null}
     </div>
   );
 }
