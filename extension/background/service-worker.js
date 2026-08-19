@@ -1,5 +1,6 @@
 import {
   analyzeContent,
+  canOpenAfterScan,
   checkUrl,
   clearCache,
   displayHost,
@@ -7,18 +8,96 @@ import {
   getProfile,
   getSettings,
   headlineFor,
+  isExtensionPage,
+  isOwnAppUrl,
   isScannableUrl,
   login,
   markContinued,
+  markGateAllowed,
+  normalizeHttpUrl,
   saveSettings,
   setCachedScan,
   statusFromResult,
   wasContinued,
+  wasGateAllowed,
 } from "../utils/api.js";
+import { STORAGE_KEYS, registeredDomain } from "../utils/config.js";
 
 const api = typeof browser !== "undefined" ? browser : chrome;
 const inflight = new Map();
 const tabState = new Map();
+const gatingTabs = new Set();
+let preNavigateEnabled = true;
+let scanAllPagesEnabled = false;
+const allowedNow = new Set();
+const allowedHosts = new Set();
+const allowedDomains = new Set();
+const domainScan = new Map();
+
+function hostnameOf(url) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+}
+
+function domainOf(url) {
+  return registeredDomain(hostnameOf(url));
+}
+
+function rememberAllowed(url, state = null) {
+  const key = normalizeHttpUrl(url);
+  if (key) allowedNow.add(key);
+  const host = hostnameOf(key || url);
+  if (host) allowedHosts.add(host);
+  const domain = registeredDomain(host);
+  if (domain) {
+    allowedDomains.add(domain);
+    if (state) domainScan.set(domain, state);
+  }
+}
+
+function loadAllowedMap(allowed) {
+  allowedNow.clear();
+  allowedHosts.clear();
+  allowedDomains.clear();
+  for (const [url, at] of Object.entries(allowed || {})) {
+    if (at) rememberAllowed(url);
+  }
+}
+
+async function hydrateGateState() {
+  const settings = await getSettings();
+  preNavigateEnabled = settings.preNavigate !== false;
+  scanAllPagesEnabled = settings.scanAllPages === true;
+  const data = await (api.storage.session || api.storage.local).get(STORAGE_KEYS.gateAllow);
+  loadAllowedMap(data[STORAGE_KEYS.gateAllow] || {});
+}
+
+hydrateGateState().catch(() => {});
+api.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes[STORAGE_KEYS.preNavigate]) {
+    preNavigateEnabled = changes[STORAGE_KEYS.preNavigate].newValue !== false;
+  }
+  if (area === "local" && changes[STORAGE_KEYS.scanAllPages]) {
+    scanAllPagesEnabled = changes[STORAGE_KEYS.scanAllPages].newValue === true;
+  }
+  if ((area === "session" || area === "local") && changes[STORAGE_KEYS.gateAllow]) {
+    loadAllowedMap(changes[STORAGE_KEYS.gateAllow].newValue || {});
+  }
+});
+
+function panelPageUrl(target) {
+  const base = api.runtime.getURL("panel/panel.html");
+  if (!target) return base;
+  return `${base}?target=${encodeURIComponent(target)}`;
+}
+
+function isPanelUrl(url) {
+  if (!url) return false;
+  return url.startsWith(api.runtime.getURL("panel/panel.html"));
+}
 
 function setTabState(tabId, state) {
   tabState.set(tabId, { ...state, updatedAt: Date.now() });
@@ -72,25 +151,26 @@ async function notifyTab(tabId, message) {
   }
 }
 
-async function scanUrl(url, { force = false } = {}) {
+async function scanUrl(url, { force = false, pageSignals = null } = {}) {
   if (!isScannableUrl(url)) {
     return { status: "unsupported", url, result: null, error: "This browser page cannot be scanned." };
   }
 
-  if (!force) {
+  if (!force && !pageSignals) {
     const cached = await getCachedScan(url);
     if (cached) {
       return { status: statusFromResult(cached), url, result: cached, error: "" };
     }
   }
 
-  if (inflight.has(url)) {
-    return inflight.get(url);
+  const inflightKey = pageSignals ? `${url}::signals` : url;
+  if (inflight.has(inflightKey)) {
+    return inflight.get(inflightKey);
   }
 
   const promise = (async () => {
     try {
-      const result = await checkUrl(url);
+      const result = await checkUrl(url, pageSignals);
       await setCachedScan(url, result);
       return { status: statusFromResult(result), url, result, error: "" };
     } catch (error) {
@@ -101,15 +181,15 @@ async function scanUrl(url, { force = false } = {}) {
         error: error.message || "Protection service unavailable.",
       };
     } finally {
-      inflight.delete(url);
+      inflight.delete(inflightKey);
     }
   })();
 
-  inflight.set(url, promise);
+  inflight.set(inflightKey, promise);
   return promise;
 }
 
-async function scanTab(tabId, url, { force = false } = {}) {
+async function scanTab(tabId, url, { force = false, pageSignals = null } = {}) {
   const settings = await getSettings();
   if (!url) {
     const state = { status: "unsupported", url: "", result: null, error: "No URL is available on this tab." };
@@ -139,14 +219,28 @@ async function scanTab(tabId, url, { force = false } = {}) {
     return state;
   }
 
+  const domain = domainOf(url);
+  const scanEveryPage = settings.scanAllPages === true || scanAllPagesEnabled;
+  if (!force && !scanEveryPage && domain && allowedDomains.has(domain)) {
+    const prior = domainScan.get(domain);
+    const state = prior
+      ? { ...prior, url, host: displayHost(url) }
+      : { status: "safe", url, result: null, error: "" };
+    setTabState(tabId, state);
+    await updateBadge(tabId, state.status);
+    return state;
+  }
+
   setTabState(tabId, { status: "checking", url, result: null, error: "" });
   await updateBadge(tabId, "checking");
   await notifyPage(tabId, { status: "checking", url, result: null, error: "" }, settings);
 
-  const state = await scanUrl(url, { force });
+  const state = await scanUrl(url, { force, pageSignals });
   setTabState(tabId, state);
   await updateBadge(tabId, state.status);
   await notifyPage(tabId, state, settings);
+  if (state.status === "safe") rememberAllowed(url, state);
+  else if (domain) domainScan.set(domain, state);
   return state;
 }
 
@@ -174,6 +268,8 @@ api.runtime.onInstalled.addListener(async (details) => {
     dashboardUrl: settings.dashboardUrl,
     autoScan: settings.autoScan,
     warnings: settings.warnings,
+    preNavigate: settings.preNavigate,
+    scanAllPages: settings.scanAllPages === true,
   });
   if (details.reason === "install") {
     api.tabs.create({ url: api.runtime.getURL("welcome/welcome.html") });
@@ -181,15 +277,28 @@ api.runtime.onInstalled.addListener(async (details) => {
 });
 
 api.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  const url = changeInfo.url || (changeInfo.status === "loading" ? tab.url : "");
+  if (url) {
+    pullTabToGate(tabId, url).catch(() => {});
+  }
   if (changeInfo.status === "complete" && tab.url) {
-    scanTab(tabId, tab.url);
+    if (isPanelUrl(tab.url) || isExtensionPage(tab.url)) return;
+    (async () => {
+      if (await shouldGate(tab.url)) {
+        await pullTabToGate(tabId, tab.url);
+        return;
+      }
+      await scanTab(tabId, tab.url);
+    })().catch(() => {});
   }
 });
 
 api.tabs.onActivated.addListener(async ({ tabId }) => {
   try {
     const tab = await api.tabs.get(tabId);
-    if (tab?.url) scanTab(tabId, tab.url);
+    if (!tab?.url) return;
+    await pullTabToGate(tabId, tab.url);
+    await scanTab(tabId, tab.url);
   } catch {
     // Ignore missing tabs.
   }
@@ -197,7 +306,68 @@ api.tabs.onActivated.addListener(async ({ tabId }) => {
 
 api.tabs.onRemoved.addListener((tabId) => {
   tabState.delete(tabId);
+  gatingTabs.delete(tabId);
 });
+
+const SKIP_GATE_TRANSITIONS = new Set(["auto_subframe", "manual_subframe"]);
+
+async function shouldGate(url) {
+  if (!url || isPanelUrl(url) || isExtensionPage(url)) return false;
+  if (!isScannableUrl(url)) return false;
+  if (await isOwnAppUrl(url)) return false;
+  if (preNavigateEnabled === false) {
+    const settings = await getSettings();
+    if (settings.preNavigate === false) return false;
+    preNavigateEnabled = settings.preNavigate !== false;
+  }
+  const key = normalizeHttpUrl(url);
+  const host = hostnameOf(key || url);
+  const domain = registeredDomain(host);
+  if (key && allowedNow.has(key)) return false;
+  if (host && allowedHosts.has(host)) return false;
+  if (domain && allowedDomains.has(domain)) return false;
+  if (await wasGateAllowed(url)) {
+    rememberAllowed(url);
+    return false;
+  }
+  return true;
+}
+
+async function sendTabToGate(tabId, url) {
+  if (tabId < 0 || gatingTabs.has(tabId)) return;
+  gatingTabs.add(tabId);
+  try {
+    await api.tabs.update(tabId, { url: panelPageUrl(url) });
+  } catch {
+    gatingTabs.delete(tabId);
+  } finally {
+    setTimeout(() => gatingTabs.delete(tabId), 2500);
+  }
+}
+
+async function pullTabToGate(tabId, url) {
+  if (!url || tabId < 0) return;
+  if (!(await shouldGate(url))) return;
+  await sendTabToGate(tabId, url);
+}
+
+async function interceptNavigation(details) {
+  if (details.frameId !== 0 || details.tabId < 0) return;
+  if (SKIP_GATE_TRANSITIONS.has(details.transitionType)) return;
+  await pullTabToGate(details.tabId, details.url);
+}
+
+if (api.webNavigation?.onBeforeNavigate) {
+  api.webNavigation.onBeforeNavigate.addListener((details) => {
+    interceptNavigation(details).catch(() => {});
+  });
+}
+
+if (api.webNavigation?.onCommitted) {
+  api.webNavigation.onCommitted.addListener((details) => {
+    interceptNavigation(details).catch(() => {});
+  });
+}
 
 api.runtime.onMessage.addListener((message, sender, sendResponse) => {
   handleMessage(message, sender).then(sendResponse).catch((error) => {
@@ -230,16 +400,48 @@ async function handleMessage(message, sender) {
     return { ok: true, ...state, host: displayHost(state.url), headline: headlineFor(state.status), user: (await getSettings()).user };
   }
 
+  if (type === "GATE_SHOULD_HOLD") {
+    const settings = await getSettings();
+    if (settings.preNavigate === false) return { hold: false, gatedOff: true };
+    const url = normalizeHttpUrl(message.url || tab?.url || "");
+    if (!url || !(await shouldGate(url))) return { hold: false };
+    return { hold: true, panelUrl: panelPageUrl(url) };
+  }
+
   if (type === "PAGE_READY") {
     if (!tab?.id) return { ok: true };
     const url = tab.url || message.url;
+    if (url && (await shouldGate(url))) {
+      await sendTabToGate(tab.id, url);
+      return { ok: true, gated: true };
+    }
+    const pageSignals = message.page_signals || null;
     const existing = getTabState(tab.id);
-    if (existing && existing.url === url) {
+    if (existing && existing.url === url && !pageSignals) {
       await notifyPage(tab.id, existing, await getSettings());
       return { ok: true, ...existing };
     }
-    const state = await scanTab(tab.id, url);
+    const state = await scanTab(tab.id, url, { force: false, pageSignals });
     return { ok: true, ...state };
+  }
+
+  if (type === "GATE_NAVIGATE") {
+    const url = normalizeHttpUrl(message.url);
+    if (!url) return { ok: false, error: "No website address." };
+    if (!(await shouldGate(url))) {
+      const tabId = tab?.id;
+      if (message.newTab) await api.tabs.create({ url, active: true });
+      else if (tabId) await api.tabs.update(tabId, { url });
+      return { ok: true, skipped: true };
+    }
+    if (message.newTab) {
+      await api.tabs.create({ url: panelPageUrl(url), active: true });
+    } else if (tab?.id) {
+      await sendTabToGate(tab.id, url);
+    } else {
+      await api.tabs.create({ url: panelPageUrl(url), active: true });
+    }
+    return { ok: true };
   }
 
   if (type === "CONTINUE_ANYWAY") {
@@ -303,6 +505,70 @@ async function handleMessage(message, sender) {
     if (api.runtime.openOptionsPage) await api.runtime.openOptionsPage();
     else await api.tabs.create({ url: api.runtime.getURL("settings/settings.html") });
     return { ok: true };
+  }
+
+  if (type === "OPEN_PANEL") {
+    const compact = message.size === "compact";
+    if (compact) {
+      await api.windows.create({
+        url: panelPageUrl(message.url || ""),
+        type: "popup",
+        width: 420,
+        height: 740,
+        focused: true,
+      });
+    } else {
+      await api.windows.create({
+        url: panelPageUrl(message.url || ""),
+        type: "normal",
+        state: "maximized",
+        focused: true,
+      });
+    }
+    return { ok: true };
+  }
+
+  if (type === "SCAN_URL") {
+    const url = normalizeHttpUrl(message.url);
+    if (!url) return { ok: false, error: "Enter a website address first." };
+    const state = await scanUrl(url, { force: true, pageSignals: message.page_signals || null });
+    return {
+      ok: true,
+      ...state,
+      host: displayHost(state.url),
+      headline: headlineFor(state.status),
+      user: (await getSettings()).user,
+    };
+  }
+
+  if (type === "OPEN_AFTER_SCAN") {
+    const url = normalizeHttpUrl(message.url);
+    if (!url) return { ok: false, error: "No website address." };
+    const state = await scanUrl(url, { force: Boolean(message.force) });
+    if (!canOpenAfterScan(state.status, { forceContinue: Boolean(message.forceContinue) })) {
+      return {
+        ok: false,
+        blocked: true,
+        ...state,
+        host: displayHost(state.url),
+        headline: headlineFor(state.status),
+        error: state.error || "PHISHEYE will not open this website.",
+      };
+    }
+    await markGateAllowed(url);
+    rememberAllowed(url, state);
+    const replaceTab = message.replaceTab !== false && tab?.id;
+    if (replaceTab) {
+      await api.tabs.update(tab.id, { url });
+    } else {
+      await api.tabs.create({ url, active: true });
+    }
+    return {
+      ok: true,
+      ...state,
+      host: displayHost(state.url),
+      headline: headlineFor(state.status),
+    };
   }
 
   if (type === "ANALYZE_PAGE_LINKS") {

@@ -32,6 +32,10 @@ def _level(score: int) -> str:
     return "LOW"
 
 
+def risk_level_for_score(score: int) -> str:
+    return _level(score)
+
+
 def fuse(signals: Dict[str, float], weights: Dict[str, float] = None) -> Dict:
     weights = dict(weights or DEFAULT_WEIGHTS)
     cleaned = {key: max(0.0, min(100.0, float(signals.get(key, 0) or 0))) for key in weights}

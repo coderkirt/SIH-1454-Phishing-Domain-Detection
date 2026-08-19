@@ -6,3 +6,5 @@ __pycache__/
 .pytest_cache/
 frontend/node_modules/
 frontend/dist/
+backend/data/feeds/*
+!backend/data/feeds/.gitkeep

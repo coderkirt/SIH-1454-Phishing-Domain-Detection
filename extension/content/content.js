@@ -375,5 +375,18 @@
     });
   }
 
-  api.runtime.sendMessage({ type: "PAGE_READY", url: location.href });
+  function collectPageSignals() {
+    const onclickPopups = [...document.querySelectorAll("[onclick]")].filter((el) =>
+      String(el.getAttribute("onclick") || "").toLowerCase().includes("window.open")
+    ).length;
+    return {
+      buttons: document.querySelectorAll("button, [role='button'], input[type='submit'], input[type='button']").length,
+      iframes: document.querySelectorAll("iframe").length,
+      popups: onclickPopups,
+      overlays: document.querySelectorAll("dialog, [aria-modal='true']").length,
+      links: document.querySelectorAll("a[href]").length,
+    };
+  }
+
+  api.runtime.sendMessage({ type: "PAGE_READY", url: location.href, page_signals: collectPageSignals() });
 })();

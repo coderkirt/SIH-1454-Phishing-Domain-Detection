@@ -6,6 +6,8 @@ const logoutBtn = document.getElementById("logout");
 const authStatus = document.getElementById("auth-status");
 const saveStatus = document.getElementById("save-status");
 const autoScan = document.getElementById("auto-scan");
+const scanAllPages = document.getElementById("scan-all-pages");
+const preNavigate = document.getElementById("pre-navigate");
 const pagePopup = document.getElementById("page-popup");
 const warnings = document.getElementById("warnings");
 const apiUrl = document.getElementById("api-url");
@@ -31,6 +33,8 @@ async function load() {
   const payload = await send("GET_SETTINGS");
   const settings = payload.settings || {};
   autoScan.checked = settings.autoScan !== false;
+  scanAllPages.checked = settings.scanAllPages === true;
+  preNavigate.checked = settings.preNavigate !== false;
   pagePopup.checked = settings.pagePopup !== false;
   warnings.checked = settings.warnings !== false;
   apiUrl.value = settings.apiBaseUrl || "";
@@ -66,6 +70,8 @@ document.getElementById("save").addEventListener("click", async () => {
   await send("SAVE_SETTINGS", {
     settings: {
       autoScan: autoScan.checked,
+      scanAllPages: scanAllPages.checked,
+      preNavigate: preNavigate.checked,
       pagePopup: pagePopup.checked,
       warnings: warnings.checked,
       apiBaseUrl: apiUrl.value.trim(),

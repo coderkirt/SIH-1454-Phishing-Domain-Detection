@@ -12,12 +12,12 @@ Same URL → same backend → same risk score, risk level, and reasons.
 
 ## What it does
 
-- Reads the current tab URL
+- Intercepts link clicks and other navigations so the destination does not open first
+- Shows the PHISHEYE gate and scans the URL with the FastAPI backend
+- Opens LOW / clear sites automatically. MEDIUM needs Open anyway. HIGH and CRITICAL stay closed
 - Skips browser pages such as `chrome://` and `edge://`
-- Calls the existing PHISHEYE threat API
-- Shows the real result in the popup
+- Shows the real result in the popup and on the gate
 - Updates the toolbar badge: OK, MED, HIGH, CRIT
-- Shows a warning overlay on HIGH and CRITICAL pages
 - Saves scans through the backend, so they appear in dashboard history
 - Lets you log in with the existing PHISHEYE account
 
@@ -75,8 +75,9 @@ Then open http://127.0.0.1:5173
 5. Select this `extension` folder
 6. Pin PHISHEYE
 7. Make sure the backend is running
-8. Open a normal website
-9. Click the PHISHEYE icon
+8. Reload the unpacked extension after code changes (this build is **1.7.0**)
+9. Type a website or click a link — you should see the PHISHEYE gate, not the live site
+10. A clear site opens by itself. A fishy or dangerous site stays on the gate
 
 For Edge use `edge://extensions`. For Brave use `brave://extensions`.
 

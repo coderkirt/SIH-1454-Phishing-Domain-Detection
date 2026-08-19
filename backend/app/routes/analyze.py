@@ -72,7 +72,13 @@ async def analyze_qr(file: UploadFile = File(...), credentials: HTTPAuthorizatio
             detail=decoded.get("error") or "No QR code was found in that image. Try a closer, sharper photo of the code.",
         )
     text = " ".join(payloads) if payloads else " ".join(urls)
-    return analyze_content("qr", text=text, urls=urls, user_id=_user_id(credentials))
+    result = analyze_content("qr", text=text, urls=urls, user_id=_user_id(credentials))
+    result["qr_payloads"] = payloads
+    result["qr_urls"] = urls
+    result["decoded_text"] = text
+    if not result.get("url") and urls:
+        result["url"] = urls[0]
+    return result
 
 
 @router.post("/screenshot")

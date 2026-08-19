@@ -24,7 +24,7 @@ export function recommendationFor(level, warning) {
     case "MEDIUM":
       return "Be careful. Double-check the address bar before signing in or making a payment.";
     default:
-      return "This website looks safe. Still verify the name in the address bar before you sign in.";
+      return "No malicious indicators were detected. That is not a guarantee of safety. Absence from a feed does not mean the site is legitimate.";
   }
 }
 

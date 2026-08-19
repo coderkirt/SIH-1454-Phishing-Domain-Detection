@@ -7,7 +7,7 @@ from app.services.url_checker import URLChecker
 from app.services.psychology import analyze_message
 from app.services.brand_detector import detect_impersonation
 from app.services.sender_analyzer import analyze_sender
-from app.services.risk_engine import fuse
+from app.services.risk_engine import fuse, risk_level_for_score
 from app.services.explanation import build_explanation
 from app.services.reputation import get_reputation
 from app.services.warnings import build_simple_view, build_technical_view
@@ -62,6 +62,7 @@ def analyze_content(
             "domain": item.get("domain") or details.get("domain"),
             "risk_score": analyzed.get("risk_score", 0),
             "classification": classification,
+            "decision_classification": analyzed.get("classification"),
             "threat_tags": analyzed.get("threat_tags", []),
             "reasons": analyzed.get("reasons", []),
             "safe": analyzed.get("safe", True),
@@ -80,6 +81,7 @@ def analyze_content(
             "domain": details.get("domain"),
             "risk_score": analyzed.get("risk_score", 0),
             "classification": analyzed.get("risk_level", "LOW"),
+            "decision_classification": analyzed.get("classification"),
             "threat_tags": analyzed.get("threat_tags", []),
             "reasons": analyzed.get("reasons", []),
             "safe": analyzed.get("safe", True),
@@ -94,7 +96,11 @@ def analyze_content(
     domain_risk = _domain_risk({"details": (top or {}).get("details") or {}, "brand_impersonated": False, "safe": (top or {}).get("safe", True)}) if top else 0
     if top:
         domain_risk = max(domain_risk, int(url_risk * 0.6))
-    intel = 80 if top and "safe_browsing" in (top.get("threat_tags") or []) else (url_risk if top else 0)
+    intel = 90 if top and (
+        top.get("decision_classification") == "CONFIRMED_MALICIOUS"
+        or "confirmed_malicious" in (top.get("threat_tags") or [])
+        or "threat_intel" in (top.get("threat_tags") or [])
+    ) else (url_risk if top else 0)
     redirect_risk = 40 if any(link.get("shortened") for link in link_results) else 0
     brand = detect_impersonation(
         normalized["raw_text"],
@@ -116,6 +122,13 @@ def analyze_content(
         "sender": sender_info["score"],
         "community": community.get("reputation_score", 0),
     })
+    if top and (
+        top.get("decision_classification") == "CONFIRMED_MALICIOUS"
+        or "confirmed_malicious" in (top.get("threat_tags") or [])
+    ):
+        fused["risk_score"] = max(fused["risk_score"], int(top.get("risk_score") or 0))
+        fused["risk_level"] = risk_level_for_score(fused["risk_score"])
+        fused["scam_risk"] = fused["risk_score"]
 
     tags = list(psych["tags"])
     if brand["impersonated"]:
@@ -147,7 +160,12 @@ def analyze_content(
         "scam_risk": fused["scam_risk"],
         "model_probability": fused["model_probability"],
         "model_confidence": fused["model_confidence"],
-        "safe": fused["risk_level"] == "LOW",
+        "safe": fused["risk_level"] == "LOW" and "confirmed_malicious" not in tags,
+        "classification": (
+            "CONFIRMED_MALICIOUS"
+            if "confirmed_malicious" in tags
+            else ("SUSPICIOUS" if fused["risk_level"] != "LOW" else "NO_MALICIOUS_EVIDENCE")
+        ),
         "threat_tags": tags,
         "brand_impersonated": brand["impersonated"],
         "reasons": (psych["findings"] + brand["findings"] + sender_info.get("findings", []))[:8],

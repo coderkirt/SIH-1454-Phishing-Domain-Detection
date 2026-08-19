@@ -118,68 +118,41 @@ def _check_openphish(url: str, host: str) -> Optional[List[str]]:
 
 
 def check_safe_browsing(url: str, host: str = "") -> dict:
+    """Backward-compatible wrapper around lookup_threat_intelligence.
+
+    status is flagged / no_match / unavailable / partial. Never "clean".
     """
-    Prefer Google Safe Browsing when an API key is present.
-    Otherwise use the public OpenPhish feed so scans still get a live verdict.
-    """
-    if url in _sb_cache:
-        return _sb_cache[url]
+    from app.services.threat_intel import lookup_threat_intelligence
 
-    result = {
-        "status": "unavailable",
-        "label": "Lookup failed",
-        "threats": [],
-        "source": None,
-    }
-    if not ENABLE_ONLINE_CHECKS:
-        result["label"] = "Disabled"
-        _sb_cache[url] = result
-        return result
-
-    gsb = check_google_safe_browsing(url)
-    if gsb is not None:
-        if gsb:
-            result = {
-                "status": "flagged",
-                "label": f"Flagged by Google Safe Browsing ({', '.join(gsb)})",
-                "threats": gsb,
-                "source": "google_safe_browsing",
-            }
-        else:
-            result = {
-                "status": "clean",
-                "label": "Clean (Google Safe Browsing)",
-                "threats": [],
-                "source": "google_safe_browsing",
-            }
-        _sb_cache[url] = result
-        return result
-
-    openphish = _check_openphish(url, host)
-    if openphish is None:
-        result = {
-            "status": "unavailable",
-            "label": "Lookup failed — could not reach threat databases",
+    intel = lookup_threat_intelligence(url)
+    overall = intel.get("overall_status") or "unavailable"
+    if overall == "confirmed_malicious":
+        return {
+            "status": "flagged",
+            "label": intel.get("summary") or "Confirmed by threat intelligence",
+            "threats": ["PHISHING"],
+            "source": (intel.get("best_match") or {}).get("provider"),
+        }
+    if overall == "no_match":
+        return {
+            "status": "no_match",
+            "label": "No match in queried threat-intelligence feeds",
             "threats": [],
             "source": None,
         }
-    elif openphish:
-        result = {
-            "status": "flagged",
-            "label": f"Flagged by OpenPhish ({', '.join(openphish)})",
-            "threats": openphish,
-            "source": "openphish",
-        }
-    else:
-        result = {
-            "status": "clean",
-            "label": "Clean (OpenPhish threat feed)",
+    if overall == "partial":
+        return {
+            "status": "partial",
+            "label": intel.get("summary") or "Partial threat-intelligence results",
             "threats": [],
-            "source": "openphish",
+            "source": None,
         }
-
-    _sb_cache[url] = result
-    return result
+    return {
+        "status": "unavailable",
+        "label": "Threat intelligence unavailable",
+        "threats": [],
+        "source": None,
+    }
 
 
 def get_domain_age_days(registrable_domain: str) -> Optional[int]:

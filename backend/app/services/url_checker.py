@@ -3,32 +3,15 @@ import re
 from typing import Dict, Optional
 
 from app.services.psychology import analyze_text
-from app.services.external_intel import check_domain_exists, check_safe_browsing, get_domain_age_days
-from app.services.ad_signals import check_ad_signals
+from app.services.external_intel import check_domain_exists, get_domain_age_days
+from app.services.ad_signals import check_ad_signals, score_page_clutter
 from app.services.redirects import expand_url, is_shortener
 from app.services.ssl_certs import inspect_tls
 from app.services.warnings import build_simple_view, build_technical_view
-
-
-# Multi-part country TLDs so "sbi.co.in" is treated as one domain
-MULTI_TLDS = {
-    "co.in", "com.au", "co.uk", "org.in", "net.in", "gov.in",
-    "ac.in", "edu.in", "co.jp", "com.br",
-}
-
-# Real popular / trusted sites — skip most heuristics for these
-TRUSTED_DOMAINS = {
-    "google.com", "google.co.in", "youtube.com", "gmail.com",
-    "googleusercontent.com", "googlevideo.com",
-    "facebook.com", "instagram.com", "whatsapp.com",
-    "microsoft.com", "microsoftonline.com", "live.com", "office.com",
-    "github.com", "apple.com", "icloud.com",
-    "amazon.com", "amazon.in", "paypal.com",
-    "wikipedia.org", "linkedin.com", "twitter.com", "x.com",
-    "netflix.com", "flipkart.com", "paytm.com", "phonepe.com",
-    "sbi.co.in", "onlinesbi.sbi", "hdfcbank.com", "icicibank.com",
-    "axisbank.com", "irctc.co.in", "psitkanpur.com",
-}
+from app.services.url_normalize import get_registrable_domain, normalize_url
+from app.services.trusted import is_trusted_destination
+from app.services.threat_intel import lookup_threat_intelligence
+from app.services.decision_engine import calculate_final_risk
 
 # Known phishing / fake-brand fragments
 PHISHING_DOMAINS = [
@@ -55,11 +38,27 @@ SUSPICIOUS_TLDS = {
     "buzz", "cam", "cfd", "sbs", "cyou", "rest", "bar", "pw", "med",
 }
 
+# App-host platforms. A project on these is not automatically phishing, but
+# login/bank/health names on a free host are a common phishing pattern.
+FREE_APP_HOSTS = {
+    "lovable.app", "vercel.app", "netlify.app", "web.app", "firebaseapp.com",
+    "glitch.me", "pages.dev", "workers.dev", "github.io", "webflow.io",
+    "notion.site", "framer.app", "herokuapp.com", "onrender.com", "fly.dev",
+}
+
+FREE_HOST_PHISH_TOKENS = (
+    "login", "signin", "account", "verify", "secure", "update", "wallet",
+    "bank", "paypal", "saude", "gov", "receita", "nfe", "imposto", "cpf",
+    "invoice", "support", "recover", "unlock", "password", "otp", "central",
+)
+
 # Brand name -> real domain (used for impersonation / edit-distance checks)
 BRANDS = {
     "paypal": "paypal.com",
     "amazon": "amazon.com",
     "google": "google.com",
+    "youtube": "youtube.com",
+    "github": "github.com",
     "microsoft": "microsoft.com",
     "apple": "apple.com",
     "facebook": "facebook.com",
@@ -124,17 +123,41 @@ def _normalize_label(label: str) -> str:
     return text.translate(LEET_TABLE)
 
 
-def get_registrable_domain(netloc: str) -> str:
-    """sbi.co.in stays together; www.google.com becomes google.com."""
-    host = netloc.split(":")[0].lower()
-    if host.startswith("www."):
-        host = host[4:]
-    parts = [p for p in host.split(".") if p]
-    if len(parts) >= 3 and ".".join(parts[-2:]) in MULTI_TLDS:
-        return ".".join(parts[-3:])
-    if len(parts) >= 2:
-        return ".".join(parts[-2:])
-    return host
+def _debug_payload(original: str, features: dict, intel: dict, decision: dict) -> dict:
+    providers = (intel or {}).get("providers") or []
+    by_name = {row.get("provider"): row for row in providers}
+    return {
+        "original_url": (features or {}).get("original") or original,
+        "normalized_url": (features or {}).get("normalized_full_url") or (intel or {}).get("normalized_url"),
+        "hostname": (features or {}).get("hostname"),
+        "registered_domain": (features or {}).get("registered_domain"),
+        "path": (features or {}).get("path"),
+        "query": (features or {}).get("query"),
+        "phishtank": _provider_debug(by_name.get("PhishTank")),
+        "openphish": _provider_debug(by_name.get("OpenPhish")),
+        "urlhaus": _provider_debug(by_name.get("URLhaus")),
+        "phishing_army": _provider_debug(by_name.get("Phishing Army")),
+        "google_safe_browsing": _provider_debug(by_name.get("Google Safe Browsing")),
+        "ml_probability": (decision.get("ml_score") or 0) / 100.0,
+        "heuristic_score": decision.get("heuristic_score"),
+        "final_risk_score": decision.get("risk_score"),
+        "final_classification": decision.get("classification"),
+        "reason_for_classification": decision.get("explanation"),
+    }
+
+
+def _provider_debug(row: dict = None) -> str:
+    if not row:
+        return "unavailable"
+    status = row.get("status") or "unavailable"
+    match_type = row.get("match_type") or ""
+    if status == "confirmed_malicious":
+        return f"confirmed_malicious ({match_type})"
+    if status == "reported_malicious":
+        return f"reported_malicious ({match_type})"
+    if status == "no_match":
+        return "no match"
+    return "unavailable"
 
 
 def _risk_level(score: int) -> str:
@@ -145,6 +168,27 @@ def _risk_level(score: int) -> str:
     if score >= 30:
         return "MEDIUM"
     return "LOW"
+
+
+def _free_host_signal(features: Dict) -> Optional[Dict]:
+    """Flag phishing-style names published on free app hosts (e.g. lovable.app)."""
+    host = (features or {}).get("registered_domain") or ""
+    hostname = (features or {}).get("hostname") or ""
+    if host not in FREE_APP_HOSTS:
+        return None
+    extra = hostname[: -len(host)].strip(".") if hostname.endswith(host) else hostname
+    blob = f"{extra} {(features or {}).get('path') or ''}".lower()
+    token = next((item for item in FREE_HOST_PHISH_TOKENS if item in blob), None)
+    deep_subdomain = extra.count(".") >= 1
+    if not token and not deep_subdomain:
+        return None
+    if token:
+        reason = f"Published on free host {host} with '{token}' in the name"
+        points = 34
+    else:
+        reason = f"Multi-level app on free host {host} — not an official company website"
+        points = 22
+    return {"points": points, "reason": reason, "tag": "free_host_phish"}
 
 
 def _detect_brand(domain: str, label: str) -> Optional[str]:
@@ -165,22 +209,34 @@ def _detect_brand(domain: str, label: str) -> Optional[str]:
     return None
 
 
-def _finalize_intel(details: dict, tags: list) -> None:
-    """Keep Safe Browsing readable, and don't call a phishing site 'clean'."""
-    if details.get("domain_exists") is False:
-        details["google_safe_browsing"] = "skipped"
-        details["safe_browsing_label"] = "Skipped — domain does not exist"
-        return
-    local_flag = any(tag in tags for tag in ("phishing", "piracy_scam", "brand_impersonation", "safe_browsing"))
-    label = details.get("safe_browsing_label") or ""
-    failed = label.startswith("Lookup failed") or details.get("google_safe_browsing") == "unavailable"
-    if local_flag:
+def _finalize_intel(details: dict, intel: dict = None, tags: list = None) -> None:
+    """Keep a readable intel label. Never rewrite unavailable/no-match as clean."""
+    intel = intel or details.get("threat_intelligence") or {}
+    details["threat_intelligence"] = intel
+    overall = intel.get("overall_status") or "unavailable"
+    if details.get("domain_exists") is False and overall not in {"confirmed_malicious"}:
+        # DNS failure does not cancel a confirmed feed hit; otherwise note the skip.
+        pass
+    if overall == "confirmed_malicious":
         details["google_safe_browsing"] = "flagged"
-        details["safe_browsing_label"] = "Flagged by PHISHEYE threat database"
+        details["safe_browsing_label"] = intel.get("summary") or "Confirmed by threat intelligence"
         return
-    if failed:
-        details["google_safe_browsing"] = "clean"
-        details["safe_browsing_label"] = "No match in PHISHEYE threat database"
+    if overall == "reported_malicious":
+        details["google_safe_browsing"] = "flagged"
+        details["safe_browsing_label"] = intel.get("summary") or "Unverified threat-intelligence report"
+        return
+    if overall == "unavailable":
+        details["google_safe_browsing"] = "unavailable"
+        details["safe_browsing_label"] = "Threat intelligence unavailable"
+        return
+    if overall == "partial":
+        details["google_safe_browsing"] = "partial"
+        details["safe_browsing_label"] = intel.get("summary") or "Partial threat-intelligence results"
+        return
+    details["google_safe_browsing"] = "no_match"
+    details["safe_browsing_label"] = (
+        "No match in queried threat-intelligence feeds — not a safety guarantee"
+    )
 
 
 class URLChecker:
@@ -189,11 +245,13 @@ class URLChecker:
     PHISHING_DOMAINS = PHISHING_DOMAINS
     SUSPICIOUS_KEYWORDS = SUSPICIOUS_KEYWORDS
 
-    def analyze(self, url: str) -> Dict:
+    def analyze(self, url: str, page_signals: Optional[Dict] = None, intel_providers: Optional[Dict] = None) -> Dict:
         risk_score = 0
         reasons = []
         tags = []
         brand_impersonated = None
+        intel = {}
+        features = normalize_url(url or "")
         details = {
             "domain": "",
             "https": url.startswith("https://") if url else False,
@@ -204,11 +262,15 @@ class URLChecker:
             "safe_browsing_label": "Not checked yet",
             "aggressive_ads": False,
             "ad_signal_label": "Not checked yet",
+            "page_clutter": {},
+            "clutter_label": "Not checked yet",
             "original_url": url,
             "final_url": url,
             "redirect_chain": [url],
             "shortened": False,
             "redirect_hops": 0,
+            "normalization": {},
+            "threat_intelligence": {},
             "tls": {
                 "checked": False,
                 "status": "not_checked",
@@ -259,11 +321,16 @@ class URLChecker:
                 domain = parsed.path.split("/")[0].lower()
             domain = domain.split("@")[-1]
             full_url = url.lower()
-            registrable = get_registrable_domain(domain)
+            features = normalize_url(url)
+            registrable = features["registered_domain"] or get_registrable_domain(domain)
             label = registrable.split(".")[0] if registrable else ""
             tld = registrable.split(".")[-1] if "." in registrable else ""
-            details["domain"] = domain or registrable
-            lookup_host = domain.split(":")[0] if domain else registrable
+            details["domain"] = features["hostname"] or domain or registrable
+            details["normalization"] = features
+            lookup_host = features["hostname"] or (domain.split(":")[0] if domain else registrable)
+
+            intel = lookup_threat_intelligence(url, providers=intel_providers)
+            details["threat_intelligence"] = intel
 
             valid_host = bool(lookup_host) and (
                 re.match(r"^\d+\.\d+\.\d+\.\d+$", lookup_host) or "." in lookup_host
@@ -282,14 +349,6 @@ class URLChecker:
                     tags.append("domain_not_found")
 
             if details["domain_exists"] is not False:
-                sb = check_safe_browsing(url if "://" in url else f"https://{url}", lookup_host)
-                details["google_safe_browsing"] = sb["threats"] if sb["threats"] else sb["status"]
-                details["safe_browsing_label"] = sb["label"]
-                if sb["status"] == "flagged":
-                    risk_score += 40
-                    reasons.append(sb["label"])
-                    tags.append("safe_browsing")
-
                 age_days = get_domain_age_days(registrable)
                 details["domain_age_days"] = age_days
                 if age_days is not None:
@@ -301,28 +360,43 @@ class URLChecker:
                         risk_score += 10
                         reasons.append(f"Recently registered domain ({age_days} days old)")
             else:
-                details["google_safe_browsing"] = "skipped"
-                details["safe_browsing_label"] = "Skipped — domain does not exist"
                 details["domain_age_days"] = None
 
             if details["domain_exists"] is not False:
                 details["https"] = str(url).startswith("https://")
                 details["tls"] = inspect_tls(url if "://" in url else f"https://{url}")
 
-            # Trusted sites stay LOW unless they failed DNS (should not happen)
-            if registrable in TRUSTED_DOMAINS and details["domain_exists"] is not False:
+            # Official Google / YouTube / GitHub etc. skip noisy heuristics.
+            # Confirmed intel still wins. User-content hosts stay fully scanned.
+            if (
+                is_trusted_destination(hostname=lookup_host, registered_domain=registrable)
+                and details["domain_exists"] is not False
+                and not intel.get("confirmed")
+            ):
                 keep_tags = [t for t in tags if t == "shortened_url"]
                 keep_reasons = [r for r in reasons if "unwrapped" in r.lower() or "redirect" in r.lower()]
+                decision = calculate_final_risk(
+                    threat_intelligence=intel,
+                    heuristic_score=min(risk_score, 20),
+                    heuristic_tags=keep_tags,
+                    ml_score=min(risk_score, 20),
+                    url_features=features,
+                    heuristic_reasons=keep_reasons,
+                )
+                _finalize_intel(details, intel, decision["threat_tags"])
                 result = {
-                    "risk_score": 0,
-                    "risk_level": "LOW",
-                    "reasons": keep_reasons,
-                    "safe": True,
-                    "threat_tags": keep_tags,
+                    "risk_score": decision["risk_score"],
+                    "risk_level": decision["risk_level"],
+                    "reasons": decision["reasons"],
+                    "safe": decision["safe"],
+                    "threat_tags": decision["threat_tags"],
                     "brand_impersonated": None,
+                    "classification": decision["classification"],
+                    "explanation": decision["explanation"],
+                    "evidence": decision["evidence"],
+                    "debug": _debug_payload(url, features, intel, decision),
                     "details": details,
                 }
-                _finalize_intel(details, [])
                 result["simple_view"] = build_simple_view(result)
                 result["technical_view"] = build_technical_view(result)
                 return result
@@ -344,7 +418,7 @@ class URLChecker:
                     break
 
             # 2b. Aggressive popup / malware-style ads (not normal Google Ads)
-            if details["domain_exists"] is not False:
+            if details["domain_exists"] is not False and not intel.get("confirmed"):
                 ads = check_ad_signals(url if "://" in url else f"https://{url}")
                 details["aggressive_ads"] = ads["flagged"]
                 details["ad_signal_label"] = ads["label"]
@@ -353,12 +427,29 @@ class URLChecker:
                     reasons.append(ads["label"])
                     tags.append("malvertising")
 
+                clutter = score_page_clutter(ads.get("clutter") or {}, page_signals)
+                details["page_clutter"] = clutter["counts"]
+                details["clutter_label"] = clutter["label"]
+                if clutter["points"]:
+                    risk_score += clutter["points"]
+                    reasons.extend(clutter["reasons"])
+                    tags.append("page_clutter")
+            elif intel.get("confirmed"):
+                details["ad_signal_label"] = "Skipped — already confirmed by threat intelligence"
+                details["clutter_label"] = "Skipped — already confirmed by threat intelligence"
+
             # 3. Brand impersonation (typos + leetspeak + lookalike letters)
             brand_impersonated = _detect_brand(registrable, label)
             if brand_impersonated:
                 risk_score += 40
                 reasons.append(f"Looks like a fake {brand_impersonated} website")
                 tags.append("brand_impersonation")
+
+            host_signal = _free_host_signal(features)
+            if host_signal:
+                risk_score += host_signal["points"]
+                reasons.append(host_signal["reason"])
+                tags.append(host_signal["tag"])
 
             # 4. Suspicious domain ending
             if tld in SUSPICIOUS_TLDS:
@@ -421,7 +512,6 @@ class URLChecker:
             risk_score = 20
             reasons = [f"Error parsing URL: {str(e)}"]
 
-        # Unique tags, keep order
         seen = set()
         unique_tags = []
         for tag in tags:
@@ -429,16 +519,26 @@ class URLChecker:
                 seen.add(tag)
                 unique_tags.append(tag)
 
-        _finalize_intel(details, unique_tags)
-
-        risk_level = _risk_level(risk_score)
+        decision = calculate_final_risk(
+            threat_intelligence=intel,
+            heuristic_score=min(risk_score, 100),
+            heuristic_tags=unique_tags,
+            ml_score=min(risk_score, 100),
+            url_features=features or details.get("normalization") or {},
+            heuristic_reasons=reasons,
+        )
+        _finalize_intel(details, intel, decision["threat_tags"])
         result = {
-            "risk_score": risk_score,
-            "risk_level": risk_level,
-            "reasons": reasons[:6],
-            "safe": risk_level == "LOW" and "domain_not_found" not in unique_tags,
-            "threat_tags": unique_tags,
+            "risk_score": decision["risk_score"],
+            "risk_level": decision["risk_level"],
+            "reasons": decision["reasons"],
+            "safe": decision["safe"],
+            "threat_tags": decision["threat_tags"],
             "brand_impersonated": brand_impersonated,
+            "classification": decision["classification"],
+            "explanation": decision["explanation"],
+            "evidence": decision["evidence"],
+            "debug": _debug_payload(url, features, intel, decision),
             "details": details,
         }
         result["simple_view"] = build_simple_view(result)

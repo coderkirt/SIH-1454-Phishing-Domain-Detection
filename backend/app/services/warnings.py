@@ -45,9 +45,21 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
     elif level == "MEDIUM":
         verdict = "BE CAREFUL"
     else:
-        verdict = "LOOKS SAFE"
+        verdict = "NO MALICIOUS INDICATORS"
 
-    if "domain_not_found" in tags:
+    if "confirmed_malicious" in tags or "threat_intel" in tags:
+        verdict = "DANGER" if level in ("HIGH", "CRITICAL") else "BE CAREFUL"
+        if "reported_phish" in tags and "confirmed_malicious" not in tags:
+            warning = (
+                "A threat-intelligence source has an unverified report for this address. "
+                "Do not enter a password, OTP, or card number until you confirm the real site."
+            )
+        else:
+            warning = (
+                "Threat-intelligence feeds confirmed this address as malicious. "
+                "Do not open it and do not enter a password, OTP, or card number."
+            )
+    elif "domain_not_found" in tags:
         verdict = "DANGER" if level in ("HIGH", "CRITICAL") else "BE CAREFUL"
         warning = (
             "This domain does not exist. There is no real website at this address. "
@@ -73,6 +85,11 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
         warning = (
             "This is a known fraudulent website. Close it immediately and do "
             "not enter any personal information."
+        )
+    elif "free_host_phish" in tags:
+        warning = (
+            "This page is hosted on a free app platform, not on an official company or government site. "
+            "Do not enter a password, OTP, or personal details here."
         )
     elif level in ("HIGH", "CRITICAL"):
         if is_message:
@@ -101,8 +118,9 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
             warning = "No major threat was found in this message."
         else:
             warning = (
-                "This website looks safe. Still, double-check the name in the "
-                "address bar before you sign in."
+                "No malicious indicators were detected. That is not a guarantee of safety. "
+                "Absence from threat-intelligence feeds does not mean a site is legitimate. "
+                "Still check the name in the address bar before you sign in."
             )
 
     extras = []
@@ -144,6 +162,20 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
             "This page uses aggressive popup or malware-style ads. "
             "Do not click download or play buttons on this site."
         )
+    if "page_clutter" in tags:
+        extras.append(
+            "This page is crowded with buttons, popups, or extra frames. "
+            "That pattern is common on scam pages. Do not click random buttons."
+        )
+    intel_status = ((result.get("details") or {}).get("threat_intelligence") or {}).get("overall_status")
+    if intel_status == "unavailable":
+        extras.append(
+            "Threat intelligence was unavailable for this scan. Unknown is not the same as safe."
+        )
+    elif intel_status == "no_match":
+        extras.append(
+            "Queried feeds had no match. That is not a confirmation that the site is legitimate."
+        )
 
     full_warning = " ".join([warning] + extras)
 
@@ -171,8 +203,15 @@ def build_technical_view(result: Dict) -> Dict:
         "domain_age_days": details.get("domain_age_days"),
         "google_safe_browsing": details.get("google_safe_browsing", "unavailable"),
         "safe_browsing_label": details.get("safe_browsing_label", "Unavailable"),
+        "threat_intelligence": details.get("threat_intelligence") or {},
+        "classification": result.get("classification"),
+        "explanation": result.get("explanation"),
+        "debug": result.get("debug") or {},
+        "evidence": result.get("evidence") or {},
         "aggressive_ads": details.get("aggressive_ads", False),
         "ad_signal_label": details.get("ad_signal_label", "Not checked"),
+        "page_clutter": details.get("page_clutter", {}),
+        "clutter_label": details.get("clutter_label", "Not checked"),
         "original_url": details.get("original_url", ""),
         "final_url": details.get("final_url", ""),
         "redirect_chain": details.get("redirect_chain", []),
