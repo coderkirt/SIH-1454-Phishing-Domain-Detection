@@ -6,6 +6,7 @@ Feeds are stored under backend/data/feeds/ and are not committed.
 """
 
 import csv
+import gzip
 import json
 import time
 from io import StringIO
@@ -15,8 +16,9 @@ from typing import Dict, Iterable, List, Optional
 import requests
 
 HEADERS = {
-    "User-Agent": "PHISHEYE/1.4 (SIH-1454 academic phishing detector; local lookup only)",
-    "Accept": "text/plain, text/csv, application/json, */*",
+    "User-Agent": "PHISHEYE/1.8 (SIH-1454 academic phishing detector; local lookup only)",
+    "Accept": "text/plain, text/csv, application/json, application/gzip, */*",
+    "Accept-Encoding": "gzip, deflate",
 }
 
 FEED_DIR = Path(__file__).resolve().parents[2] / "data" / "feeds"
@@ -38,7 +40,11 @@ def _cache_path(name: str) -> Path:
 def download_text(url: str, timeout: int = 20) -> str:
     resp = requests.get(url, timeout=timeout, headers=HEADERS)
     resp.raise_for_status()
-    return resp.text or ""
+    content = resp.content or b""
+    if content[:2] == b"\x1f\x8b":
+        content = gzip.decompress(content)
+        return content.decode("utf-8", errors="ignore")
+    return resp.text or content.decode("utf-8", errors="ignore")
 
 
 def parse_url_lines(text: str) -> List[str]:
@@ -167,6 +173,11 @@ def get_url_index(name: str, url: str, *, fetch=None, parser=None, timeout: int 
         return None
     from app.services.threat_intel import build_feed_index
     urls = (parser or parse_url_lines)(text)
+    if not urls:
+        if name in _memory:
+            _memory[name]["index"] = None
+            _memory[name]["error"] = _memory[name].get("error") or "feed contained no URLs"
+        return None
     index = build_feed_index(urls)
     index["size"] = len(urls)
     if name in _memory:
