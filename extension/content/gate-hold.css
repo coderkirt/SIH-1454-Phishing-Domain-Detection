@@ -1,0 +1,4 @@
+/* Hide the destination until PHISHEYE decides: gate it, or the user already allowed it. */
+html {
+  visibility: hidden !important;
+}
