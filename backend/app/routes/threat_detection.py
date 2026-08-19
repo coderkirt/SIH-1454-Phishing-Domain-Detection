@@ -16,6 +16,9 @@ class PageSignals(BaseModel):
     popups: int = Field(0, ge=0, le=10000)
     overlays: int = Field(0, ge=0, le=10000)
     links: int = Field(0, ge=0, le=100000)
+    title: str = Field("", max_length=300)
+    heading: str = Field("", max_length=300)
+    snippet: str = Field("", max_length=800)
 
 
 class URLCheckRequest(BaseModel):
@@ -194,7 +197,7 @@ async def intel_status():
     }
     status["note"] = (
         "OpenPhish, URLhaus, and Phishing Army use public lists. "
-        "The PhishTank dump is verified-only; PHISHTANK_API_KEY enables live lookup of unverified reports. "
+        "The PhishTank dump is verified-only; live checkurl is also queried for unverified/suspected reports. "
         "Google Safe Browsing needs GOOGLE_SAFE_BROWSING_API_KEY. A missing key does not invent matches."
     )
     return status
