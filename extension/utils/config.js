@@ -22,12 +22,31 @@ export const STORAGE_KEYS = {
   autoScan: "cg_auto_scan",
   warnings: "cg_warnings",
   pagePopup: "cg_page_popup",
+  preNavigate: "cg_pre_navigate",
+  scanAllPages: "cg_scan_all_pages",
   token: "cg_token",
   user: "cg_user",
   welcomeSeen: "cg_welcome_seen",
   cache: "cg_scan_cache",
   continued: "cg_continued",
+  gateAllow: "cg_gate_allow",
 };
+
+export const MULTI_TLDS = [
+  "co.in", "com.au", "co.uk", "org.in", "net.in", "gov.in",
+  "ac.in", "edu.in", "co.jp", "com.br",
+];
+
+export function registeredDomain(hostname) {
+  const host = String(hostname || "").split(":")[0].toLowerCase().replace(/^www\./, "").replace(/\.$/, "");
+  const parts = host.split(".").filter(Boolean);
+  if (parts.length >= 3) {
+    const tail = `${parts[parts.length - 2]}.${parts[parts.length - 1]}`;
+    if (MULTI_TLDS.includes(tail)) return parts.slice(-3).join(".");
+  }
+  if (parts.length >= 2) return parts.slice(-2).join(".");
+  return host;
+}
 
 export const SKIP_PROTOCOLS = [
   "chrome:",
