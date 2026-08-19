@@ -2,6 +2,26 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.connection import init_db
 from app.routes import threat_detection, user, stats, analyze, reports, scans
+from contextlib import asynccontextmanager
+import os
+import threading
+
+
+def _warmup_threat_feeds():
+    try:
+        from app.services.threat_intel import warmup_feeds
+        warmup_feeds()
+    except Exception:
+        pass
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    skip = os.getenv("PHISHEYE_SKIP_FEED_WARMUP", "").strip().lower() in {"1", "true", "yes"}
+    if not skip:
+        threading.Thread(target=_warmup_threat_feeds, daemon=True).start()
+    yield
+
 
 # Initialize database
 init_db()
@@ -13,7 +33,8 @@ app = FastAPI(
         "AI-powered multi-channel scam intelligence: links, messages, "
         "sender signals, psychological manipulation and community reports."
     ),
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan,
 )
 
 # Add CORS middleware (allow all origins for now)
@@ -54,6 +75,7 @@ async def root():
             "POST /api/v1/feedback",
             "GET /api/v1/reputation/domain/{domain}",
             "GET /api/v1/scans",
+            "GET /api/v1/threat/intel-status",
             "GET /api/v1/stats/overview",
             "GET /api/v1/stats/sources",
             "GET /api/v1/stats/timeline"

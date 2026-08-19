@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.url_checker import URLChecker
 from app.services.content_analyzer import analyze_content
 from app.database.connection import get_db_connection
@@ -10,9 +10,18 @@ router = APIRouter(prefix="/api/v1/threat", tags=["threat"])
 url_checker = URLChecker()
 
 
+class PageSignals(BaseModel):
+    buttons: int = Field(0, ge=0, le=10000)
+    iframes: int = Field(0, ge=0, le=10000)
+    popups: int = Field(0, ge=0, le=10000)
+    overlays: int = Field(0, ge=0, le=10000)
+    links: int = Field(0, ge=0, le=100000)
+
+
 class URLCheckRequest(BaseModel):
     url: str
     view: str = "both"  # simple | technical | both
+    page_signals: Optional[PageSignals] = None
 
 
 class MessageCheckRequest(BaseModel):
@@ -22,6 +31,8 @@ class MessageCheckRequest(BaseModel):
 
 def classify_threat_type(result: dict) -> str:
     tags = result.get("threat_tags") or []
+    if "confirmed_malicious" in tags or "threat_intel" in tags:
+        return "phishing"
     if "phishing" in tags or "brand_impersonation" in tags:
         return "phishing"
     if "piracy_scam" in tags or "malvertising" in tags:
@@ -48,12 +59,16 @@ def _pick_view(result: dict, view: str) -> dict:
         "risk_level": result["risk_level"],
         "reasons": result["reasons"],
         "safe": result["safe"],
+        "classification": result.get("classification"),
+        "explanation": result.get("explanation"),
         "threat_tags": result.get("threat_tags", []),
         "brand_impersonated": result.get("brand_impersonated"),
         "original_url": (result.get("details") or {}).get("original_url"),
         "final_url": (result.get("details") or {}).get("final_url"),
         "redirect_chain": (result.get("details") or {}).get("redirect_chain", []),
         "shortened": (result.get("details") or {}).get("shortened", False),
+        "debug": result.get("debug"),
+        "evidence": result.get("evidence"),
     }
     view = (view or "both").lower()
     if view in ("simple", "both"):
@@ -80,7 +95,10 @@ async def check_url(request: URLCheckRequest):
         if not url.startswith("http://") and not url.startswith("https://"):
             url = f"https://{url}"
 
-        result = url_checker.analyze(url)
+        result = url_checker.analyze(
+            url,
+            page_signals=request.page_signals.model_dump() if request.page_signals else None,
+        )
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -161,6 +179,25 @@ async def get_stats():
         "safety_rate": f"{safety_rate:.1f}%",
         "recent_urls": [dict(row) for row in recent]
     }
+
+
+@router.get("/intel-status")
+async def intel_status():
+    """Show which public threat feeds are loaded. Does not fetch the scanned page."""
+    from app.services.feed_cache import feed_status
+    from app.services.threat_intel import GSB_API_KEY, PHISHTANK_API_KEY, URLHAUS_AUTH_KEY
+    status = feed_status()
+    status["api_keys"] = {
+        "google_safe_browsing": bool(GSB_API_KEY),
+        "phishtank": bool(PHISHTANK_API_KEY),
+        "urlhaus": bool(URLHAUS_AUTH_KEY),
+    }
+    status["note"] = (
+        "OpenPhish, URLhaus, and Phishing Army use public lists. "
+        "The PhishTank dump is verified-only; PHISHTANK_API_KEY enables live lookup of unverified reports. "
+        "Google Safe Browsing needs GOOGLE_SAFE_BROWSING_API_KEY. A missing key does not invent matches."
+    )
+    return status
 
 
 @router.get("/recent-urls")
