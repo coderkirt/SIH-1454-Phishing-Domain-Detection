@@ -1,9 +1,13 @@
 import sqlite3
 import os
 
-# Store threats.db inside the backend folder no matter where the app is started from
+# Store threats.db inside the backend folder no matter where the app is started from.
+# On Render, set DATABASE_PATH to a persistent-disk mount if you add one.
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATABASE_URL = os.path.join(BACKEND_DIR, "threats.db")
+DATABASE_URL = os.getenv("DATABASE_PATH") or os.path.join(BACKEND_DIR, "threats.db")
+_db_dir = os.path.dirname(os.path.abspath(DATABASE_URL))
+if _db_dir:
+    os.makedirs(_db_dir, exist_ok=True)
 
 
 def get_db_connection():

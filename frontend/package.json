@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "pack:extension": "node scripts/pack-extension.mjs",
+    "build": "node scripts/pack-extension.mjs && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },

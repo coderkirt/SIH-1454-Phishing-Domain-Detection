@@ -43,6 +43,11 @@ npm run dev
 
 Sign up, open **Scan**, paste a message with several links, then open Dashboard / Reports / History.
 
+### Deploy on Render (API + dashboard)
+
+See `docs/RENDER.md`. Blueprint file: `render.yaml` (branch `phisheye-update`). The Chrome extension is installed locally and pointed at the Render API URL.
+
+
 ## Risk numbers (read this)
 - **Risk score** 0–100: fused evidence
 - **Scam risk**: same score shown as an estimate, not a calibrated fraud probability
@@ -67,3 +72,12 @@ Uses the official SIH template structure. Fill `[TEAM ID]` and `[TEAM NAME]` fro
 - `PhishShield_SIH_2026_Final_Presentation.pdf`
 - `docs/SIH_PRESENTATION_CONTENT.md`
 - `docs/SIH_PRESENTATION_REALITY_CHECK.md`
+
+## Internal-round jury pack (print this)
+
+Spoken scripts, cheat sheet, diagrams, 40 viva answers, and faculty tactics. Product name on the cover is **PHISHEYE**.
+
+- `PHISHEYE_Internal_Round_Jury_Pack.pdf`
+- `docs/INTERNAL_ROUND_JURY_PACK.html`
+- Source brief: `docs/INTERNAL_ROUND_LLM_BRIEF.md`
+- Rebuild: `python docs/build_internal_round_pdf.py`

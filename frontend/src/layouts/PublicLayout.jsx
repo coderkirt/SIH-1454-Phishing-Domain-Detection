@@ -8,6 +8,7 @@ export default function PublicLayout() {
     <div className="min-h-screen bg-page text-ink">
       <SystemTopBar>
         <nav className="flex items-center gap-2 text-xs uppercase tracking-[0.12em]">
+          <Link to="/extension" className="btn-secondary px-3 py-2">Extension</Link>
           <Link to="/login" className="btn-secondary px-3 py-2">Log in</Link>
           <Link to="/signup" className="btn-primary px-3 py-2">Sign up</Link>
           <ThemeToggle />
