@@ -5,11 +5,11 @@
  * Local: keeps 127.0.0.1 defaults unless VITE_API_URL is set.
  * Render: VITE_API_URL and RENDER_EXTERNAL_URL / VITE_DASHBOARD_URL.
  */
-import { createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
+import { crc32, deflateRawSync } from "node:zlib";
 
 const frontendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(frontendDir, "..");
@@ -74,37 +74,64 @@ writeFileSync(
 );
 
 rmSync(zipPath, { force: true });
-
-function zipWithTar() {
-  execFileSync("tar", ["-a", "-c", "-f", zipPath, "-C", stagingDir, "."], { stdio: "inherit" });
-}
-
-try {
-  zipWithTar();
-} catch {
-  await zipFallback(stagingDir, zipPath);
-}
-
+writeZip(stagingDir, zipPath);
 rmSync(stagingDir, { recursive: true, force: true });
 console.log(`Packed ${zipPath}`);
 console.log(`  API       ${apiUrl}`);
 console.log(`  Dashboard ${dashboardUrl}`);
 
-async function zipFallback(fromDir, outFile) {
-  const { createRequire } = await import("node:module");
-  let archiver;
-  try {
-    archiver = createRequire(import.meta.url)("archiver");
-  } catch {
-    throw new Error("Could not create zip (tar failed and archiver is not installed).");
+function walkFiles(dir, prefix = "") {
+  const out = [];
+  for (const name of readdirSync(dir)) {
+    const full = path.join(dir, name);
+    const rel = prefix ? `${prefix}/${name}` : name;
+    if (statSync(full).isDirectory()) out.push(...walkFiles(full, rel));
+    else out.push({ full, rel: rel.replaceAll("\\", "/") });
   }
-  await new Promise((resolve, reject) => {
-    const output = createWriteStream(outFile);
-    const archive = archiver("zip", { zlib: { level: 9 } });
-    output.on("close", resolve);
-    archive.on("error", reject);
-    archive.pipe(output);
-    archive.directory(fromDir, false);
-    archive.finalize();
-  });
+  return out;
+}
+
+/** Real PK zip. `tar -a` on Linux writes a tar named .zip, which Windows cannot open. */
+function writeZip(fromDir, outFile) {
+  const files = walkFiles(fromDir);
+  const locals = [];
+  const centrals = [];
+  let offset = 0;
+  for (const file of files) {
+    const data = readFileSync(file.full);
+    const compressed = deflateRawSync(data);
+    const checksum = crc32(data) >>> 0;
+    const name = Buffer.from(file.rel, "utf8");
+    const local = Buffer.alloc(30);
+    local.writeUInt32LE(0x04034b50, 0);
+    local.writeUInt16LE(20, 4);
+    local.writeUInt16LE(8, 8);
+    local.writeUInt32LE(checksum, 14);
+    local.writeUInt32LE(compressed.length, 18);
+    local.writeUInt32LE(data.length, 22);
+    local.writeUInt16LE(name.length, 26);
+    const localFull = Buffer.concat([local, name, compressed]);
+    locals.push(localFull);
+
+    const central = Buffer.alloc(46);
+    central.writeUInt32LE(0x02014b50, 0);
+    central.writeUInt16LE(20, 4);
+    central.writeUInt16LE(20, 6);
+    central.writeUInt16LE(8, 10);
+    central.writeUInt32LE(checksum, 16);
+    central.writeUInt32LE(compressed.length, 20);
+    central.writeUInt32LE(data.length, 24);
+    central.writeUInt16LE(name.length, 28);
+    central.writeUInt32LE(offset, 42);
+    centrals.push(Buffer.concat([central, name]));
+    offset += localFull.length;
+  }
+  const centralDir = Buffer.concat(centrals);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(files.length, 8);
+  eocd.writeUInt16LE(files.length, 10);
+  eocd.writeUInt32LE(centralDir.length, 12);
+  eocd.writeUInt32LE(offset, 16);
+  writeFileSync(outFile, Buffer.concat([...locals, centralDir, eocd]));
 }

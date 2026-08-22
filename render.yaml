@@ -38,11 +38,12 @@ services:
     plan: free
     region: singapore
     rootDir: frontend
-    buildCommand: npm ci && npm run build
+    # npm ci skips Linux Vite/Rolldown bindings when the lockfile was generated on Windows.
+    buildCommand: npm install --include=optional && npm run build
     staticPublishPath: dist
     envVars:
       - key: NODE_VERSION
-        value: "20.18.1"
+        value: "22.12.0"
       - key: VITE_API_URL
         fromService:
           name: phisheye-api

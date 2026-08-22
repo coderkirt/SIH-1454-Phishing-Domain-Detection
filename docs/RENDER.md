@@ -25,7 +25,7 @@ Free web services **sleep after ~15 minutes**. Wake `/health` before the jury si
 
 **API:** root `backend`, Python 3.12, `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`, health `/health`. Env: `SECRET_KEY`, `ENABLE_ONLINE_CHECKS=true`, `FRONTEND_ORIGINS=*`.
 
-**Web:** root `frontend`, `npm ci && npm run build`, publish `dist`, env `VITE_API_URL=https://<api-host>`. Rewrite `/*` → `/index.html` (keep the zip file as a real file).
+**Web:** root `frontend`, `npm install --include=optional && npm run build`, publish `dist`, env `VITE_API_URL=https://<api-host>`. Rewrite `/*` → `/index.html` (keep the zip file as a real file).
 
 ## Honesty
 
