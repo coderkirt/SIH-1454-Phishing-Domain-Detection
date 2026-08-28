@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>PHISHEYE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles/phishshield.css" />
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <p class="meta-tech">
+        <span class="dot dot-active" aria-hidden="true"></span>
+        PHISHEYE
+        <span class="sep">│</span>
+        Clear sites open automatically
+      </p>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle theme" title="Toggle theme">◐</button>
+    </header>
+
+    <main class="gate">
+      <header class="brand-block">
+        <div class="logo-eye" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 3L27 8.2v8.1c0 7.2-5.3 12.4-11 14.7C10.3 28.7 5 23.5 5 16.3V8.2L16 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M8.5 16c2.4-4.2 5.2-6.3 7.5-6.3S21.1 11.8 23.5 16c-2.4 4.2-5.2 6.3-7.5 6.3S10.9 20.2 8.5 16z" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="16" cy="16" r="2.6" fill="#ff0000"/>
+            <circle cx="16.8" cy="15.2" r="0.7" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <h1 class="font-display">PHISHEYE</h1>
+          <p class="lead">Scan first. Safe sites open on their own. Everything else stays closed.</p>
+        </div>
+      </header>
+
+      <form id="scan-form" class="search-row" autocomplete="off">
+        <label class="sr-only" for="url-input">Website address</label>
+        <input id="url-input" class="field font-mono" name="url" spellcheck="false" placeholder="https://example.com" />
+        <button id="scan-btn" class="btn-primary" type="submit">Scan</button>
+      </form>
+
+      <section id="result-panel" class="panel panel-accent site idle">
+        <div class="result-head">
+          <p class="label-tech">Scan result</p>
+          <p id="host" class="host font-mono">Waiting for an address</p>
+        </div>
+        <p id="headline" class="headline font-display tone-unknown">READY</p>
+        <p id="message" class="message">The website is not open yet.</p>
+        <div id="metrics" class="metrics" hidden>
+          <div class="metric">
+            <span class="label-tech">Score</span>
+            <strong id="score">—</strong>
+          </div>
+          <div class="metric">
+            <span class="label-tech">Level</span>
+            <strong id="level">—</strong>
+          </div>
+        </div>
+        <ul id="reasons"></ul>
+      </section>
+
+      <footer class="dock">
+        <div class="actions">
+          <button id="open-site" class="btn-primary" type="button" hidden>Open website</button>
+          <button id="open-anyway" class="btn-secondary" type="button" hidden>Open anyway</button>
+          <button id="stay-here" class="btn-danger" type="button" hidden>Keep closed</button>
+        </div>
+        <p id="status-line" class="note" role="status">Enter a website, or wait if PHISHEYE intercepted one.</p>
+      </footer>
+    </main>
+    <script type="module" src="panel.js"></script>
+  </body>
+</html>

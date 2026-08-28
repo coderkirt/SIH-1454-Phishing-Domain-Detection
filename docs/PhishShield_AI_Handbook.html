@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PhishShield AI — Presentation and Jury Master Guide</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+    body { font-family: "Segoe UI", Georgia, serif; color: #0f172a; line-height: 1.45; font-size: 12px; }
+    h1 { color: #070d18; font-size: 22px; border-bottom: 3px solid #22d3ee; padding-bottom: 6px; }
+    h2 { color: #0e7490; font-size: 16px; margin-top: 22px; }
+    h3 { color: #155e75; font-size: 13px; }
+    .cover { text-align: center; padding: 80px 20px; page-break-after: always; }
+    .cover h1 { font-size: 32px; border: 0; }
+    .muted { color: #475569; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 11px; }
+    th { background: #0e7490; color: #fff; text-align: left; padding: 6px; }
+    td { border: 1px solid #cbd5e1; padding: 6px; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .box { padding: 10px 12px; margin: 10px 0; border-radius: 6px; }
+    .must { background: #f0fdf4; border-left: 5px solid #16a34a; }
+    .warn { background: #fff7ed; border-left: 5px solid #ea580c; }
+    .dont { background: #fff1f2; border-left: 5px solid #e11d48; }
+    .tip { background: #ecfeff; border-left: 5px solid #0891b2; }
+    pre { background: #f1f5f9; padding: 10px; font-size: 11px; overflow: auto; }
+    .page { page-break-before: always; }
+    ul { margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <p class="muted">SIH 1454</p>
+    <h1>PHISHSHIELD AI</h1>
+    <p><strong>Presentation + Jury Viva Master Guide</strong></p>
+    <p>Intelligent detection of phishing domains imitating genuine domains</p>
+    <p class="muted">Based on the current CyberGuard repository. Do not invent metrics.</p>
+  </section>
+
+  <h1>1. How to use this book</h1>
+  <p>The SIH name is <strong>PhishShield AI</strong>. The code is branded <strong>CyberGuard</strong>. Say both in viva.</p>
+  <div class="box warn"><strong>Accuracy rule:</strong> The running stack is FastAPI + SQLite + a rule engine + live threat lists. There is no Flask, no PostgreSQL server, no TensorFlow/CNN, and no published F1/accuracy.</div>
+  <p>Full markdown companions:</p>
+  <ul>
+    <li>docs/IMPLEMENTATION_REALITY_CHECK.md</li>
+    <li>docs/TECH_STACK_STUDY_GUIDE.md</li>
+    <li>docs/PRESENTATION_MASTER_GUIDE.md</li>
+    <li>docs/JURY_VIVA_QUESTION_BANK.md (120 questions)</li>
+    <li>docs/TEAM_STUDY_PLANS.md</li>
+  </ul>
+  <div class="box must"><strong>Must know:</strong> Website and extension both call <code>POST /api/v1/threat/check-url</code> with <code>{ url, view: "both" }</code>. Same URL, same score.</div>
+
+  <h1 class="page">2. Implementation reality check</h1>
+  <table>
+    <tr><th>Feature</th><th>Status</th><th>Evidence</th></tr>
+    <tr><td>FastAPI + Uvicorn</td><td>IMPLEMENTED</td><td>backend/app/main.py</td></tr>
+    <tr><td>Flask</td><td>NOT IMPLEMENTED</td><td>not in requirements</td></tr>
+    <tr><td>React + Vite + Tailwind + Axios + Recharts</td><td>IMPLEMENTED</td><td>frontend/package.json</td></tr>
+    <tr><td>SQLite threats.db</td><td>IMPLEMENTED</td><td>database/connection.py</td></tr>
+    <tr><td>PostgreSQL</td><td>NOT IMPLEMENTED</td><td>planned scale-up</td></tr>
+    <tr><td>SQLAlchemy at runtime</td><td>PARTIAL</td><td>models exist, routes use sqlite3</td></tr>
+    <tr><td>Rule URL engine</td><td>IMPLEMENTED</td><td>url_checker.py</td></tr>
+    <tr><td>Psychology urgency/fear/greed</td><td>IMPLEMENTED</td><td>psychology.py</td></tr>
+    <tr><td>Simple + Technical views</td><td>IMPLEMENTED</td><td>warnings.py</td></tr>
+    <tr><td>Google Safe Browsing / OpenPhish</td><td>IMPLEMENTED</td><td>external_intel.py</td></tr>
+    <tr><td>Aggressive ads + SSRF guards</td><td>IMPLEMENTED</td><td>ad_signals.py</td></tr>
+    <tr><td>CNN / sklearn / TensorFlow</td><td>NOT IMPLEMENTED</td><td>no model files</td></tr>
+    <tr><td>ml_confidence</td><td>PARTIAL</td><td>column default 0.0</td></tr>
+    <tr><td>JWT login</td><td>IMPLEMENTED</td><td>user.py, auth.py</td></tr>
+    <tr><td>Auth required on scan</td><td>NOT IMPLEMENTED</td><td>check-url is public</td></tr>
+    <tr><td>Extension MV3</td><td>IMPLEMENTED</td><td>extension/</td></tr>
+    <tr><td>Message scanner UI</td><td>PARTIAL</td><td>API yes, React unused</td></tr>
+    <tr><td>Rate limiting</td><td>NOT IMPLEMENTED</td><td>admit this gap</td></tr>
+    <tr><td>Published accuracy / F1</td><td>NOT AVAILABLE</td><td>never invent a number</td></tr>
+  </table>
+  <div class="box dont"><strong>Do not say:</strong> We use Flask, PostgreSQL, a CNN, 99% accuracy, federated learning, or zero-knowledge proofs.</div>
+
+  <h1 class="page">3. Architecture</h1>
+  <pre>Extension / React
+    REST JSON   POST /api/v1/threat/check-url
+        FastAPI :8000
+            URLChecker + psychology + intel + ads
+                SQLite  threats.db
+            JSON: score, simple_view, technical_view</pre>
+  <p><strong>Beginner:</strong> You paste a link or open a website. Our server checks it and warns you in simple English.</p>
+  <p><strong>Technical:</strong> Multi-signal rule engine plus live lists (Safe Browsing if a key is set, else OpenPhish), DNS, RDAP age, brand impersonation, Hinglish psychological phrases, and aggressive-ad HTML sampling. React and the extension are clients of one FastAPI process.</p>
+  <div class="box tip"><strong>Jury tip:</strong> If they draw Flask to Postgres to CNN, redraw FastAPI to SQLite to rules. Offer Postgres and a trained model as the roadmap.</div>
+
+  <h1>4. check-url pipeline</h1>
+  <ol>
+    <li>Pydantic body: url, view = both / simple / technical</li>
+    <li>Trim; add https:// if missing</li>
+    <li>Analyze: DNS, intel, age, phishing fragments, piracy, ads, brand, TLD, keywords, IP, length, HTTPS, psychology</li>
+    <li>Cap score at 100. LOW under 30, MEDIUM under 50, HIGH under 70, else CRITICAL</li>
+    <li>Trusted sites such as google.com return 0 if the domain exists</li>
+    <li>Insert url_checks (user_id not set; ml_confidence stays 0)</li>
+    <li>HIGH/CRITICAL also insert threats</li>
+    <li>Return Simple View and/or Technical View</li>
+  </ol>
+  <p>Other APIs: /health, /api/v1/threat/check-message (no dashboard UI), stats, signup, login, profile.</p>
+  <div class="box warn"><strong>Warning:</strong> average_response_time_ms = 245 is hardcoded. Do not call it a measured SLA.</div>
+
+  <h1 class="page">5. Risk points actually in code</h1>
+  <table>
+    <tr><th>Check</th><th>Points</th></tr>
+    <tr><td>Domain does not exist</td><td>+35</td></tr>
+    <tr><td>Google Safe Browsing / OpenPhish flagged</td><td>+40</td></tr>
+    <tr><td>Domain age under 30 / 90 days</td><td>+20 / +10</td></tr>
+    <tr><td>Known phishing fragment (paypa1, amaz0n)</td><td>+40</td></tr>
+    <tr><td>Piracy / scam streaming name</td><td>+35</td></tr>
+    <tr><td>Brand impersonation</td><td>+40</td></tr>
+    <tr><td>Suspicious TLD (.xyz, .tk)</td><td>+15</td></tr>
+    <tr><td>Suspicious keyword (login, verify)</td><td>+5</td></tr>
+    <tr><td>IP-based host</td><td>+30</td></tr>
+    <tr><td>Too many subdomains</td><td>+10</td></tr>
+    <tr><td>Very long URL</td><td>+8</td></tr>
+    <tr><td>No HTTPS</td><td>+5</td></tr>
+    <tr><td>Email used as host</td><td>+20</td></tr>
+    <tr><td>Urgency / fear / greed language</td><td>+15 / +15 / +12</td></tr>
+    <tr><td>Aggressive popup / malware ads</td><td>+20</td></tr>
+  </table>
+
+  <h1>6. Database (SQLite, not PostgreSQL)</h1>
+  <table>
+    <tr><th>Table</th><th>Purpose</th></tr>
+    <tr><td>users</td><td>username, email, bcrypt password hash</td></tr>
+    <tr><td>url_checks</td><td>scanned URL, score, level; user_id unused</td></tr>
+    <tr><td>threats</td><td>HIGH/CRITICAL rows for charts</td></tr>
+  </table>
+  <p>SQL injection defense: parameterized <code>?</code> queries. Two users at once: SQLite serializes writes. Database down: API 500, extension says unavailable.</p>
+
+  <h1>7. Machine learning honesty</h1>
+  <div class="box dont"><strong>METRIC NOT YET AVAILABLE.</strong> No dataset file, no train/test split, no confusion matrix, no CNN.</div>
+  <p>If asked for ML theory: accuracy alone is dangerous because a dummy “always SAFE” model can look accurate. Recall matters more for phishing. A future model can use the same features we already score by rules. The <code>ml_confidence</code> column is reserved.</p>
+  <div class="box must"><strong>Must know:</strong> “Act now” on a real sale is not automatically phishing. We add points. CRITICAL needs several strong signals.</div>
+
+  <h1 class="page">8. Security of our system</h1>
+  <table>
+    <tr><th>Issue</th><th>Status</th></tr>
+    <tr><td>SQL injection</td><td>IMPLEMENTED — parameterized SQL</td></tr>
+    <tr><td>Password hashing</td><td>IMPLEMENTED — bcrypt</td></tr>
+    <tr><td>JWT</td><td>IMPLEMENTED — change SECRET_KEY in production</td></tr>
+    <tr><td>SSRF on ad fetch</td><td>IMPLEMENTED — block private IPs, timeout, size cap</td></tr>
+    <tr><td>XSS</td><td>PARTIAL — React escape + extension escapeHtml</td></tr>
+    <tr><td>CORS</td><td>WEAK — allow all origins</td></tr>
+    <tr><td>Rate limiting</td><td>NOT IMPLEMENTED</td></tr>
+    <tr><td>Full TLS certificate check</td><td>NOT IMPLEMENTED — only https:// prefix</td></tr>
+    <tr><td>Reading page passwords</td><td>Not done, by design</td></tr>
+  </table>
+
+  <h1>9. Extension</h1>
+  <p>Manifest V3. Auto-scans the tab. Same API as the website. Badge: OK / MED / HIGH / CRIT. On-page risk card. Full warning on HIGH/CRITICAL. If the backend is down it says <strong>UNAVAILABLE</strong>, never SAFE.</p>
+
+  <h1>10. 2-minute pitch</h1>
+  <p>Phishing copies banks and UPI apps. HTTPS and logos are not proof. PhishShield AI, in our CyberGuard repo, scores any URL with the same FastAPI engine from the website and the Chrome extension. We combine live intel, brand impersonation, Hinglish urgency language, and shady popup ads into a 0–100 score and a plain-English warning. This version is a multi-signal rule engine plus threat lists, not a trained CNN, and it stores scans in SQLite. Next: a supervised model and PostgreSQL. Today the value is consistent, explainable, real-time protection without invented results.</p>
+
+  <h1>11. 20 slides</h1>
+  <p>Title → Problem → Gap → Solution → Innovation → Architecture → Pipeline → Intelligent detection (current + planned) → Psychology → Simple View → Technical View → Extension → Data model → Security → Testing → Stack → Novelty → Limitations → Future → Demo.</p>
+
+  <h1 class="page">12. Cheat sheet</h1>
+  <ul>
+    <li>Not Flask — FastAPI</li>
+    <li>Not Postgres yet — SQLite</li>
+    <li>Not CNN — rules + intel</li>
+    <li>Same check-url for web and extension</li>
+    <li>HTTPS does not mean safe</li>
+    <li>Urgency alone is not phishing</li>
+    <li>Backend down is not SAFE</li>
+    <li>No page passwords collected</li>
+    <li>METRIC NOT YET AVAILABLE</li>
+    <li>Biggest limit: no trained model + URL-centric analysis</li>
+  </ul>
+  <div class="box tip"><strong>Demo:</strong> Scan google.com, then paypa1.com or sbi-login.xyz, in both the website and the extension. Scores must match.</div>
+  <p class="muted">For the full 120 viva answers, open docs/JURY_VIVA_QUESTION_BANK.md</p>
+</body>
+</html>

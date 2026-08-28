@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>PhishShield AI — SIH 2026 Idea PPT</title>
+<style>
+  @page { size: 13.333in 7.5in; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Calibri, "Segoe UI", sans-serif; color: #1e293b; }
+  .slide { width: 13.333in; height: 7.5in; padding: 0.35in 0.4in 0.45in; page-break-after: always; position: relative; overflow: hidden; }
+  .slide:last-child { page-break-after: auto; }
+  .hdr { background: #1F497D; color: #fff; padding: 10px 16px; font-size: 22px; font-weight: 700; }
+  .foot { position: absolute; bottom: 8px; left: 24px; right: 24px; font-size: 11px; color: #64748b; display: flex; justify-content: space-between; }
+  h2 { margin: 8px 0 6px; color: #1F497D; font-size: 16px; }
+  .row { display: flex; gap: 8px; }
+  .pill { flex: 1; color: #fff; text-align: center; padding: 8px 6px; border-radius: 8px; font-weight: 700; font-size: 13px; }
+  .card { background: #eef4fa; border: 1px solid #4F81BD; border-radius: 8px; padding: 8px; font-size: 12px; }
+  .muted { color: #475569; font-size: 12px; }
+  .warn { color: #b45309; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  td, th { border: 1px solid #cbd5e1; padding: 5px 7px; vertical-align: top; }
+  th { background: #1F497D; color: #fff; text-align: left; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="hdr">TITLE PAGE &nbsp;·&nbsp; SMART INDIA HACKATHON 2026</div>
+  <p style="font-size:28px;font-weight:800;margin:28px 0 8px">SMART INDIA HACKATHON 2026</p>
+  <p class="muted">Official idea-submission title page (template structure preserved)</p>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Problem Statement ID</td><td>SIH1454</td></tr>
+    <tr><td>Problem Statement Title</td><td>Create an intelligent system using AI/ML to detect phishing domains which imitate look and feel of genuine domains</td></tr>
+    <tr><td>Theme</td><td>Blockchain &amp; Cybersecurity</td></tr>
+    <tr><td>PS Category</td><td>Software</td></tr>
+    <tr><td>Team ID</td><td>[TEAM ID] — fill from SIH portal</td></tr>
+    <tr><td>Team Name (Registered on portal)</td><td>[TEAM NAME] — fill from SIH portal</td></tr>
+  </table>
+  <p class="muted">Organisation (PS): National Technical Research Organisation (NTRO)</p>
+  <div class="foot"><span>@SIH Idea submission- Template</span><span>1</span></div>
+</section>
+
+<section class="slide">
+  <div class="hdr">IDEA TITLE</div>
+  <h2>PhishShield AI — Analyze before you trust</h2>
+  <p class="muted">Proposed Solution · How it addresses the problem · Innovation and uniqueness</p>
+  <div class="row">
+    <div class="pill" style="background:#4F81BD">URL / domain</div>
+    <div class="pill" style="background:#4BACC6">Pasted email / WA / SMS</div>
+    <div class="pill" style="background:#1F497D">Webpage (extension)</div>
+    <div class="pill" style="background:#3D8B5F">QR image</div>
+  </div>
+  <p class="pill" style="background:#F79646;margin:8px auto;width:55%">↓ POST /api/v1/analyze/content</p>
+  <div class="row">
+    <div class="pill" style="background:#4F81BD">URL / domain</div>
+    <div class="pill" style="background:#C0504D">Psychological EN+Hinglish</div>
+    <div class="pill" style="background:#F79646">Brand + sender</div>
+    <div class="pill" style="background:#1F497D">GSB / OpenPhish</div>
+    <div class="pill" style="background:#4BACC6">Community (signal)</div>
+  </div>
+  <p class="pill" style="background:#1e293b;margin:8px 0">RISK FUSION → 0–100 · LOW / MED / HIGH / CRITICAL</p>
+  <div class="row">
+    <div class="pill" style="background:#3D8B5F">SIMPLE VIEW — do not enter OTP</div>
+    <div class="pill" style="background:#1F497D">TECHNICAL VIEW — evidence + tags</div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <div class="card"><b>1 DETECT</b><br/>Lookalike domains, short links, intel</div>
+    <div class="card"><b>2 UNDERSTAND</b><br/>Urgency / fear / Hinglish</div>
+    <div class="card"><b>3 EXPLAIN</b><br/>Plain English + technical evidence</div>
+    <div class="card"><b>4 PROTECT</b><br/>Extension overlay HIGH/CRITICAL</div>
+    <div class="card"><b>5 LEARN</b><br/>Mark Scam/Risky/Safe — not proof</div>
+  </div>
+  <p class="warn">Honesty: paste not inbox · OCR partial · native SMS planned · trained CNN planned · confidence = signal agreement, not accuracy</p>
+  <div class="foot"><span>@SIH Idea submission- Template · [TEAM NAME]</span><span>2</span></div>
+</section>
+
+<section class="slide">
+  <div class="hdr">TECHNICAL APPROACH</div>
+  <p class="muted">Technologies to be used · Methodology / process · Working prototype</p>
+  <div class="row">
+    <div class="pill" style="background:#4F81BD">FRONTEND<br/>React · Vite · Tailwind · Axios · Recharts</div>
+    <div class="pill" style="background:#1F497D">BACKEND<br/>Python · FastAPI · Pydantic</div>
+    <div class="pill" style="background:#4BACC6">DATABASE<br/>SQLite live · Postgres planned</div>
+    <div class="pill" style="background:#F79646">DETECTION<br/>URLChecker · Psych 2.0 · Fusion · OpenCV QR</div>
+    <div class="pill" style="background:#3D8B5F">EXTENSION<br/>Manifest V3</div>
+    <div class="pill" style="background:#C0504D">SECURITY<br/>bcrypt · JWT · SSRF · ?-SQL</div>
+  </div>
+  <h2>Actual architecture (not Flask, not a trained CNN)</h2>
+  <div class="row">
+    <div class="card"><b>INPUT</b><br/>URL · paste · QR · tab</div>
+    <div class="card"><b>NORMALIZE</b><br/>extract URLs · unwrap shorts</div>
+    <div class="card"><b>ANALYZE</b><br/>domain · intel · psych · brand</div>
+    <div class="card"><b>FUSE</b><br/>weights · psych cannot solo-CRITICAL</div>
+    <div class="card"><b>EXPLAIN</b><br/>Simple + Technical</div>
+    <div class="card"><b>ACT</b><br/>warn · report · SQLite</div>
+  </div>
+  <p class="muted">Prototype: React :5173 + FastAPI :8000 + unpacked Chrome extension. Key files: content_analyzer.py, risk_engine.py, url_checker.py, psychology.py, Scanner.jsx, extension/</p>
+  <p class="warn">NOT in repo as live: Flask · PostgreSQL server · TensorFlow CNN · sklearn model · Gmail OAuth · Android SMS</p>
+  <div class="foot"><span>@SIH Idea submission- Template · [TEAM NAME]</span><span>3</span></div>
+</section>
+
+<section class="slide">
+  <div class="hdr">FEASIBILITY AND VIABILITY</div>
+  <p class="muted">Analysis of feasibility · Challenges and risks · Strategies</p>
+  <div class="row">
+    <div class="card" style="border-color:#3D8B5F"><b>TECHNICAL</b><br/>Working FastAPI+React prototype · pytest · modular services · OpenCV QR in requirements</div>
+    <div class="card" style="border-color:#4F81BD"><b>OPERATIONAL</b><br/>Paste workflow · extension on current tab · Simple View · no private inbox required</div>
+    <div class="card" style="border-color:#1F497D"><b>SECURITY</b><br/>IMPLEMENTED: bcrypt, JWT, SSRF, report caps. PARTIAL: CORS *. PLANNED: global API rate limit</div>
+  </div>
+  <h2>Challenge → mitigation</h2>
+  <table>
+    <tr><th>Challenge</th><th>Mitigation</th></tr>
+    <tr><td>Marketing language false positives</td><td>Psychology cannot raise HIGH/CRITICAL alone</td></tr>
+    <tr><td>New domains / shorteners</td><td>RDAP age + unwrap + GSB/OpenPhish + brand distance</td></tr>
+    <tr><td>Community report abuse</td><td>Login + 1 URL/24h + 20/day</td></tr>
+    <tr><td>Privacy / inbox access</td><td>User-pasted content only</td></tr>
+    <tr><td>SQLite at multi-server scale</td><td>PLANNED PostgreSQL</td></tr>
+    <tr><td>No labelled CNN yet</td><td>PLANNED model; explainable fusion today</td></tr>
+  </table>
+  <div class="foot"><span>@SIH Idea submission- Template · [TEAM NAME]</span><span>4</span></div>
+</section>
+
+<section class="slide">
+  <div class="hdr">IMPACT AND BENEFITS</div>
+  <p class="muted">Target audience · Social / economic benefits · Proposed metrics (not claimed results)</p>
+  <div class="row">
+    <div class="pill" style="background:#4F81BD">Elderly users</div>
+    <div class="pill" style="background:#1F497D">First-time UPI / banking</div>
+    <div class="pill" style="background:#4F81BD">Students</div>
+    <div class="pill" style="background:#1F497D">Everyday smartphone users</div>
+    <div class="pill" style="background:#4F81BD">Non-technical staff</div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <div class="card" style="border-color:#C0504D"><b>BEFORE</b><br/>Suspicious link → padlock / jargon → user does not understand → enters OTP on fake bank</div>
+    <div class="card" style="border-color:#3D8B5F"><b>WITH PHISHSHIELD</b><br/>Same link scanned → fusion score → “This may be pretending to be SBI/PayPal. Do not enter OTP.” → go back or continue consciously</div>
+  </div>
+  <p><b>Proposed evaluation metrics — NOT claimed F1/accuracy (none published in this repo)</b></p>
+  <div class="row">
+    <div class="card">Detection recall on lookalikes</div>
+    <div class="card">False-positive rate on real banks</div>
+    <div class="card">Median analysis latency</div>
+    <div class="card">Usable Simple View on HIGH/CRITICAL</div>
+    <div class="card">Community report precision after review</div>
+    <div class="card">Coverage: URL / paste / QR / extension</div>
+  </div>
+  <div class="foot"><span>@SIH Idea submission- Template · [TEAM NAME]</span><span>5</span></div>
+</section>
+
+<section class="slide">
+  <div class="hdr">RESEARCH AND REFERENCES</div>
+  <p class="muted">Details / links of reference and research work actually used</p>
+  <table>
+    <tr><th>Source</th><th>Why it is here</th></tr>
+    <tr><td>SIH1454 / NTRO</td><td>Official problem: phishing domains imitating genuine domains</td></tr>
+    <tr><td>Google Safe Browsing API v4</td><td>Optional live IOC lookup</td></tr>
+    <tr><td>OpenPhish</td><td>Fallback phishing URL feed</td></tr>
+    <tr><td>RDAP (RFC 7480+)</td><td>Domain age for newly registered lookalikes</td></tr>
+    <tr><td>OWASP SSRF / phishing</td><td>Informed private-IP blocking</td></tr>
+    <tr><td>FastAPI / React / Vite</td><td>Actual web stack (not Flask)</td></tr>
+    <tr><td>Chrome Extensions MV3</td><td>Service worker + content scripts</td></tr>
+    <tr><td>SQLite</td><td>Live database</td></tr>
+    <tr><td>OpenCV</td><td>QR decode</td></tr>
+  </table>
+  <p class="warn">No fabricated papers or accuracy numbers. Fill Team ID / Team Name on slide 1 before portal upload. Portal accepts PDF.</p>
+  <div class="foot"><span>@SIH Idea submission- Template · [TEAM NAME]</span><span>6</span></div>
+</section>
+</body>
+</html>

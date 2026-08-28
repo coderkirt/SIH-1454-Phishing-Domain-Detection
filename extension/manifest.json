@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "PHISHEYE",
+  "version": "1.8.1",
+  "description": "PHISHEYE browser protection: intercepts navigation, scans first, opens clear sites automatically, and keeps fishy or dangerous sites closed. Uses the same FastAPI engine as the dashboard. Does not read passwords, OTPs, cookies, or phone SMS.",
+  "action": {
+    "default_title": "PHISHEYE",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "settings/settings.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content/gate-clicks.js"],
+      "css": ["content/gate-hold.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["tabs", "storage", "webNavigation"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;"
+  }
+}
