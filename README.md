@@ -3,13 +3,59 @@
 ### Intelligent Phishing Domain Detection using AI/ML
 
 <p align="center">
-<img src="https://img.shields.io/badge/SIH%202026-Problem%20Statement%201454-red?style=for-the-badge">
-<img src="https://img.shields.io/badge/AI%2FML-Phishing%20Detection-black?style=for-the-badge">
-<img src="https://img.shields.io/badge/Cybersecurity-Web%20Security-red?style=for-the-badge">
-<img src="https://img.shields.io/badge/Status-Active%20Development-black?style=for-the-badge">
+  <a href="https://phisheye-web-fhn5.onrender.com">
+    <img src="https://img.shields.io/badge/🌐%20LIVE%20DASHBOARD-OPEN-red?style=for-the-badge">
+  </a>
+  <a href="https://phisheye-web-fhn5.onrender.com/extension">
+    <img src="https://img.shields.io/badge/🧩%20EXTENSION-OPEN-black?style=for-the-badge">
+  </a>
+  <a href="https://phisheye-api.onrender.com">
+    <img src="https://img.shields.io/badge/⚡%20API-OPEN-black?style=for-the-badge">
+  </a>
+  <a href="https://phisheye-api.onrender.com/health">
+    <img src="https://img.shields.io/badge/●%20API%20HEALTH-ONLINE-red?style=for-the-badge">
+  </a>
 </p>
 
-<p align="center"><strong>Detect suspicious domains. Understand the evidence. Browse safer.</strong></p>
+<p align="center">
+  <strong>Detect suspicious domains. Understand the evidence. Browse safer.</strong>
+</p>
+
+---
+
+## 🚀 LIVE PROJECT
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <strong>🌐 Dashboard</strong><br><br>
+      <a href="https://phisheye-web-fhn5.onrender.com">Open PHISHEYE →</a>
+    </td>
+    <td align="center">
+      <strong>🧩 Extension</strong><br><br>
+      <a href="https://phisheye-web-fhn5.onrender.com/extension">Open Extension →</a>
+    </td>
+    <td align="center">
+      <strong>⚡ API</strong><br><br>
+      <a href="https://phisheye-api.onrender.com">Open API →</a>
+    </td>
+    <td align="center">
+      <strong>💚 API Health</strong><br><br>
+      <a href="https://phisheye-api.onrender.com/health">Check Status →</a>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🔴 SYSTEM STATUS
+
+```text
+WEB DASHBOARD   ->  ONLINE   https://phisheye-web-fhn5.onrender.com
+EXTENSION PAGE  ->  ONLINE   https://phisheye-web-fhn5.onrender.com/extension
+BACKEND API     ->  ONLINE   https://phisheye-api.onrender.com
+API HEALTH      ->  ONLINE   https://phisheye-api.onrender.com/health
+```
 
 ---
 
@@ -417,8 +463,6 @@ Technical information, evidence, and risk assessment are given priority over unn
 
 # 17 — PRODUCT SCREENSHOTS
 
-> Add actual screenshots inside `docs/images/` using the filenames below.
-
 ## Landing Page
 
 <p align="center"><img src="docs/images/landing-page.png" width="900"></p>
@@ -427,25 +471,13 @@ Technical information, evidence, and risk assessment are given priority over unn
 
 <p align="center"><img src="docs/images/dashboard.png" width="900"></p>
 
-## URL Analysis
-
-<p align="center"><img src="docs/images/url-analysis.png" width="900"></p>
-
 ## Security Report
 
 <p align="center"><img src="docs/images/security-report.png" width="900"></p>
 
-## Technical Analysis
+## Threat Analytics
 
 <p align="center"><img src="docs/images/detection-analysis.png" width="900"></p>
-
-## Chrome Extension
-
-<p align="center"><img src="docs/images/extension.png" width="500"></p>
-
-## Phishing Warning
-
-<p align="center"><img src="docs/images/phishing-warning.png" width="600"></p>
 
 ---
 
