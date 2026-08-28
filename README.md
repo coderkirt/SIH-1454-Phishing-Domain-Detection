@@ -718,16 +718,296 @@ Make sure the backend is running before testing automatic URL analysis.
 
 ---
 
-# 26 — TEAM PHISHEYE
+# 26 — 👥 TEAM PHISHEYE
 
-| Member | Contribution |
+<p align="center">
+  <strong>THE TEAM BEHIND PHISHEYE</strong><br>
+  <sub>Different responsibilities. One security-focused system.</sub>
+</p>
+
+---
+
+## ⚙️ TEAM STRUCTURE
+
+```text
+                         🛡️ PHISHEYE
+                              │
+               ┌──────────────┴──────────────┐
+               │                             │
+               ▼                             ▼
+       ⚡ BACKEND TEAM                🎨 FRONTEND + UI/UX
+               │                     + DOCUMENTATION
+               │                             │
+        ┌──────┴──────┐          ┌──────────┼──────────┐
+        ▼             ▼          ▼          ▼          ▼
+     HRITIK          KIRT     SHASHANK   AISHWARYA   ASTHA
+                                      │
+                                      ▼
+                                   PRAGATI
+
+        APIs • Database • ML          UI • UX • Database
+        Authentication • Deploy       Documentation • PPT
+        Testing • Integration         Research • Presentation
+```
+
+---
+
+# ⚡ BACKEND DEVELOPMENT
+
+### Hritik · Kirt
+
+| Area | Responsibility |
 |---|---|
-| **Shashank** | Development & System Implementation |
-| **Kirt** | Development & System Implementation |
-| **Hritik** | Development & System Implementation |
-| **Aishwarya** | Development & System Implementation |
-| **Pragati** | Development & System Implementation |
-| **Astha** | Development & System Implementation |
+| 🏗️ Architecture | Backend architecture and service structure |
+| ⚡ API | REST API development and integration |
+| 🗄️ Database | Database design and backend integration |
+| 🔐 Security | Authentication and authorization |
+| 🧠 AI/ML | ML model integration when required |
+| 🚀 Deployment | Server deployment and configuration |
+| 🧪 Testing | Backend and API testing |
+| 📖 Documentation | API documentation |
+| 🔧 Repository | Git repository management |
+
+### Backend Focus
+
+```text
+API Architecture
+      ↓
+Authentication
+      ↓
+Database Integration
+      ↓
+Analysis Services
+      ↓
+AI / ML Integration
+      ↓
+Testing
+      ↓
+Deployment
+```
+
+### 🤝 Backend Support
+
+**Shashank** supports the backend team whenever required, with particular focus on:
+
+- Database-related tasks
+- Frontend ↔ Backend integration
+- API integration
+- Cross-module debugging
+
+---
+
+# 🎨 FRONTEND · UI/UX · DOCUMENTATION
+
+### Shashank · Aishwarya · Astha · Pragati
+
+| Area | Responsibility |
+|---|---|
+| 💻 Frontend | Web interface development |
+| 🎨 UI/UX | Interface design and prototyping |
+| 🗄️ Database | Database design and management |
+| 📱 Responsive UI | Desktop, tablet and mobile interfaces |
+| 📊 PPT | Presentation and PPT preparation |
+| 🔎 Research | Problem statement and domain research |
+| 📝 Documentation | Technical documentation and reports |
+| 📐 Architecture | Flowcharts, diagrams and system architecture |
+| 🎤 Demo | Demo preparation and presentation materials |
+| 🧪 Testing | Frontend testing and integration |
+
+---
+
+# 🛡️ INDIVIDUAL FOCUS
+
+### Shashank
+
+**Primary:** Frontend + Database
+
+**Secondary:** Backend Support & Integration
+
+```text
+Frontend
+   +
+Database
+   +
+Backend Integration
+   +
+UI/UX
+   +
+System Documentation
+```
+
+Responsibilities include:
+
+- Frontend development
+- Database design and management
+- UI/UX implementation
+- Frontend ↔ Backend integration
+- Database-related backend support
+- System architecture
+- Documentation
+- Demo preparation
+
+---
+
+### Aishwarya
+
+**Primary:** Frontend + UI/UX + Documentation
+
+Responsibilities include:
+
+- Frontend development
+- UI/UX design
+- Responsive interface
+- Problem statement research
+- Documentation
+- PPT preparation
+- Presentation material
+- Frontend testing
+
+---
+
+### Astha
+
+**Primary:** Frontend + UI/UX + Documentation
+
+Responsibilities include:
+
+- Frontend development
+- UI/UX implementation
+- Responsive interface
+- Documentation
+- Flowcharts and diagrams
+- PPT preparation
+- Demo preparation
+- Frontend testing
+
+---
+
+### Pragati
+
+**Primary:** Frontend + Research + Documentation
+
+Responsibilities include:
+
+- Frontend development
+- UI/UX support
+- Problem statement research
+- Technical documentation
+- System diagrams
+- PPT preparation
+- Demo and presentation material
+- Frontend testing
+
+---
+
+### Hritik
+
+**Primary:** Backend Development
+
+Responsibilities include:
+
+- Backend architecture
+- API development
+- Authentication and authorization
+- Database integration
+- AI/ML integration when required
+- Server deployment
+- Backend testing
+- API documentation
+- Git repository management
+
+---
+
+### Kirt
+
+**Primary:** Backend Development
+
+Responsibilities include:
+
+- Backend architecture
+- API development
+- Database integration
+- Authentication and authorization
+- AI/ML integration when required
+- Server deployment
+- Backend testing
+- API documentation
+- Git repository management
+
+---
+
+# 🔗 TEAM CONNECTION
+
+```text
+                         PHISHEYE
+                            │
+        ┌───────────────────┴───────────────────┐
+        │                                       │
+        ▼                                       ▼
+   BACKEND TEAM                          FRONTEND TEAM
+   Hritik • Kirt                    Shashank • Aishwarya
+                                          Astha • Pragati
+        │                                       │
+        │                                       │
+        └───────────────┬───────────────────────┘
+                        │
+                        ▼
+                 DATABASE + APIs
+                        │
+                        ▼
+                 AI / ML PIPELINE
+                        │
+                        ▼
+                SECURITY ANALYSIS
+                        │
+                        ▼
+             WEB + CHROME EXTENSION
+                        │
+                        ▼
+                  FINAL PRODUCT
+```
+
+---
+
+# 📌 RESPONSIBILITY MATRIX
+
+| Member | Backend | Frontend | Database | UI/UX | AI/ML | Documentation | PPT / Demo |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Shashank** | 🟡 Support | 🟢 Primary | 🟢 Primary | 🟢 | 🟡 Support | 🟢 | 🟢 |
+| **Hritik** | 🟢 Primary | — | 🟢 | — | 🟢 | 🟡 | 🟡 |
+| **Kirt** | 🟢 Primary | — | 🟢 | — | 🟢 | 🟡 | 🟡 |
+| **Aishwarya** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
+| **Astha** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
+| **Pragati** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
+
+### Legend
+
+```text
+🟢 PRIMARY RESPONSIBILITY
+🟡 SUPPORT / COLLABORATION
+— NOT PRIMARY
+```
+
+---
+
+# 🔗 CONNECT WITH THE TEAM
+
+<p align="center">
+<a href="https://www.linkedin.com/in/shashank-kumar-singh-a8aa9930a">Shashank</a> ·
+<a href="https://www.linkedin.com/in/kirt-raj-dixit-6573b6387/">Kirt</a> ·
+<a href="https://www.linkedin.com/in/hritik-kumar-srivastava-b52b7720b/">Hritik</a> ·
+<a href="https://www.linkedin.com/in/aishwarya-keshari-37a270381/">Aishwarya</a> ·
+<a href="https://www.linkedin.com/in/pragati-singh-1147033b2">Pragati</a> ·
+<a href="https://www.linkedin.com/in/astha-mishra-891586423/">Astha</a>
+</p>
+
+---
+
+<p align="center">
+<strong>ONE TEAM · MULTIPLE DISCIPLINES · ONE MISSION</strong>
+<br><br>
+<code>BUILD → ANALYZE → DETECT → PROTECT</code>
+</p>
 
 ---
 
