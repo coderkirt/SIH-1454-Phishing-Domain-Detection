@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+.extension-pack
+public/phisheye-extension.zip
 
 # Editor directories and files
 .vscode/*

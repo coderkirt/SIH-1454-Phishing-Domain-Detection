@@ -15,6 +15,7 @@ const links = [
   { to: "/privacy", num: "07", label: "Privacy" },
   { to: "/advisor", num: "08", label: "Advisor" },
   { to: "/settings", num: "09", label: "Settings" },
+  { to: "/extension", num: "10", label: "Extension" },
 ];
 
 function NavItem({ to, num, label, onNavigate }) {

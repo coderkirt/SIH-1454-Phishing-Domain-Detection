@@ -45,6 +45,7 @@ export default function Landing() {
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#scan" onClick={() => setScanMode("url")} className="btn-primary px-5 py-3">Analyze URL</a>
             <a href="#scan" onClick={() => setScanMode("screenshot")} className="btn-secondary px-5 py-3">Upload screenshot</a>
+            <Link to="/extension" className="btn-primary px-5 py-3">Get browser protection</Link>
             <Link to="/dashboard" className="btn-secondary px-5 py-3">View overview</Link>
           </div>
           <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-2">

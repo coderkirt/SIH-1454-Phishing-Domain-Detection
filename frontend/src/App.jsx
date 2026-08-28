@@ -16,6 +16,7 @@ import Statistics from "./pages/Statistics";
 import Privacy from "./pages/Privacy";
 import Settings from "./pages/Settings";
 import Advisor from "./pages/Advisor";
+import InstallExtension from "./pages/InstallExtension";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./context/AuthContext";
 
@@ -40,6 +41,7 @@ export default function App() {
             </Route>
             <Route element={<AdaptiveLayout />}>
               <Route path="/scan-result" element={<ScanResult />} />
+              <Route path="/extension" element={<InstallExtension />} />
             </Route>
             <Route
               element={

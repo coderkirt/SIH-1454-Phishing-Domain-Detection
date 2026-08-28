@@ -37,11 +37,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware (allow all origins for now)
+# Bearer tokens go in Authorization, not cookies. Wildcard + credentials
+# is rejected by browsers, so credentials stay off when origins="*".
+_cors = os.getenv("FRONTEND_ORIGINS", "*").strip()
+if _cors == "*":
+    _allow_origins = ["*"]
+    _allow_credentials = False
+else:
+    _allow_origins = [origin.strip() for origin in _cors.split(",") if origin.strip()]
+    _allow_credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_allow_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
