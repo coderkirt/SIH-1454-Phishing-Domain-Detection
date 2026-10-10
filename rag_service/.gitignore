@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+
+# Install / runtime logs
+pip_install.log
+
+# ChromaDB persistent index + caches (rebuild via scripts/ingest.py)
+data/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local secrets / config
+.env
