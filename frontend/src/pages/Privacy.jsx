@@ -44,7 +44,7 @@ export default function Privacy() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        section="06 / Privacy"
+        section="07 / Privacy"
         title="Privacy center"
         subtitle="This page describes what the current MVP actually does. Planned ideas are labeled clearly."
       />
