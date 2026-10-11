@@ -193,3 +193,9 @@ def test_browser_opens_do_not_flip_trusted_site():
     assert decision["risk_level"] == "LOW"
     assert decision["evidence"]["local_activity"]["this_browser_opens"] == 40
     assert decision["evidence"]["local_activity"]["this_browser_status"] == "observed"
+
+
+def test_javascript_url_is_not_recorded():
+    result = record_visit("javascript:alert(1)", "client-abcdef")
+    assert result["recorded"] is False
+    assert result["reason"] == "invalid_url"

@@ -22,9 +22,12 @@ def record_visit(
     if len(client) < 8 or len(client) > 80:
         return {"recorded": False, "deduped": False, "reason": "invalid_client_id"}
 
-    info = normalize_url(url or "")
-    normalized = (info.get("normalized_full_url") or url or "").strip()
-    if not normalized:
+    raw = (url or "").strip()
+    if raw.lower().startswith(("javascript:", "data:", "file:", "about:")):
+        return {"recorded": False, "deduped": False, "reason": "invalid_url"}
+    info = normalize_url(raw)
+    normalized = (info.get("normalized_full_url") or raw or "").strip()
+    if not normalized or not normalized.lower().startswith(("http://", "https://")):
         return {"recorded": False, "deduped": False, "reason": "invalid_url"}
     domain = (info.get("registered_domain") or "").strip().lower()
     stamp = now or datetime.utcnow()
