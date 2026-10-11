@@ -96,8 +96,18 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Health check"""
-    return {"status": "ok"}
+    """Health check, including whether the local assess-link RAG is reachable."""
+    rag = {"assess_link": "unknown"}
+    try:
+        from urllib.request import urlopen
+        from app.services.rag_client import RAG_ASSESS_URL
+
+        health_url = RAG_ASSESS_URL.replace("/assess-link", "/health")
+        with urlopen(health_url, timeout=0.4) as response:
+            rag["assess_link"] = "ok" if response.status == 200 else f"http_{response.status}"
+    except Exception:
+        rag["assess_link"] = "unavailable"
+    return {"status": "ok", "rag": rag}
 
 
 if __name__ == "__main__":
