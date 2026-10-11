@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     # Hybrid retrieval settings
     RRF_K: int = 60  # Standard Reciprocal Rank Fusion constant
     TOP_K: int = 4
+    DENSE_WEIGHT: float = 0.6
+    SPARSE_WEIGHT: float = 0.4
 
     # Cache settings
     CACHE_SIZE: int = 512
