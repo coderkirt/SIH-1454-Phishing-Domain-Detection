@@ -1,4 +1,4 @@
-import { loadTheme, toggleTheme } from "../utils/theme.js";
+import { fillVersionLabels, loadTheme, toggleTheme } from "../utils/theme.js";
 
 const accountLine = document.getElementById("account-line");
 const loginForm = document.getElementById("login-form");
@@ -89,4 +89,7 @@ document.getElementById("clear-cache").addEventListener("click", async () => {
 document.getElementById("open-dashboard").addEventListener("click", () => send("OPEN_DASHBOARD"));
 document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
-loadTheme().then(() => load());
+loadTheme().then(() => {
+  fillVersionLabels();
+  load();
+});

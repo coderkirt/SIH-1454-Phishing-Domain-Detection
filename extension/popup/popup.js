@@ -1,4 +1,5 @@
-import { loadTheme, toggleTheme } from "../utils/theme.js";
+import { showRagPopup } from "../utils/rag-popup.js";
+import { fillVersionLabels, loadTheme, toggleTheme } from "../utils/theme.js";
 
 const protection = document.getElementById("protection-status");
 const accountChip = document.getElementById("account-chip");
@@ -14,6 +15,7 @@ const reasonsEl = document.getElementById("reasons");
 const scanBtn = document.getElementById("scan-again");
 const clockEl = document.getElementById("clock");
 const hostEl = document.getElementById("host");
+let awaitingScore = false;
 
 function tickClock() {
   clockEl.textContent = new Date().toLocaleTimeString(undefined, {
@@ -49,6 +51,10 @@ function render(payload) {
 
   if (hasResult) {
     scoreEl.textContent = `${result.risk_score ?? "—"} / 100`;
+    if (awaitingScore && result.risk_score != null) {
+      awaitingScore = false;
+      showRagPopup(result);
+    }
     levelEl.textContent = result.risk_level || "—";
     const reasons = result.reasons?.length ? result.reasons : [];
     reasonsTitle.textContent = status === "safe" ? "Why this result?" : "Why was this flagged?";
@@ -83,6 +89,7 @@ function render(payload) {
 
 async function loadStatus(force = false) {
   scanBtn.disabled = true;
+  awaitingScore = true;
   render({ status: "checking", headline: "CHECKING", host: hostEl.textContent, result: null });
   try {
     const payload = force ? await send("SCAN_NOW") : await send("GET_STATUS");
@@ -150,4 +157,5 @@ async function analyzeLinks() {
 document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 tickClock();
 setInterval(tickClock, 1000);
+fillVersionLabels();
 loadTheme().then(() => loadStatus());

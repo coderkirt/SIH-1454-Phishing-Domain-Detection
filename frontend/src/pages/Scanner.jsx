@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader";
 import RiskBadge from "../components/RiskBadge";
 import FlagActions from "../components/FlagActions";
 import { analyzeContent, getErrorMessage } from "../services/api";
+import RagPopup from "../components/RagPopup";
 import { saveLastScan } from "../utils/risk";
 
 const TABS = [
@@ -27,6 +28,7 @@ export default function Scanner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [ragOpen, setRagOpen] = useState(false);
   const navigate = useNavigate();
 
   const runText = async (sourceType) => {
@@ -44,6 +46,7 @@ export default function Scanner() {
       const { data } = await analyzeContent(payload);
       saveLastScan(data);
       setResult(data);
+      setRagOpen(true);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -62,6 +65,7 @@ export default function Scanner() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
+      <RagPopup result={result} open={ragOpen} onClose={() => setRagOpen(false)} />
       <PageHeader
         section="02 / Scan"
         title="Analyze target"

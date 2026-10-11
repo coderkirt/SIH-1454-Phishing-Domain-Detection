@@ -1,0 +1,121 @@
+[
+  {
+    "id": "lookalike-brand",
+    "title": "Lookalike or impersonated brand domain",
+    "keywords": ["lookalike", "impersonat", "brand", "paypa1", "amaz0n", "typo", "homoglyph", "leet", "fake"],
+    "body": "A domain that looks like a known brand but is not the official brand domain is a common phishing pattern. Edit-distance typos, leetspeak (paypa1), and lookalike letters are suspicion signals. HTTPS on a lookalike does not make it the real brand.",
+    "suspicion": 78
+  },
+  {
+    "id": "brand-vs-domain",
+    "title": "Brand name in the URL is not the official brand domain",
+    "keywords": ["paypal", "amazon", "google", "microsoft", "apple", "sbi", "hdfc", "icici", "official", "impersonat"],
+    "body": "If the page claims or resembles a brand but the registered domain is not that brand's official domain, treat it as impersonation. The official site lives on the company's own domain, not a lookalike host.",
+    "suspicion": 74
+  },
+  {
+    "id": "secure-login-tokens",
+    "title": "secure-login style tokens in host or path",
+    "keywords": ["secure", "login", "signin", "verify", "update", "account", "password", "otp", "recover"],
+    "body": "Hosts or paths that stack words like secure, login, verify, update, or account are often used on fake sign-in pages. These tokens are not proof of a scam by themselves, but they raise suspicion when combined with a new, lookalike, or free-host domain.",
+    "suspicion": 48
+  },
+  {
+    "id": "ip-url",
+    "title": "Raw IP address used as the website host",
+    "keywords": ["ip", "address", "numeric", "host", "192", "10", "172"],
+    "body": "Legitimate consumer sites almost never ask people to sign in on a raw IPv4 host. An IP URL hiding a login or payment page is a strong phishing pattern.",
+    "suspicion": 72
+  },
+  {
+    "id": "shortener",
+    "title": "Shortened URL hides the real destination",
+    "keywords": ["short", "shortener", "bitly", "tinyurl", "hidden", "redirect"],
+    "body": "A short link hides the final host. That is not automatically phishing, but users cannot judge the brand from the short code. If the unwrapped host is a lookalike, IP, or new domain, suspicion stays with the destination — the shortener does not make it safer.",
+    "suspicion": 36
+  },
+  {
+    "id": "new-domain",
+    "title": "Very new or recently registered domain",
+    "keywords": ["new", "age", "days", "registered", "young", "recent"],
+    "body": "Brand phishing kits are often stood up on domains registered in the last 30 to 90 days. A new domain is not proof of fraud, but it is not a reason to trust a lookalike or login page.",
+    "suspicion": 42
+  },
+  {
+    "id": "https-not-enough",
+    "title": "HTTPS and a padlock do not prove the site is genuine",
+    "keywords": ["https", "tls", "certificate", "padlock", "ssl"],
+    "body": "Anyone can obtain a certificate for a lookalike domain. A valid HTTPS lock means the connection is encrypted to that host, not that the host is the real bank or brand.",
+    "suspicion": 20
+  },
+  {
+    "id": "tls-problems",
+    "title": "Broken, expired, or mismatched TLS certificate",
+    "keywords": ["tls", "expired", "mismatch", "untrusted", "self-signed", "hostname"],
+    "body": "An expired, self-signed, or hostname-mismatched certificate is a warning. Combined with a login path it is a reason to stay out, not a reason to proceed.",
+    "suspicion": 55
+  },
+  {
+    "id": "message-urgency",
+    "title": "Surrounding message uses urgency or fear",
+    "keywords": ["urgent", "immediately", "suspend", "blocked", "verify now", "otp", "password", "fear", "limited time"],
+    "body": "Phishing messages pressure the reader to tap now, claim an account is blocked, or ask for an OTP. The surrounding text is evidence about the link. It cannot prove the destination is safe.",
+    "suspicion": 40
+  },
+  {
+    "id": "local-scam-reports",
+    "title": "How to read PhishEye 30-day scam and risky reports",
+    "keywords": ["scam", "risky", "reports", "community", "30-day", "local"],
+    "body": "PhishEye's own 30-day user reports are local evidence, not global website traffic. Several scam or risky reports for the same domain raise suspicion. Safe reports do not prove the link is clean and cannot override a confirmed threat-intel hit or a lookalike domain. Use only the counts provided; do not invent visit or report numbers.",
+    "suspicion": 58
+  },
+  {
+    "id": "local-unknown",
+    "title": "Zero 30-day visits is unknown, not safe",
+    "keywords": ["unknown", "zero", "visits", "scans", "history", "30-day"],
+    "body": "If PhishEye has no scans and no reports for this URL or domain in 30 days, the local history status is unknown. Unknown is not a clean bill of health. Do not treat a first-seen link as safe because nobody has scanned it yet.",
+    "suspicion": 0
+  },
+  {
+    "id": "local-scan-volume",
+    "title": "Many local scans do not clear a lookalike",
+    "keywords": ["scans", "volume", "visits", "popular", "history", "lookalike"],
+    "body": "A high 30-day scan count only means PhishEye users opened this address often. It is not proof the site is legitimate. Scan volume must never lower risk on a lookalike, impersonation, or IP-host URL.",
+    "suspicion": 0
+  },
+  {
+    "id": "trusted-host-phish-path",
+    "title": "Phishing-style path or query on an otherwise official host",
+    "keywords": ["trusted", "official", "path", "query", "redirect", "return_to", "continue", "oauth"],
+    "body": "An official hostname can still carry a phishing lure in the path or query, such as a return URL that sends the user to a fake site after a real login page. Only apply this when the host is a known official site and the path or query itself looks like a phishing redirect. A vague note about new domains or HTTPS must not flip an official homepage.",
+    "suspicion": 46
+  },
+  {
+    "id": "free-host-phish",
+    "title": "Login or bank names on a free app host",
+    "keywords": ["lovable", "vercel", "netlify", "web.app", "github.io", "free", "host"],
+    "body": "Free app platforms are easy to stand up quickly. A project named login, verify, bank, or saude on a free host is a common phishing pattern. It is not the official company or government website.",
+    "suspicion": 62
+  },
+  {
+    "id": "login-portal-hygiene",
+    "title": "Login or ERP portal was checked",
+    "keywords": ["erp", "portal", "sso", "webmail", "campus", "login", "signin", "password"],
+    "body": "This address looks like a login, ERP, SSO, or campus portal. The knowledge-base evaluated it. A password form and HTTPS are not proof the site is official — confirm the domain is the one your institution published. This note does not mark the page safe and does not raise score by itself.",
+    "suspicion": 0
+  },
+  {
+    "id": "kb-checked",
+    "title": "Knowledge-base evaluated the facts",
+    "keywords": ["checked", "evaluated", "knowledge", "no match"],
+    "body": "The knowledge-base compared this URL to its phishing notes. No pattern in those notes applied to the supplied facts. That is an evaluation result, not a clean bill of health.",
+    "suspicion": 0
+  },
+  {
+    "id": "suspicious-tld",
+    "title": "Cheap or commonly abused domain ending",
+    "keywords": ["tld", "xyz", "tk", "ml", "ga", "cf", "top", "click", "zip", "icu"],
+    "body": "Some domain endings are cheap and frequently used for throwaway phishing kits. A suspicious TLD is supporting evidence, especially with login tokens or a brand lookalike. It is not enough by itself to call a site confirmed malicious.",
+    "suspicion": 34
+  }
+]

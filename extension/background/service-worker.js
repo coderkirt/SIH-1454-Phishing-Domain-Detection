@@ -3,6 +3,7 @@ import {
   canOpenAfterScan,
   checkUrl,
   clearCache,
+  countBrowserOpens,
   displayHost,
   getCachedScan,
   getProfile,
@@ -15,6 +16,7 @@ import {
   markContinued,
   markGateAllowed,
   normalizeHttpUrl,
+  recordVisit,
   saveSettings,
   setCachedScan,
   statusFromResult,
@@ -151,7 +153,7 @@ async function notifyTab(tabId, message) {
   }
 }
 
-async function scanUrl(url, { force = false, pageSignals = null } = {}) {
+async function scanUrl(url, { force = false, pageSignals = null, browser = null } = {}) {
   if (!isScannableUrl(url)) {
     return { status: "unsupported", url, result: null, error: "This browser page cannot be scanned." };
   }
@@ -170,7 +172,7 @@ async function scanUrl(url, { force = false, pageSignals = null } = {}) {
 
   const promise = (async () => {
     try {
-      const result = await checkUrl(url, pageSignals);
+      const result = await checkUrl(url, pageSignals, browser || {});
       await setCachedScan(url, result);
       return { status: statusFromResult(result), url, result, error: "" };
     } catch (error) {
@@ -205,6 +207,8 @@ async function scanTab(tabId, url, { force = false, pageSignals = null } = {}) {
     return state;
   }
 
+  recordVisit(url);
+
   if (!settings.autoScan && !force) {
     const cached = await getCachedScan(url);
     if (cached) {
@@ -235,7 +239,8 @@ async function scanTab(tabId, url, { force = false, pageSignals = null } = {}) {
   await updateBadge(tabId, "checking");
   await notifyPage(tabId, { status: "checking", url, result: null, error: "" }, settings);
 
-  const state = await scanUrl(url, { force, pageSignals });
+  const browser = await countBrowserOpens(url);
+  const state = await scanUrl(url, { force, pageSignals, browser });
   setTabState(tabId, state);
   await updateBadge(tabId, state.status);
   await notifyPage(tabId, state, settings);

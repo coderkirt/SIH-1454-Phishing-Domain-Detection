@@ -14,6 +14,28 @@ INTEL_FLOOR = {
     "registered_domain": 55,
 }
 
+RAG_FLOOR = (
+    (70, 50),
+    (50, 40),
+    (35, 32),
+)
+
+ACTIVITY_FLOOR = (
+    (70, 50),
+    (50, 40),
+    (35, 32),
+    (20, 20),
+    (8, 12),
+)
+
+TRUSTED_RAG_RULES = {
+    "trusted-host-phish-path",
+    "trusted-host-phish-query",
+    "path-phishing-on-trusted-host",
+}
+
+LOOKALIKE_TAGS = {"phishing", "brand_impersonation", "ip_url"}
+
 
 def _level(score: int) -> str:
     if score >= 70:
@@ -25,6 +47,115 @@ def _level(score: int) -> str:
     return "LOW"
 
 
+def _rag_floor(suspicion: int) -> int:
+    for threshold, floor in RAG_FLOOR:
+        if suspicion >= threshold:
+            return floor
+    return 0
+
+
+def _activity_floor(suspicion: int) -> int:
+    for threshold, floor in ACTIVITY_FLOOR:
+        if suspicion >= threshold:
+            return floor
+    return 0
+
+
+def _activity_suspicion(activity: Optional[Dict]) -> int:
+    activity = activity or {}
+    scam = int(activity.get("scam_reports") or 0)
+    risky = int(activity.get("risky_reports") or 0)
+    scans = int(activity.get("scans") or 0)
+    opens = int(activity.get("opens") or 0)
+    users_opened = int(activity.get("users_opened") or 0)
+    browser_opens = int(activity.get("this_browser_opens") or 0)
+    high_risk = int(activity.get("high_risk_scans") or 0)
+    suspicion = 0
+    if scam:
+        suspicion = max(suspicion, min(80, 36 + scam * 10 + risky * 3))
+    elif risky:
+        suspicion = max(suspicion, min(55, 22 + risky * 4))
+    if high_risk:
+        suspicion = max(suspicion, min(52, 16 + high_risk * 5))
+    if browser_opens:
+        suspicion = max(suspicion, min(24, 8 + browser_opens * 3))
+    if opens or users_opened:
+        suspicion = max(suspicion, min(26, 8 + opens * 2 + users_opened * 2))
+    if scans:
+        suspicion = max(suspicion, min(18, 6 + min(scans, 12)))
+    return suspicion
+
+
+def _apply_local_activity(score: int, tags: List[str], activity: Optional[Dict]) -> tuple:
+    """30-day PhishEye history and this-browser opens raise suspicion only. They never mark a link safe."""
+    activity = activity or {}
+    extra_reasons = []
+    extra_tags = []
+    meta = {"used": False, "suspicion_score": 0, "this_browser_used": False}
+    status = activity.get("status") or "unknown"
+    scam = int(activity.get("scam_reports") or 0)
+    risky = int(activity.get("risky_reports") or 0)
+    scans = int(activity.get("scans") or 0)
+    opens = int(activity.get("opens") or 0)
+    users_opened = int(activity.get("users_opened") or 0)
+    browser_opens = int(activity.get("this_browser_opens") or 0)
+
+    high_risk = int(activity.get("high_risk_scans") or 0)
+    has_signal = scans or opens or users_opened or browser_opens or scam or risky or high_risk
+    if status == "unknown" and not has_signal:
+        return score, extra_reasons, extra_tags, meta
+
+    suspicion = _activity_suspicion(activity)
+    floor = _activity_floor(suspicion)
+    meta["suspicion_score"] = suspicion
+    meta["this_browser_used"] = browser_opens > 0
+    if suspicion:
+        meta["used"] = True
+        extra_reasons.append(
+            f"PhishEye 30-day activity contributed {suspicion} suspicion "
+            f"({scans} scans, {high_risk} high-risk, {opens} opens / {users_opened} users, "
+            f"{browser_opens} in this browser). These counts cannot mark a link safe."
+        )
+        extra_tags.append("local_activity")
+    if floor:
+        score = max(score, floor)
+
+    if high_risk >= 3 and not any(tag in tags for tag in LOOKALIKE_TAGS):
+        raised = min(46, 28 + high_risk * 2)
+        if raised > score:
+            score = raised
+        extra_reasons.append(
+            f"{high_risk} high-risk PhishEye scans in 30 days raised suspicion."
+        )
+        extra_tags.append("local_high_risk_scans")
+
+    if scam >= 3 or (scam >= 1 and scam + risky >= 3):
+        raised = min(70, 40 + scam * 5 + risky * 2)
+        if raised > score:
+            score = raised
+        extra_reasons.append(
+            f"PhishEye users reported this domain as scam/risky "
+            f"{scam + risky} time(s) in the last {activity.get('window_days') or 30} days."
+        )
+        extra_tags.append("local_scam_reports")
+    elif risky >= 5:
+        raised = min(55, 32 + risky * 2)
+        if raised > score:
+            score = raised
+        extra_reasons.append(
+            f"PhishEye users flagged this domain as risky "
+            f"{risky} time(s) in the last {activity.get('window_days') or 30} days."
+        )
+        extra_tags.append("local_scam_reports")
+
+    lookalike = any(tag in tags for tag in ("brand_impersonation", "phishing", "ip_url", "lookalike"))
+    if lookalike and (scans >= 5 or opens >= 5 or users_opened >= 3 or browser_opens >= 5):
+        extra_reasons.append(
+            f"{opens} PhishEye opens ({users_opened} users) in 30 days do not clear a lookalike or impersonation domain."
+        )
+    return score, extra_reasons, extra_tags, meta
+
+
 def calculate_final_risk(
     threat_intelligence: Optional[Dict] = None,
     heuristic_score: int = 0,
@@ -32,6 +163,9 @@ def calculate_final_risk(
     ml_score: Optional[int] = None,
     url_features: Optional[Dict] = None,
     heuristic_reasons: Optional[List[str]] = None,
+    rag_assessment: Optional[Dict] = None,
+    local_activity: Optional[Dict] = None,
+    trusted_destination: bool = False,
 ) -> Dict:
     intel = threat_intelligence or {}
     tags = list(heuristic_tags or [])
@@ -105,10 +239,73 @@ def calculate_final_risk(
             "find strong phishing indicators. Absence from a feed does not guarantee safety."
         )
 
+    if classification != "CONFIRMED_MALICIOUS" and any(tag in tags for tag in LOOKALIKE_TAGS):
+        score = max(score, 50)
+        if classification == "NO_MALICIOUS_EVIDENCE":
+            classification = "SUSPICIOUS"
+            explanation = (
+                "Lookalike, phishing-fragment, or IP-host indicators are present. "
+                "A low numeric score or a later parse error cannot mark this address safe."
+            )
+
+    rag = rag_assessment if isinstance(rag_assessment, dict) else {}
+    rag_status = rag.get("status") or "unavailable"
+    rag_score = rag.get("suspicion_score")
+    rag_ok = rag_status == "ok" and rag_score is not None
+    rag_used = False
+    if rag_ok:
+        try:
+            rag_score = int(rag_score)
+        except (TypeError, ValueError):
+            rag_ok = False
+            rag_score = None
+    if trusted_destination and rag_ok:
+        rule_id = rag.get("rule_id") or ""
+        if rule_id not in TRUSTED_RAG_RULES:
+            rag_ok = False
+
+    if rag_ok and classification != "CONFIRMED_MALICIOUS":
+        floor = _rag_floor(int(rag_score))
+        if floor:
+            score = max(score, floor)
+            rag_used = True
+            if classification == "NO_MALICIOUS_EVIDENCE":
+                classification = "SUSPICIOUS"
+            summary = rag.get("rule_summary") or "Knowledge-base rule raised suspicion."
+            if summary not in reasons:
+                reasons.insert(0, summary)
+            if "rag_suspicious" not in tags:
+                tags.insert(0, "rag_suspicious")
+            explanation = (
+                f"{explanation} Local knowledge-base rule '{rag.get('rule_id')}' "
+                "raised suspicion. RAG cannot mark a link safe and cannot override confirmed intel."
+            )
+
+    activity = local_activity if isinstance(local_activity, dict) else {}
+    activity_meta = {"used": False, "suspicion_score": 0, "this_browser_used": False}
+    if classification != "CONFIRMED_MALICIOUS":
+        score, activity_reasons, activity_tags, activity_meta = _apply_local_activity(score, tags, activity)
+        for reason in activity_reasons:
+            if reason not in reasons:
+                reasons.append(reason)
+        for tag in activity_tags:
+            if tag not in tags:
+                tags.append(tag)
+            if classification == "NO_MALICIOUS_EVIDENCE" and tag == "local_scam_reports":
+                classification = "SUSPICIOUS"
+                explanation = (
+                    f"{explanation} Recent PhishEye scam/risky reports raised suspicion. "
+                    "Local history cannot mark a link safe."
+                )
+
     score = max(0, min(100, int(score)))
+    if any(tag in tags for tag in LOOKALIKE_TAGS):
+        score = max(score, 50)
+        if classification == "NO_MALICIOUS_EVIDENCE":
+            classification = "SUSPICIOUS"
     level = _level(score)
     blocking = classification in {"CONFIRMED_MALICIOUS", "SUSPICIOUS"} or level != "LOW"
-    if "domain_not_found" in tags:
+    if "domain_not_found" in tags or any(tag in tags for tag in LOOKALIKE_TAGS):
         blocking = True
 
     evidence = {
@@ -133,6 +330,31 @@ def calculate_final_risk(
         "heuristics": {
             "score": heuristic,
             "tags": tags,
+        },
+        "rag": {
+            "status": rag_status,
+            "suspicion_score": rag_score if rag_ok or rag_status == "ok" else None,
+            "rule_id": rag.get("rule_id") if rag else None,
+            "rule_summary": rag.get("rule_summary") if rag else None,
+            "citations": list(rag.get("citations") or []) if rag else [],
+            "used": rag_used,
+        },
+        "local_activity": {
+            "window_days": activity.get("window_days") or 30,
+            "scans": int(activity.get("scans") or 0),
+            "signed_in_users": int(activity.get("signed_in_users") or 0),
+            "high_risk_scans": int(activity.get("high_risk_scans") or 0),
+            "scam_reports": int(activity.get("scam_reports") or 0),
+            "risky_reports": int(activity.get("risky_reports") or 0),
+            "safe_reports": int(activity.get("safe_reports") or 0),
+            "opens": int(activity.get("opens") or 0),
+            "users_opened": int(activity.get("users_opened") or 0),
+            "this_browser_opens": int(activity.get("this_browser_opens") or 0),
+            "this_browser_status": activity.get("this_browser_status") or "unavailable",
+            "this_browser_used": bool(activity_meta.get("this_browser_used")),
+            "suspicion_score": int(activity_meta.get("suspicion_score") or 0),
+            "used": bool(activity_meta.get("used")),
+            "status": activity.get("status") or "unknown",
         },
         "url": {
             "original": features.get("original") or intel.get("url"),

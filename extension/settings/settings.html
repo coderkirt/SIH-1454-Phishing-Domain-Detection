@@ -27,9 +27,9 @@
           </svg>
         </div>
         <div>
-          <p class="label-tech">08 / Settings</p>
+          <p class="label-tech">08 / Settings <span data-extension-version>v1.8</span></p>
           <h1 class="font-display">PHISHEYE SETTINGS</h1>
-          <p class="note">The extension uses the same FastAPI backend as the web dashboard.</p>
+          <p class="note">Version 1.8 uses the same FastAPI backend as the web dashboard, including PhishTank suspected listings and Cloudflare phishing warnings.</p>
         </div>
       </header>
 
@@ -64,8 +64,19 @@
       </section>
 
       <section class="panel">
+        <h2 class="font-display">What is new in 1.8</h2>
+        <ul class="feature-list">
+          <li>Scan-first gate: the destination stays closed until PHISHEYE finishes the check. Clear sites open by themselves.</li>
+          <li>PhishTank suspected / unverified reports are flagged. They are no longer shown as safe.</li>
+          <li>Cloudflare and browser “Suspected Phishing” warning pages are treated as HIGH / CRITICAL.</li>
+          <li>Google Safe Browsing is used when the backend has an API key.</li>
+          <li>Analyze all visible links on the current page (up to 15).</li>
+        </ul>
+      </section>
+
+      <section class="panel">
         <h2 class="font-display">What data does PHISHEYE use?</h2>
-        <p>The extension sends the website URL to the same backend as the dashboard. It does not collect passwords, OTPs, or card numbers. It does not read the page content.</p>
+        <p>The extension sends the website URL to the same backend as the dashboard. For warning-page detection it also sends the page title and heading. It does not collect passwords, OTPs, or card numbers.</p>
         <p class="note">Planned: richer privacy controls. Not implemented: zero-knowledge proofs, encrypted local database, federated learning.</p>
       </section>
 

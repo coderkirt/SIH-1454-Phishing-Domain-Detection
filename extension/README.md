@@ -15,6 +15,8 @@ Same URL → same backend → same risk score, risk level, and reasons.
 - Intercepts link clicks and other navigations so the destination does not open first
 - Shows the PHISHEYE gate and scans the URL with the FastAPI backend
 - Opens LOW / clear sites automatically. MEDIUM needs Open anyway. HIGH and CRITICAL stay closed
+- Flags PhishTank suspected/unverified reports instead of calling them safe
+- Treats Cloudflare / browser “Suspected Phishing” warning pages as HIGH / CRITICAL
 - Skips browser pages such as `chrome://` and `edge://`
 - Shows the real result in the popup and on the gate
 - Updates the toolbar badge: OK, MED, HIGH, CRIT
@@ -75,7 +77,7 @@ Then open http://127.0.0.1:5173
 5. Select this `extension` folder
 6. Pin PHISHEYE
 7. Make sure the backend is running
-8. Reload the unpacked extension after code changes (this build is **1.8.1**)
+8. Reload the unpacked extension after code changes (this build is **1.8.2**)
 9. Type a website or click a link — you should see the PHISHEYE gate, not the live site
 10. A clear site opens by itself. A fishy or dangerous site stays on the gate
 

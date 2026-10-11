@@ -4,6 +4,33 @@
   const TOAST_ID = "cyberguard-toast-host";
   let currentUrl = location.href;
 
+  function ragFrom(result) {
+    return result?.technical_view?.rag || result?.evidence?.rag || {};
+  }
+
+  function ragBlock(result) {
+    if (!result || result.risk_score == null) return "";
+    const rag = ragFrom(result);
+    const status = !rag || rag.status === "unavailable"
+      ? "Unavailable"
+      : rag.used
+        ? "Raised suspicion"
+        : rag.status === "ok"
+          ? "Evaluated"
+          : rag.status || "Unknown";
+    const rule = rag?.rule_id || "kb-checked";
+    const detail = rag?.rule_summary || (rag?.status === "unavailable"
+      ? "Knowledge-base weight omitted."
+      : "Knowledge-base checked this URL.");
+    return `
+      <div class="rag">
+        <p class="rag-label">Knowledge-base (RAG)</p>
+        <p class="rag-status">${escapeHtml(status)} · ${escapeHtml(String(rule))}</p>
+        <p class="rag-detail">${escapeHtml(detail)}</p>
+      </div>
+    `;
+  }
+
   function reasonsFrom(result) {
     if (!result) return [];
     if (Array.isArray(result.reasons) && result.reasons.length) return result.reasons;
@@ -204,6 +231,22 @@
           animation: scan 1.1s linear infinite;
         }
         .reason { margin: 8px 0 0; color: ${theme.muted}; font-size: 13px; line-height: 1.45; }
+        .rag {
+          margin-top: 10px;
+          padding-top: 10px;
+          border-top: 1px solid ${theme.accent}44;
+          animation: slide-in 220ms ease-out;
+        }
+        .rag-label {
+          margin: 0;
+          color: ${theme.accent};
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+        .rag-status { margin: 6px 0 0; font-size: 12px; font-family: "IBM Plex Mono", Consolas, monospace; }
+        .rag-detail { margin: 6px 0 0; color: ${theme.muted}; font-size: 12px; line-height: 1.4; }
       </style>
       <aside class="card ${theme.pulse ? `pulse-${theme.pulse}` : ""}" role="status" aria-live="polite">
         <div class="top">
@@ -222,6 +265,7 @@
         <p class="meta">Risk ${escapeHtml(scoreText)} / 100 · ${escapeHtml(level)}</p>
         <div class="bar" aria-hidden="true"><span></span></div>
         <p class="reason">${escapeHtml(reason)}</p>
+        ${ragBlock(result)}
       </aside>
     `;
     shadow.getElementById("cg-close").addEventListener("click", removeToast);

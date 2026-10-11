@@ -44,3 +44,10 @@ label { display: grid; gap: 6px; }
 .row .btn-primary,
 .row .btn-secondary { width: auto; }
 #logout { margin-top: 12px; width: auto; }
+
+.feature-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+}
+.feature-list li { margin: 8px 0; }

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getInstallId, recordBrowserOpen } from "../utils/browserActivity";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
@@ -38,7 +39,17 @@ export const healthCheck = () => api.get("/health");
 export const signup = (payload) => api.post("/api/v1/user/signup", payload);
 export const login = (payload) => api.post("/api/v1/user/login", payload);
 export const getProfile = () => api.get("/api/v1/user/profile");
-export const checkUrl = (url) => api.post("/api/v1/threat/check-url", { url, view: "both" });
+export const checkUrl = (url) => {
+  const browser = recordBrowserOpen(url);
+  api.post("/api/v1/visits", { url, client_id: getInstallId() }).catch(() => {});
+  return api.post("/api/v1/threat/check-url", {
+    url,
+    view: "both",
+    this_browser_opens: browser.this_browser_opens,
+    this_browser_status: browser.this_browser_status,
+    client_id: getInstallId(),
+  });
+};
 export const checkMessage = (message, url) => api.post("/api/v1/threat/check-message", { message, url });
 export const analyzeContent = (payload) => api.post("/api/v1/analyze/content", payload);
 export const analyzeImage = async (endpoint, file, hint = "") => {

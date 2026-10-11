@@ -1,4 +1,5 @@
-import { loadTheme, toggleTheme } from "../utils/theme.js";
+import { showRagPopup } from "../utils/rag-popup.js";
+import { fillVersionLabels, loadTheme, toggleTheme } from "../utils/theme.js";
 
 const form = document.getElementById("scan-form");
 const input = document.getElementById("url-input");
@@ -20,6 +21,7 @@ let compact = window.outerWidth > 0 && window.outerWidth < 700;
 let currentUrl = "";
 let currentStatus = "";
 let opening = false;
+let awaitingScore = false;
 
 function send(type, extra = {}) {
   return chrome.runtime.sendMessage({ type, ...extra });
@@ -66,6 +68,10 @@ function render(payload) {
   reasonsEl.innerHTML = "";
   if (result) {
     scoreEl.textContent = `${result.risk_score ?? "—"} / 100`;
+    if (awaitingScore && status !== "checking" && result.risk_score != null) {
+      awaitingScore = false;
+      showRagPopup(result);
+    }
     levelEl.textContent = result.risk_level || "—";
     const reasons = result.reasons?.length ? result.reasons : ["No suspicious signals were found."];
     reasons.slice(0, 3).forEach((reason) => {
@@ -110,6 +116,7 @@ async function scan(url) {
   openSiteBtn.hidden = true;
   openAnywayBtn.hidden = true;
   stayHereBtn.hidden = true;
+  awaitingScore = true;
   render({ status: "checking", headline: "SCANNING", url: address, host: address, result: null });
   try {
     const payload = await send("SCAN_URL", { url: address });
@@ -176,6 +183,7 @@ stayHereBtn.addEventListener("click", () => {
 document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
 loadTheme().then(async () => {
+  fillVersionLabels();
   try {
     const win = await chrome.windows.getCurrent();
     compact = win?.type === "popup";

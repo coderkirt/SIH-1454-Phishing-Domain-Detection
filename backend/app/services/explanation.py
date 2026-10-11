@@ -8,11 +8,33 @@ from app.services.rag_client import fetch_rag_explanation_sync
 logger = logging.getLogger(__name__)
 
 
+UNSAFE_TAGS = {
+    "phishing",
+    "brand_impersonation",
+    "confirmed_malicious",
+    "ip_url",
+    "reported_phish",
+    "threat_intel",
+}
+BENIGN_VERDICTS = {"BENIGN", "SAFE", "LOW RISK", "UNKNOWN", "NO THREAT"}
+
+
+def _scan_is_unsafe(result: Dict, level: str, tags: list, brand) -> bool:
+    if result.get("safe") is False:
+        return True
+    if level in {"HIGH", "CRITICAL", "MEDIUM"}:
+        return True
+    if brand:
+        return True
+    return any(tag in tags for tag in UNSAFE_TAGS)
+
+
 def build_explanation(result: Dict) -> Dict[str, Any]:
     level = result.get("risk_level", "LOW")
     tags = result.get("threat_tags") or []
     brand = result.get("brand_impersonated")
     why = list(result.get("reasons") or [])[:6]
+    unsafe = _scan_is_unsafe(result, level, tags, brand)
 
     # Attempt to enrich explanation using standalone RAG service
     rag_explanation = result.get("rag_explanation")
@@ -38,32 +60,38 @@ def build_explanation(result: Dict) -> Dict[str, Any]:
             rag_explanation = None
 
     if rag_explanation and rag_explanation.get("summary"):
-        # Grounded RAG explanation output
-        verdict = rag_explanation.get("verdict", "PHISHING").upper()
-        if level in ("HIGH", "CRITICAL") and "RISK" not in verdict:
-            headline = f"{verdict} ({level} RISK)"
+        verdict = (rag_explanation.get("verdict") or "PHISHING").upper()
+        # RAG is explain-only. A BENIGN note cannot mark an unsafe lookalike safe.
+        if unsafe and verdict in BENIGN_VERDICTS:
+            rag_explanation = None
         else:
-            headline = verdict
+            if unsafe and verdict not in {"PHISHING", "SUSPICIOUS", "MALICIOUS"}:
+                verdict = "PHISHING" if level in {"HIGH", "CRITICAL"} else "SUSPICIOUS"
+            if level in ("HIGH", "CRITICAL") and "RISK" not in verdict:
+                headline = f"{verdict} ({level} RISK)"
+            else:
+                headline = verdict
 
-        actions = rag_explanation.get("actionable_recommendations") or []
-        action_text = " ".join(actions) if actions else (
-            "Do not enter passwords or OTPs on this destination. Verify through official channels."
-        )
+            actions = rag_explanation.get("actionable_recommendations") or []
+            action_text = " ".join(actions) if actions else (
+                "Do not enter passwords or OTPs on this destination. Verify through official channels."
+            )
 
-        return {
-            "headline": headline,
-            "what": rag_explanation["summary"],
-            "why": [tb["explanation"] for tb in rag_explanation.get("threat_breakdown", [])] or why,
-            "what_to_do": action_text,
-            "matched_playbook": rag_explanation.get("matched_playbook"),
-            "brand_analysis": rag_explanation.get("brand_analysis"),
-            "citations": rag_explanation.get("citations", []),
-            "rag_grounded": True,
-            "model_used": rag_explanation.get("model_used", "grounded-rag-engine"),
-            "confidence_note": (
-                "Explanation verified against authoritative threat intelligence reports and official brand guidance."
-            ),
-        }
+            return {
+                "headline": headline,
+                "what": rag_explanation["summary"],
+                "why": [tb["explanation"] for tb in rag_explanation.get("threat_breakdown", [])] or why,
+                "what_to_do": action_text,
+                "matched_playbook": rag_explanation.get("matched_playbook"),
+                "brand_analysis": rag_explanation.get("brand_analysis"),
+                "citations": rag_explanation.get("citations", []),
+                "rag_grounded": True,
+                "model_used": rag_explanation.get("model_used", "grounded-rag-engine"),
+                "confidence_note": (
+                    "Explanation verified against authoritative threat intelligence reports and official brand guidance. "
+                    "RAG cannot override the PhishEye verdict."
+                ),
+            }
 
     # Heuristic fallback when RAG service is unreachable or offline
     if level in ("HIGH", "CRITICAL"):
@@ -76,9 +104,13 @@ def build_explanation(result: Dict) -> Dict[str, Any]:
         headline = "LOW RISK"
         action = "No strong scam signals were found. Still check the address bar if you sign in."
 
-    if brand:
+    if brand or "brand_impersonation" in tags or "phishing" in tags:
+        if level == "LOW":
+            headline = "SUSPICIOUS"
+            action = "Do not enter a password, OTP, or card number. Check the real brand website yourself."
+        shown = (brand or "a known brand").upper() if brand else "a known brand"
         simple = (
-            f"This may be pretending to be {brand.upper()} and is asking you to act on a link. "
+            f"This may be pretending to be {shown} and is asking you to act on a link. "
             f"Do not enter your OTP or password."
         )
     elif "credential_pressure" in tags:
@@ -90,7 +122,10 @@ def build_explanation(result: Dict) -> Dict[str, Any]:
     elif level == "MEDIUM":
         simple = "Some warning signs were found. Double-check before you continue."
     else:
-        simple = "This looks relatively safe based on the signals we have."
+        simple = (
+            "No strong scam signals were found. That is not a guarantee of safety. "
+            "Still check the name in the address bar before you sign in."
+        )
 
     return {
         "headline": headline,

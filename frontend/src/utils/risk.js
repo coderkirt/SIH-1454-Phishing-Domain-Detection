@@ -1,4 +1,15 @@
 export const LAST_SCAN_KEY = "cg_last_scan";
+export const RAG_POPUP_KEY = "cg_rag_popup";
+
+export function markRagPopupPending() {
+  sessionStorage.setItem(RAG_POPUP_KEY, "1");
+}
+
+export function consumeRagPopupPending() {
+  const pending = sessionStorage.getItem(RAG_POPUP_KEY) === "1";
+  if (pending) sessionStorage.removeItem(RAG_POPUP_KEY);
+  return pending;
+}
 
 export function riskColor(level) {
   switch ((level || "").toUpperCase()) {
