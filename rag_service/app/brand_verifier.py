@@ -46,13 +46,19 @@ class BrandRegistry:
             for doc in docs:
                 if doc.category != "brand_guidance":
                     continue
+                # A roundup that names several brands must not copy every
+                # bank's domains onto each one. SBI's allowlist is only SBI.
+                if len(doc.brands) != 1:
+                    continue
                 for b in doc.brands:
                     b_norm = b.lower().strip()
                     if b_norm in self._profiles:
-                        # Append any additional official domains
                         existing = self._profiles[b_norm]
                         existing.official_domains = list(
                             dict.fromkeys(existing.official_domains + doc.official_domains)
+                        )
+                        existing.phishing_patterns = list(
+                            dict.fromkeys(existing.phishing_patterns + doc.phishing_patterns)
                         )
                         existing.never_does = list(
                             dict.fromkeys(existing.never_does + doc.never_does)
