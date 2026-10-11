@@ -57,7 +57,10 @@ def get_local_activity_30d(
     try:
         since = (now or datetime.utcnow()) - timedelta(days=WINDOW_DAYS)
         since_s = since.isoformat(sep=" ", timespec="seconds")
-        url_like = f"%{registered}%" if registered else ""
+        host_http = f"http://{registered}" if registered else ""
+        host_https = f"https://{registered}" if registered else ""
+        www_http = f"http://www.{registered}" if registered else ""
+        www_https = f"https://www.{registered}" if registered else ""
 
         scan_row = conn.execute(
             """
@@ -69,10 +72,22 @@ def get_local_activity_30d(
             WHERE timestamp >= ?
               AND (
                     (? != '' AND (url = ? OR url = ?))
-                 OR (? != '' AND url LIKE ?)
+                 OR (? != '' AND (
+                        url = ? OR url = ? OR url = ? OR url = ?
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                 ))
               )
             """,
-            (since_s, raw, raw, normalized, registered, url_like),
+            (
+                since_s,
+                raw, raw, normalized,
+                registered,
+                host_http, host_https, www_http, www_https,
+                host_http, host_https, www_http, www_https,
+            ),
         ).fetchone()
 
         extra_scans = conn.execute(
@@ -84,10 +99,23 @@ def get_local_activity_30d(
             WHERE scan_id IN (SELECT id FROM content_scans WHERE created_at >= ?)
               AND (
                     (? != '' AND url = ?)
-                 OR (? != '' AND (domain = ? OR url LIKE ?))
+                 OR (? != '' AND (
+                        domain = ?
+                     OR url = ? OR url = ? OR url = ? OR url = ?
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                     OR url LIKE ? || '/%'
+                 ))
               )
             """,
-            (since_s, normalized or raw, normalized or raw, registered, registered, url_like),
+            (
+                since_s,
+                normalized or raw, normalized or raw,
+                registered, registered,
+                host_http, host_https, www_http, www_https,
+                host_http, host_https, www_http, www_https,
+            ),
         ).fetchone()
 
         try:
