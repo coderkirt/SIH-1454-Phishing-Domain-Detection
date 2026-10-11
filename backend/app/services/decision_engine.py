@@ -70,14 +70,12 @@ def _link_already_suspicious(score: int, tags: List[str], trusted_destination: b
     return lookalike or rag_flag or score >= 30
 
 
-def _activity_suspicion(activity: Optional[Dict]) -> int:
+def _activity_suspicion(activity: Optional[Dict], *, count_dangers: bool = True) -> int:
+    if not count_dangers:
+        return 0
     activity = activity or {}
     scam = int(activity.get("scam_reports") or 0)
     risky = int(activity.get("risky_reports") or 0)
-    scans = int(activity.get("scans") or 0)
-    opens = int(activity.get("opens") or 0)
-    users_opened = int(activity.get("users_opened") or 0)
-    browser_opens = int(activity.get("this_browser_opens") or 0)
     high_risk = int(activity.get("high_risk_scans") or 0)
     suspicion = 0
     if scam:
@@ -86,8 +84,8 @@ def _activity_suspicion(activity: Optional[Dict]) -> int:
         suspicion = max(suspicion, min(55, 22 + risky * 4))
     if high_risk:
         suspicion = max(suspicion, min(52, 16 + high_risk * 5))
-    # Repeat scans and ordinary opens are not evidence. YouTube and other
-    # legitimate sites are visited often and must not pick up a 12-point floor.
+    # Repeat scans and ordinary opens are not evidence. GitHub and other
+    # legitimate sites are visited often and must not pick up a floor.
     return suspicion
 
 
