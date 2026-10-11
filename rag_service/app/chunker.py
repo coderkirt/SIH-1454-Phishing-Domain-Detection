@@ -56,6 +56,10 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         "language": doc.language,
         "region": doc.region,
         "path": doc.path,
+        "license": doc.license,
+        "source_hash": doc.source_hash,
+        "fetched_at": doc.fetched_at,
+        "version": doc.version,
         # ChromaDB requires non-empty lists for list-type metadata
         "brands": doc.brands if doc.brands else ["_none_"],
         "threat_tags": doc.threat_tags if doc.threat_tags else ["_none_"],

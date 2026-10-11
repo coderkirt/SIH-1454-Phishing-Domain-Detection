@@ -65,6 +65,10 @@ class CorpusDocument:
     brands: List[str] = field(default_factory=list)
     threat_tags: List[str] = field(default_factory=list)
     mitre: List[str] = field(default_factory=list)
+    fetched_at: str = ""
+    source_hash: str = ""
+    license: str = "Public Domain / Synthesized"
+    version: int = 1
     body: str = ""
     path: str = ""
 
@@ -114,6 +118,11 @@ def parse_document(path: Path) -> CorpusDocument:
 
     body = _clean_body(match.group(2))
     doc_path = str(path.relative_to(CORPUS_DIR)).replace("\\", "/")
+
+    # Generate deterministic SHA-256 hash if not in front-matter
+    import hashlib
+    raw_hash = meta.get("source_hash") or hashlib.sha256(body.encode("utf-8")).hexdigest()
+
     doc = CorpusDocument(
         id=str(meta.get("id", "")),
         title=str(meta.get("title", "")),
@@ -128,6 +137,10 @@ def parse_document(path: Path) -> CorpusDocument:
         brands=list(meta.get("brands", [])),
         threat_tags=list(meta.get("threat_tags", [])),
         mitre=list(meta.get("mitre", [])),
+        fetched_at=str(meta.get("fetched_at", meta.get("last_verified", "") + "T00:00:00Z")),
+        source_hash=str(raw_hash),
+        license=str(meta.get("license", "Public Domain / Synthesized")),
+        version=int(meta.get("version", 1)),
         body=body,
         path=doc_path,
     )
