@@ -54,15 +54,14 @@ The dashboard URL default is `http://127.0.0.1:5173`.
 ## Start the backend
 
 ```powershell
-cd "$env:USERPROFILE\cybersecurity-platform\backend"
-.\venv\Scripts\activate
+cd "$env:USERPROFILE\SIH-1454-Phishing-Domain-Detection\backend"
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 ## Start the frontend / dashboard
 
 ```powershell
-cd "$env:USERPROFILE\cybersecurity-platform\frontend"
+cd "$env:USERPROFILE\SIH-1454-Phishing-Domain-Detection\frontend"
 npm run dev
 ```
 
