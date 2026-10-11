@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,6 +35,11 @@ class Settings(BaseSettings):
     # Cache settings
     CACHE_SIZE: int = 512
     CACHE_TTL_SECONDS: int = 3600
+
+    # LLM settings
+    GEMINI_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
+    LLM_MODEL: str = "gemini-1.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / ".env"),
