@@ -49,9 +49,9 @@ export default function Statistics() {
   return (
     <div className="space-y-8">
       <PageHeader
-        section="05 / Statistics"
+        section="06 / Statistics"
         title="Threat analytics"
-        subtitle="Charts are generated from actual SQLite records."
+        subtitle="How your scans have turned out."
       />
 
       <div className="grid gap-px border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
