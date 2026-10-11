@@ -20,6 +20,7 @@ import httpx
 
 from app.brand_verifier import get_brand_registry
 from app.config import settings
+from app.playbook_match import match_playbook
 from app.prompt import build_grounded_prompt
 from app.retrieval import RetrievedChunk
 from app.schemas import (
@@ -149,23 +150,59 @@ def synthesize_deterministic(
     else:
         verdict = "BENIGN"
 
-    # 2. Extract Matched Playbook (if any playbook chunks retrieved)
+    # 2. Match a playbook from keywords first. A bare "verify" link is account
+    # access, not a prize. Retrieval is used only when the words are not decisive.
     matched_playbook: Optional[PlaybookMatch] = None
+    keyword_doc = match_playbook(
+        scan_url=request.scan_url or "",
+        content_text=request.content_text or "",
+        threat_tags=request.threat_tags or [],
+    )
     playbook_chunk = next((c for c in retrieved_chunks if c.category == "playbook"), None)
-    if playbook_chunk:
+    if keyword_doc is not None:
+        body = keyword_doc.body
+        playbook_id = keyword_doc.id
+        playbook_title = keyword_doc.title
+    elif playbook_chunk is not None:
         body = playbook_chunk.text
-        # Extract mechanism and warning signs from chunk lines
-        mechanism = "Attacker impersonates a trusted entity to harvest sensitive credentials or initiate payments."
+        playbook_id = playbook_chunk.doc_id
+        playbook_title = playbook_chunk.doc_title
+    else:
+        body = ""
+        playbook_id = ""
+        playbook_title = ""
+    if body:
+        mechanism_lines = []
         warning_signs = []
-        for line in body.splitlines():
-            line_str = line.strip().lstrip("-* ").strip()
-            if line_str and len(line_str) > 15 and not line.startswith("#"):
-                if len(warning_signs) < 3:
+        in_how = False
+        for raw in body.splitlines():
+            stripped = raw.strip()
+            lower = stripped.lower()
+            if lower.startswith("## how"):
+                in_how = True
+                continue
+            if stripped.startswith("##"):
+                in_how = False
+            if in_how and stripped and not stripped.startswith("#"):
+                mechanism_lines.append(stripped)
+            if stripped.startswith(("-", "*")):
+                line_str = stripped.lstrip("-* ").strip()
+                if (
+                    len(line_str) > 15
+                    and not lower.startswith("category")
+                    and "source:" not in lower[:48]
+                ):
                     warning_signs.append(line_str)
+        mechanism = " ".join(mechanism_lines).strip()
+        if len(mechanism) > 420:
+            mechanism = mechanism[:417].rstrip() + "..."
+        if not mechanism:
+            mechanism = "Attacker impersonates a trusted entity to harvest sensitive credentials or initiate payments."
+        warning_signs = warning_signs[:4]
 
         matched_playbook = PlaybookMatch(
-            playbook_id=playbook_chunk.doc_id,
-            title=playbook_chunk.doc_title,
+            playbook_id=playbook_id,
+            title=playbook_title,
             mechanism=mechanism,
             warning_signs=warning_signs or [
                 "Unsolicited urgency requiring immediate verification",
@@ -251,38 +288,22 @@ def synthesize_deterministic(
         "Report the message or sender address to organizational security analysts or national cybercrime portals.",
     ])
 
-    # 6. Synthesize Summary with Citations
-    primary_cite = "[cite-1]" if citation_map else ""
-    sec_cite = "[cite-2]" if len(citation_map) > 1 else ""
-
-    summary_parts = []
+    # Plain summary for the person reading the warning. Citations stay on the
+    # response for the dashboard, but they are not written into this sentence.
+    brand_name = (flagged_brand or "").upper()
     if verdict == "PHISHING":
-        summary_parts.append(
-            f"This communication is flagged as high-risk phishing {primary_cite}. "
-            f"It displays patterns characteristic of credential-harvesting campaigns."
+        summary_text = (
+            f"This page is pretending to be {brand_name}. It is not the real site. Do not enter your password, OTP, or card details."
+            if brand_name
+            else "This page looks like a scam. Do not enter your password, OTP, or card details."
         )
     elif verdict == "SUSPICIOUS":
-        summary_parts.append(
-            f"This communication exhibits suspicious social-engineering markers {primary_cite} "
-            f"that warrant cautious verification before interaction."
-        )
+        summary_text = "Something looks off. Open the real website yourself before you sign in or send money."
     else:
-        summary_parts.append(
-            f"The scan did not detect established phishing signatures {primary_cite}, "
-            f"though standard link hygiene remains advised."
-        )
+        summary_text = "No strong scam signs were found. Still check the address before you sign in."
 
-    if flagged_brand:
-        summary_parts.append(
-            f"The message mimics {flagged_brand.upper()} brand cues without originating from official infrastructure {sec_cite}."
-        )
-    elif request.threat_tags:
-        summary_parts.append(
-            f"Attack indicators detected include {', '.join(request.threat_tags[:2]).replace('_', ' ')}."
-        )
-
-    summary_text = " ".join(summary_parts).strip()
-    citations = resolve_citations(summary_text, citation_map, retrieved_chunks)
+    cite_keys = " ".join(f"[cite-{i}]" for i in range(1, min(3, len(citation_map) + 1)))
+    citations = resolve_citations(cite_keys or summary_text, citation_map, retrieved_chunks)
 
     return ExplainScanResponse(
         verdict=verdict,
