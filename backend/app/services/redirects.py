@@ -4,8 +4,9 @@ Scammers hide fake bank / PayPal pages behind bit.ly, tinyurl, and similar
 services. This module follows redirects hop-by-hop after SSRF checks.
 """
 
-from urllib.parse import urljoin, urlparse
-from typing import Dict, List
+import re
+from urllib.parse import parse_qsl, unquote, urljoin, urlparse
+from typing import Dict, List, Optional
 
 import requests
 
@@ -26,12 +27,67 @@ HEADERS = {
 }
 
 
+_EMBED_KEYS = {
+    "url", "u", "q", "redirect", "redirect_url", "dest", "destination",
+    "target", "to", "link", "continue", "shortlink", "href",
+}
+
+
 def is_shortener(url_or_host: str) -> bool:
     host = urlparse(url_or_host).netloc.lower() or url_or_host.lower()
     host = host.split(":")[0]
     if host.startswith("www."):
         host = host[4:]
     return host in SHORTENER_DOMAINS
+
+
+def embedded_target(url: str) -> Optional[str]:
+    """Return an http(s) address hidden in a redirect query, if the host differs."""
+    parsed = urlparse(url)
+    host = (parsed.netloc or "").lower().split(":")[0]
+    if host.startswith("www."):
+        host = host[4:]
+    for key, value in parse_qsl(parsed.query, keep_blank_values=False):
+        if key.lower() not in _EMBED_KEYS:
+            continue
+        candidate = unquote(value).strip()
+        if not candidate.startswith(("http://", "https://")):
+            continue
+        target_host = (urlparse(candidate).netloc or "").lower().split(":")[0]
+        if target_host.startswith("www."):
+            target_host = target_host[4:]
+        if target_host and target_host != host:
+            return candidate
+    return None
+
+
+def should_unwrap(url: str) -> bool:
+    """True when the visible address is a mask for a different site."""
+    if is_shortener(url) or embedded_target(url):
+        return True
+    path = (urlparse(url).path or "").lower()
+    return path.startswith(("/url", "/redirect", "/out", "/away", "/link"))
+
+
+def _hop_from_html(body: str, current: str) -> Optional[str]:
+    refresh = re.search(
+        r"""http-equiv=["']refresh["'][^>]*content=["'][^"']*url=([^"'>\s]+)""",
+        body,
+        re.I,
+    )
+    script = re.search(
+        r"""(?:window\.location|location\.href)\s*=\s*['"](https?://[^'"]+)['"]""",
+        body,
+        re.I,
+    )
+    raw = ""
+    if refresh:
+        raw = refresh.group(1)
+    elif script:
+        raw = script.group(1)
+    if not raw:
+        return None
+    return urljoin(current, unquote(raw.strip()))
 
 
 def expand_url(url: str, max_hops: int = 8) -> Dict:
@@ -44,7 +100,7 @@ def expand_url(url: str, max_hops: int = 8) -> Dict:
         "original_url": original,
         "final_url": original,
         "chain": [original],
-        "shortened": is_shortener(url),
+        "shortened": is_shortener(url) or bool(embedded_target(url)),
         "hops": 0,
         "expanded": False,
         "error": None,
@@ -62,11 +118,16 @@ def expand_url(url: str, max_hops: int = 8) -> Dict:
     current = url
     chain: List[str] = [original]
     seen = {original}
+    hidden = embedded_target(current)
+    if hidden and hidden not in seen:
+        chain.append(hidden)
+        seen.add(hidden)
+        current = hidden
 
     try:
         for _ in range(max_hops):
             assert_public_http_url(current)
-            resp = session.head(current, allow_redirects=False, timeout=6)
+            resp = session.head(current, allow_redirects=False, timeout=4)
             if resp.status_code in (403, 405, 501):
                 resp = session.get(
                     current,
@@ -77,11 +138,19 @@ def expand_url(url: str, max_hops: int = 8) -> Dict:
                 resp.close()
 
             location = resp.headers.get("Location")
-            if not location or resp.status_code not in (301, 302, 303, 307, 308):
+            nxt = ""
+            if location and resp.status_code in (301, 302, 303, 307, 308):
+                nxt = urljoin(current, location)
+            elif result["shortened"] or is_shortener(current):
+                page = session.get(current, allow_redirects=False, timeout=6, stream=True)
+                chunk = page.raw.read(20000, decode_content=True) if page.raw else b""
+                page.close()
+                html_hop = _hop_from_html(chunk.decode("utf-8", errors="ignore"), current)
+                if html_hop:
+                    nxt = html_hop
+            if not nxt:
                 result["final_url"] = current
                 break
-
-            nxt = urljoin(current, location)
             if nxt in seen:
                 result["error"] = "Redirect loop detected"
                 break
@@ -100,7 +169,6 @@ def expand_url(url: str, max_hops: int = 8) -> Dict:
         result["final_url"] = result.get("final_url") or current
         result["hops"] = max(len(chain) - 1, 0)
         result["expanded"] = result["final_url"].rstrip("/") != original.rstrip("/")
-        result["shortened"] = result["shortened"] or result["expanded"]
     except UnsafeURLError as exc:
         result["error"] = str(exc)
     except requests.TooManyRedirects:
