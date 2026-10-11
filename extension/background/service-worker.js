@@ -207,6 +207,13 @@ async function scanTab(tabId, url, { force = false, pageSignals = null } = {}) {
     return state;
   }
 
+  if (await isOwnAppUrl(url)) {
+    const state = { status: "safe", url, result: null, error: "" };
+    setTabState(tabId, state);
+    await updateBadge(tabId, "safe");
+    return state;
+  }
+
   recordVisit(url);
 
   if (!settings.autoScan && !force) {
@@ -518,8 +525,8 @@ async function handleMessage(message, sender) {
       await api.windows.create({
         url: panelPageUrl(message.url || ""),
         type: "popup",
-        width: 420,
-        height: 740,
+        width: 1040,
+        height: 760,
         focused: true,
       });
     } else {

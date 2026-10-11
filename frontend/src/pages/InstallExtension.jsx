@@ -26,7 +26,7 @@ export default function InstallExtension() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
       <PageHeader
-        section="00 / Extension"
+        section="10 / Extension"
         title="Browser protection"
         subtitle="The main product: scan before the other site opens. Same FastAPI engine as this dashboard."
       />

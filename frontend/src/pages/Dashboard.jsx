@@ -63,7 +63,7 @@ export default function Dashboard() {
       <PageHeader
         section="01 / Dashboard"
         title="Security console"
-        subtitle="Live metrics from your FastAPI + SQLite backend."
+        subtitle="What you have checked, and what was stopped."
       />
 
       <section>

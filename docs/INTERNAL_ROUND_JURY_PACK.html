@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>PHISHEYE — SIH1454 Internal Round Jury Pack</title>
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 16mm 12mm;
+    @bottom-left {
+      content: "PHISHEYE  ·  SIH1454  ·  NTRO  ·  Internal Round";
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      font-size: 7.5pt;
+      color: #64748b;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      font-size: 8pt;
+      color: #1F497D;
+      font-weight: 700;
+    }
+  }
+  @page :first {
+    margin: 0;
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.42;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  h1 {
+    font-size: 16.5pt;
+    color: #1F497D;
+    border-bottom: 2.5px solid #C8102E;
+    padding-bottom: 5px;
+    margin: 0 0 10px;
+    page-break-after: avoid;
+    letter-spacing: 0.02em;
+  }
+  h2 {
+    font-size: 11.5pt;
+    color: #fff;
+    background: #1F497D;
+    padding: 6px 10px;
+    margin: 14px 0 8px;
+    page-break-after: avoid;
+    font-weight: 650;
+  }
+  h3 {
+    font-size: 11pt;
+    color: #1F497D;
+    margin: 12px 0 6px;
+    page-break-after: avoid;
+  }
+  p { margin: 5px 0 8px; orphans: 3; widows: 3; }
+  ul, ol { margin: 4px 0 10px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  code, .mono {
+    font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+    font-size: 8.6pt;
+    background: #f1f5f9;
+    padding: 0 3px;
+  }
+  strong { color: #12263A; }
+
+  .cover {
+    page-break-after: always;
+    width: 210mm;
+    height: 297mm;
+    background: #1F497D;
+    color: #fff;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-bar { height: 8mm; background: #C8102E; }
+  .cover-inner { padding: 16mm 18mm 14mm; }
+  .kicker {
+    letter-spacing: 0.34em;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #F8D7DA;
+    margin: 0 0 10px;
+  }
+  .cover h1 {
+    font-size: 42pt;
+    line-height: 0.95;
+    color: #fff;
+    border: 0;
+    margin: 0 0 8px;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+  }
+  .cover .tagline {
+    font-size: 13.5pt;
+    color: #E8EEF6;
+    margin: 0 0 16px;
+    font-weight: 400;
+  }
+  .cover-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 18px;
+    margin: 18px 0 16px;
+    font-size: 10pt;
+  }
+  .cover-grid .lab { color: #B8C7DB; font-size: 8pt; letter-spacing: 0.12em; text-transform: uppercase; }
+  .cover-grid .val { font-weight: 700; }
+  .verbs {
+    display: flex;
+    gap: 6px;
+    margin: 18px 0 20px;
+  }
+  .verb {
+    flex: 1;
+    text-align: center;
+    background: #16365C;
+    border: 1px solid #4F81BD;
+    padding: 8px 4px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .cover-honesty {
+    background: #16365C;
+    border-left: 4px solid #F6C343;
+    padding: 10px 12px;
+    font-size: 9.2pt;
+    color: #E8EEF6;
+    margin-top: 8px;
+  }
+  .cover-close {
+    position: absolute;
+    left: 18mm;
+    right: 18mm;
+    bottom: 16mm;
+    border-top: 1px solid #4F81BD;
+    padding-top: 10px;
+    font-size: 9.5pt;
+    line-height: 1.4;
+    color: #E8EEF6;
+  }
+  .cover-close em { color: #fff; font-style: normal; font-weight: 600; }
+
+  .toc { page-break-after: always; }
+  .toc ol { margin-left: 22px; }
+  .toc li { margin: 6px 0; font-size: 11pt; }
+  .toc .hint { color: #5A6570; font-size: 9pt; }
+
+  .sheet { page-break-after: always; page-break-inside: avoid; }
+  .sheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .tile {
+    border: 1px solid #D5DCE3;
+    background: #F4F7FA;
+    padding: 8px 10px;
+    page-break-inside: avoid;
+  }
+  .tile h3 { margin: 0 0 4px; font-size: 10pt; }
+  .tile p, .tile li { font-size: 8.7pt; margin: 2px 0; }
+  .closebox {
+    background: #1F497D;
+    color: #fff;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 9.3pt;
+    page-break-inside: avoid;
+  }
+
+  .beat {
+    display: grid;
+    grid-template-columns: 28mm 18mm 1fr;
+    gap: 8px;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 7px 0;
+    page-break-inside: avoid;
+  }
+  .time {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #1F497D;
+  }
+  .who {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    height: fit-content;
+    color: #fff;
+    background: #1F497D;
+  }
+  .who.lead { background: #C8102E; }
+  .who.be { background: #1F497D; }
+  .who.fe { background: #3D8B5F; }
+  .who.ex { background: #C45911; }
+  .spoken { margin: 0; font-size: 9.6pt; }
+  .click {
+    background: #FFF8E8;
+    border-left: 3px solid #C45911;
+    padding: 6px 8px;
+    margin: 4px 0 0;
+    font-size: 9pt;
+  }
+
+  .box { padding: 8px 10px; margin: 8px 0; page-break-inside: avoid; font-size: 9.3pt; }
+  .say { background: #ECF8F0; border-left: 4px solid #166534; }
+  .never { background: #FDECEC; border-left: 4px solid #C8102E; }
+  .note { background: #FFF4E8; border-left: 4px solid #C45911; }
+  .tip { background: #E8F1FA; border-left: 4px solid #1F497D; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin: 6px 0 10px; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th {
+    background: #1F497D;
+    color: #fff;
+    text-align: left;
+    padding: 5px 6px;
+    font-weight: 650;
+  }
+  td {
+    border: 1px solid #D5DCE3;
+    padding: 4px 6px;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: #F8FAFC; }
+
+  .flow {
+    display: flex;
+    gap: 5px;
+    margin: 8px 0 10px;
+    page-break-inside: avoid;
+  }
+  .flow .n {
+    flex: 1;
+    background: #1F497D;
+    color: #fff;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 8pt;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .flow .n small { display: block; font-weight: 500; color: #C5D4E8; font-size: 7.2pt; }
+  .arch {
+    border: 1px solid #1F497D;
+    padding: 10px;
+    background: #F4F7FA;
+    page-break-inside: avoid;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8.2pt;
+    white-space: pre;
+    line-height: 1.35;
+    margin: 8px 0 12px;
+  }
+  .q {
+    border: 1px solid #D5DCE3;
+    margin: 0 0 8px;
+    page-break-inside: avoid;
+  }
+  .q .qh {
+    background: #EEF2F6;
+    padding: 5px 8px;
+    font-weight: 700;
+    font-size: 9.3pt;
+    color: #1F497D;
+  }
+  .q .qa { padding: 6px 8px 4px; font-size: 9.1pt; }
+  .q .qp {
+    padding: 0 8px 7px;
+    font-size: 8.5pt;
+    color: #7A3410;
+  }
+  .roles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .section { page-break-before: always; }
+  .section.first { page-break-before: auto; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .muted { color: #5A6570; font-size: 9pt; }
+  .red { color: #C8102E; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-bar"></div>
+  <div class="cover-inner">
+    <p class="kicker">SMART INDIA HACKATHON 2026 &nbsp;·&nbsp; INTERNAL ROUND</p>
+    <h1>PHISHEYE</h1>
+    <p class="tagline">Analyze before you trust. A working SIH1454 prototype.</p>
+    <div class="cover-grid">
+      <div><div class="lab">Problem ID</div><div class="val">SIH1454</div></div>
+      <div><div class="lab">Organisation</div><div class="val">NTRO</div></div>
+      <div><div class="lab">Theme</div><div class="val">Blockchain &amp; Cybersecurity</div></div>
+      <div><div class="lab">Category</div><div class="val">Software</div></div>
+      <div><div class="lab">Team ID</div><div class="val">[fill from SIH portal]</div></div>
+      <div><div class="lab">Team Name</div><div class="val">[fill from SIH portal]</div></div>
+    </div>
+    <p class="muted" style="color:#C5D4E8;margin:0 0 8px">Official title: Create an intelligent system using AI/ML to detect phishing domains which imitate look and feel of genuine domains.</p>
+    <div class="verbs">
+      <div class="verb">DETECT</div>
+      <div class="verb">UNDERSTAND</div>
+      <div class="verb">EXPLAIN</div>
+      <div class="verb">PROTECT</div>
+      <div class="verb">LEARN</div>
+    </div>
+    <div class="cover-honesty">
+      <strong style="color:#F6C343">Honesty strip — say this in the first two minutes.</strong><br/>
+      FastAPI, not Flask. SQLite file <em>threats.db</em>, not live PostgreSQL. No trained CNN, BERT, or TensorFlow in this repository.
+      Theme includes blockchain; we did not build a ledger. PhishShield is the SIH idea title. The running product is <strong>PHISHEYE</strong>.
+    </div>
+  </div>
+  <div class="cover-close">
+    Closing sentence (memorise this):<br/>
+    <em>PHISHEYE is a working SIH1454 prototype: one FastAPI threat engine, Simple and Technical views, public threat feeds plus lookalike heuristics, and a Chrome gate that opens clear sites and keeps the rest closed — without claiming a trained CNN, live Postgres, or inbox access we do not have.</em>
+  </div>
+</div>
+
+<section class="toc">
+  <h1>How to use this pack</h1>
+  <p>Print this PDF. Give every speaker a copy. Fill Team ID and Team Name from the SIH portal on the cover by hand. Do not invent them.</p>
+  <ol>
+    <li><strong>One-page cheat sheet</strong> — keep this on the table during Q&amp;A.</li>
+    <li><strong>60-second pitch</strong> — if they cut you short.</li>
+    <li><strong>12-minute jury script</strong> — timed spoken lines and demo clicks.</li>
+    <li><strong>3-minute emergency script</strong> — Wi-Fi or laptop dies.</li>
+    <li><strong>Six SIH slide notes</strong> — what to say on each official slide.</li>
+    <li><strong>Architecture diagrams</strong> — draw these on the whiteboard if asked.</li>
+    <li><strong>40 viva answers</strong> — 20–45 seconds, plus push-back lines.</li>
+    <li><strong>Faculty tactics</strong> — how Indian college panels actually mark.</li>
+  </ol>
+  <div class="box say"><strong>Must know, all four speakers:</strong> Website and Chrome extension both call <code>POST /api/v1/threat/check-url</code>. Same URL, same score. Same FastAPI brain on port 8000.</div>
+  <div class="box never"><strong>Never say:</strong> Flask · live PostgreSQL · trained CNN / 99% accuracy · we read Gmail or phone SMS · padlock means genuine SBI · community report is legal proof · we built a blockchain.</div>
+  <p class="muted">Source of truth: the current repository. If a fact is not in the code, say “not in our current build.” Never invent a filename or an accuracy number.</p>
+</section>
+
+<section class="sheet">
+  <h1>G. One-page cheat sheet — print this first</h1>
+  <div class="sheet-grid">
+    <div class="tile">
+      <h3>Problem</h3>
+      <p>SIH1454 · NTRO · Software</p>
+      <p>Detect phishing domains that imitate genuine sites (paypa1, sbi-login.xyz, amaz0n).</p>
+      <p>Theme is Blockchain &amp; Cybersecurity. Our work is <strong>cybersecurity</strong>. We did not implement a ledger.</p>
+    </div>
+    <div class="tile">
+      <h3>Product</h3>
+      <p><strong>PHISHEYE</strong> — website + Chrome extension + one FastAPI engine.</p>
+      <p>PhishShield AI = SIH idea title. CyberGuard = old code name. Say PHISHEYE to the jury.</p>
+      <p>Five verbs: Detect · Understand · Explain · Protect · Learn</p>
+    </div>
+    <div class="tile">
+      <h3>Stack and ports</h3>
+      <p>React 19 + Vite 8 · <code>http://127.0.0.1:5173</code></p>
+      <p>FastAPI + Uvicorn · <code>http://127.0.0.1:8000</code> · Swagger <code>/docs</code> · health <code>/health</code></p>
+      <p>SQLite <code>backend/threats.db</code> · JWT + bcrypt · OpenCV QR · MV3 1.8.0</p>
+    </div>
+    <div class="tile">
+      <h3>Demo URLs (never open a live kit)</h3>
+      <p><code>https://www.google.com</code> → LOW, auto-open</p>
+      <p><code>https://paypa1.com</code> or <code>https://sbi-login.xyz</code> → HIGH/CRITICAL, stay closed</p>
+      <p>SMS paste: “Urgent: Your SBI account will be blocked… Enter OTP here: https://sbi-login.xyz/verify”</p>
+    </div>
+    <div class="tile">
+      <h3>Intelligence today</h3>
+      <p>Feeds: OpenPhish, URLhaus, PhishTank dump, Phishing Army, optional Google Safe Browsing.</p>
+      <p>Lookalikes: fragments, leet (1→l), Levenshtein, limited homoglyphs, free-host + login tokens.</p>
+      <p>Psychology: English + Hinglish keyword rules. Cap 35 if it is the only signal.</p>
+      <p>The fusion key named <code>ml</code> is a <strong>copy of the lexical URL score</strong>. No trained classifier.</p>
+    </div>
+    <div class="tile">
+      <h3>Honesty lines</h3>
+      <p>Intel <code>no_match</code> is not SAFE. Timeout is UNAVAILABLE, not SAFE.</p>
+      <p>HTTPS / padlock does not mean genuine SBI.</p>
+      <p>Model confidence = how many signals agreed, not accuracy.</p>
+      <p>Community Mark Scam is a signal, not court proof. Rate limited: 1 URL / 24h, 20 / day.</p>
+      <p>QR is decoded. Destination is not visited. Images are not stored.</p>
+    </div>
+  </div>
+  <div class="closebox">
+    Close with this sentence, then stop talking for two seconds:<br/>
+    PHISHEYE is a working SIH1454 prototype: one FastAPI threat engine, Simple and Technical views, public threat feeds plus lookalike heuristics, and a Chrome gate that opens clear sites and keeps the rest closed — without claiming a trained CNN, live Postgres, or inbox access we do not have.
+  </div>
+</section>
+
+<section class="section first">
+  <h1>A. 60-second elevator pitch</h1>
+  <p class="muted">Lead speaks. Stand beside the screen. Do not read the title slide word for word.</p>
+  <p class="spoken">Good morning. Problem SIH1454 from NTRO asks for an intelligent system that detects phishing domains which imitate genuine sites — SBI, PayPal, IRCTC, UPI. In India, one WhatsApp KYC message is enough. The page has a green padlock. A parent types the OTP. Money leaves. HTTPS is encryption. It is not proof that the brand is real.</p>
+  <p class="spoken">Our product is PHISHEYE. It is a working prototype, not a slide. Users get a website and a Chrome extension. Both call one FastAPI engine. We detect lookalikes, we explain the result in Simple English and Technical evidence, and the extension scans before the other site is used. Clear sites auto-open. Dangerous sites stay closed.</p>
+  <p class="spoken">We did not train a CNN. We did not build a blockchain. The live database is SQLite. Intelligence today is explainable: public threat feeds, brand distance, Hinglish psychology rules, and a decision engine that will not let a confirmed feed hit be averaged away. Thank you — we can demo in the next minute.</p>
+</section>
+
+<section>
+  <h1>C. 3-minute emergency script</h1>
+  <p class="muted">Use this if Wi-Fi dies, uvicorn crashes, or the projector will not show the live app. Show desktop screenshots: ScanResult CRITICAL, gate closed, phone photo of Swagger <code>/docs</code>.</p>
+  <div class="beat"><div class="time">0:00–0:40</div><div class="who lead">Lead</div><div><p class="spoken">SIH1454, NTRO: detect lookalike phishing domains. Product name PHISHEYE. Theme includes blockchain; we did cybersecurity, not a ledger. FastAPI, not Flask. SQLite file threats.db, not live Postgres. No trained CNN in this repository.</p></div></div>
+  <div class="beat"><div class="time">0:40–1:20</div><div class="who lead">Lead</div><div><p class="spoken">Point at the CRITICAL screenshot. This is Simple View: do not enter OTP. paypa1.com is not paypal.com. Digit 1 instead of L. That is the problem statement — imitate look and feel.</p></div></div>
+  <div class="beat"><div class="time">1:20–2:00</div><div class="who ex">Ext</div><div><p class="spoken">Point at the gate screenshot. We scan before the destination is used. Google would auto-open. This lookalike stayed closed. Chrome may flash a blank page on a typed URL. Link clicks do not load the phish first.</p></div></div>
+  <div class="beat"><div class="time">2:00–2:35</div><div class="who be">Back</div><div><p class="spoken">Four honesty lines: miss is not safe. Psychology cannot solo-CRITICAL — we cap it at 35. We do not read Gmail or phone SMS. Confidence is signal agreement, not accuracy.</p></div></div>
+  <div class="beat"><div class="time">2:35–3:00</div><div class="who lead">Lead</div><div><p class="spoken">Closing sentence. Sit down. Do not apologise for the laptop.</p></div></div>
+</section>
+
+<section class="section">
+  <h1>B. 12-minute jury script</h1>
+  <p class="muted">Zoom browser 125%. Hide WhatsApp and Discord. Boot both servers in the corridor. Lead keeps time. Floater restarts uvicorn. Never debug silently — narrate every click.</p>
+  <div class="box note"><strong>Timer rule:</strong> never cut the live demo to save architecture. Cut architecture instead. Two live URLs only: Google, then paypa1 or sbi-login.xyz.</div>
+
+  <h2>Open — problem and product</h2>
+  <div class="beat"><div class="time">0:00–0:45</div><div class="who lead">Lead</div><div><p class="spoken">Good morning. Problem SIH1454 from NTRO: detect phishing domains that imitate genuine domains. Theme is Blockchain and Cybersecurity; our work is cybersecurity, not a blockchain. In India, a fake SBI or UPI link on WhatsApp is enough to steal an OTP even when the padlock is green. HTTPS does not mean the brand is real.</p></div></div>
+  <div class="beat"><div class="time">0:45–2:00</div><div class="who lead">Lead</div><div><p class="spoken">Our product is PHISHEYE. It is a working prototype, not a slide. Five verbs: Detect, Understand, Explain, Protect, Learn. Users get a website and a Chrome extension. Both call one FastAPI engine. If a slide still says PhishShield, that is the SIH idea title. The running product is PHISHEYE.</p></div></div>
+
+  <h2>Stack — Backend speaks</h2>
+  <div class="beat"><div class="time">2:00–2:45</div><div class="who be">Back</div><div><p class="spoken">Stack: React 19 and Vite on port 5173. FastAPI and Uvicorn on port 8000. Open <code>/docs</code> if they doubt FastAPI. SQLite file threats.db — PostgreSQL is planned, not live. Auth is bcrypt and JWT. QR is OpenCV. Tests are pytest.</p></div></div>
+  <div class="beat"><div class="time">2:45–3:30</div><div class="who be">Back</div><div><p class="spoken">Intel is OpenPhish, URLhaus, PhishTank dump, Phishing Army, optional Google Safe Browsing. Pipeline: INPUT, NORMALIZE, ANALYZE, FUSE, EXPLAIN, ACT. Modular monolith. One Python process. Not microservices.</p></div></div>
+
+  <h2>Intelligence — still Backend</h2>
+  <div class="beat"><div class="time">3:30–4:20</div><div class="who be">Back</div><div><p class="spoken">We normalize the URL so www, default ports, and query strings cannot trick us. We query public threat feeds. A miss is no_match, not SAFE. A timeout is unavailable, not SAFE. If a feed confirms a URL, heuristics cannot override it — confirmed intel floors the score around 80 to 85 for an exact match.</p></div></div>
+  <div class="beat"><div class="time">4:20–5:10</div><div class="who be">Back</div><div><p class="spoken">Separately we catch lookalikes: paypa1, amaz0n, Levenshtein distance to SBI and PayPal, free hosts like vercel.app with login in the name. Psychology is English and Hinglish phrases — rules, not BERT. Psychology alone cannot go CRITICAL. We cap it at 35 so a marketing SMS is not a phishing alert.</p></div></div>
+  <div class="beat"><div class="time">5:10–5:30</div><div class="who be">Back</div><div><p class="spoken">There is no trained CNN in this repository. The channel named ML is a copy of the lexical URL score so nobody can say “ML said 10 therefore it is safe.” A supervised model is phase two after curated labels. Famous sites: Google, YouTube, GitHub are trusted so one dump row for a watch video does not burn all of YouTube. sites.google.com and github.io stay fully scanned.</p></div></div>
+
+  <h2>Website — Frontend speaks</h2>
+  <div class="beat"><div class="time">5:30–6:30</div><div class="who fe">Front</div><div><p class="spoken">The site: land, sign up, dashboard, scanner with six tabs — URL, Message, Email, WhatsApp/SMS, Screenshot, QR. Last result has Simple View for parents: do not enter OTP. Technical View for analysts: providers, registered domain, tags. Then history, community reports, statistics from real SQLite rows, privacy, advisor FAQ — not ChatGPT — and settings.</p></div></div>
+
+  <h2>Live demo — Extension narrates, Lead clicks</h2>
+  <p class="muted">Lead does the mouse. Extension speaker talks. Backend stays quiet unless the API fails.</p>
+  <div class="beat"><div class="time">6:30–6:50</div><div class="who fe">Front</div><div>
+    <p class="spoken">Landing page. This is PHISHEYE. Same engine as the Chrome extension.</p>
+    <div class="click">Click: open <code>http://127.0.0.1:5173</code>. Point at the PHISHEYE mark. Log in with the prepared account.</div>
+  </div></div>
+  <div class="beat"><div class="time">6:50–7:25</div><div class="who fe">Front</div><div>
+    <p class="spoken">Scan, URL tab, official domain. No feed match is not a 100% guarantee, but heuristics are clean and this is an official domain.</p>
+    <div class="click">Click: Scan → URL → <code>https://www.google.com</code> → Last Result. Point at LOW, Simple View, Technical intel no_match.</div>
+  </div></div>
+  <div class="beat"><div class="time">7:25–8:00</div><div class="who fe">Front</div><div>
+    <p class="spoken">Lookalike. Digit 1 instead of L. Brand impersonation. Simple View: do not enter OTP.</p>
+    <div class="click">Click: scan <code>https://paypa1.com</code> or <code>https://sbi-login.xyz</code>. Point at the score and the DANGER verdict. Do not open the site in a raw tab.</div>
+  </div></div>
+  <div class="beat"><div class="time">8:00–8:35</div><div class="who fe">Front</div><div>
+    <p class="spoken">WhatsApp and SMS tab. Chrome cannot read phone SMS. The user pastes visible text. Psychology tags plus the link HIGH.</p>
+    <div class="click">Paste: <em>Urgent: Your SBI account will be blocked. Complete KYC immediately. Enter OTP here: https://sbi-login.xyz/verify</em></div>
+  </div></div>
+  <div class="beat"><div class="time">8:35–9:00</div><div class="who fe">Front</div><div>
+    <p class="spoken">QR tab. We decode the QR. We do not visit the site.</p>
+    <div class="click">Upload the prepared PNG. Point at <code>decoded_text</code> and the score.</div>
+  </div></div>
+  <div class="beat"><div class="time">9:00–9:30</div><div class="who ex">Ext</div><div>
+    <p class="spoken">Extension gate. We scan before the other site is used. Clear sites auto-open. MEDIUM asks Open anyway. HIGH and CRITICAL stay closed. Scan every page is off so we do not re-scan every GitHub click. Chrome may flash a blank page on a typed URL. Link clicks do not load the phish first.</p>
+    <div class="click">Type <code>github.com</code> → gate → auto open. Then a lookalike → stays closed.</div>
+  </div></div>
+
+  <h2>Honesty and close</h2>
+  <div class="beat"><div class="time">9:30–10:20</div><div class="who lead">Lead</div><div><p class="spoken">We do not read Gmail or WhatsApp inboxes. We do not read phone SMS. We do not store uploaded images. We do store scan metadata in SQLite — be honest about that. Community Mark Scam is a signal, not a court proof. Model confidence is signal agreement, not accuracy. CORS is open for the prototype. We will not claim 99 percent.</p></div></div>
+  <div class="beat"><div class="time">10:20–11:00</div><div class="who fe">Front</div><div>
+    <p class="spoken">Statistics charts come from real scan rows in SQLite. Advisor is FAQ, not ChatGPT inside the app.</p>
+    <div class="click">Open Statistics, then Advisor. One sentence each. Do not tour CSS.</div>
+  </div></div>
+  <div class="beat"><div class="time">11:00–12:00</div><div class="who lead">Lead</div><div><p class="spoken">Impact: fewer OTP thefts for students and families; a local engine campuses can run; a path to a trained model when NTRO-scale labelled data exists. Closing sentence. Thank you. We are ready for questions.</p></div></div>
+  <div class="box say">After questions, if they look unconvinced, repeat the closing sentence once. Then stop.</div>
+</section>
+
+<section class="section">
+  <h1>D. Six official SIH slides — speaker notes</h1>
+  <p class="muted">Fill Team ID and Team Name from the portal on slide 1 before you walk in. If a slide still says PhishShield: “PhishShield is the SIH idea title. The running product is PHISHEYE.”</p>
+
+  <h3>Slide 1 — Title</h3>
+  <p>Say the problem ID and the full title once, slowly. Say NTRO, Software, Blockchain and Cybersecurity. Then one sentence: we built cybersecurity, not a blockchain. Do not spend time on the template chrome.</p>
+
+  <h3>Slide 2 — Idea</h3>
+  <p>PHISHEYE: analyze before you trust. Multi-channel input — URL, pasted SMS, QR, screenshot, browser tab — one engine — Simple and Technical views. Innovation is five verbs: Detect, Understand, Explain, Protect, Learn. Read the honesty footer: no inbox OAuth, OCR only if Tesseract is installed, CNN planned, confidence is not accuracy.</p>
+
+  <h3>Slide 3 — Technical approach</h3>
+  <p>React, Vite, Tailwind, Axios, Recharts. FastAPI, Pydantic, Uvicorn. SQLite live. URLChecker, Psychology 2.0, decision engine, fusion, OpenCV QR, Manifest V3, bcrypt, JWT, SSRF. Architecture line: INPUT → NORMALIZE → ANALYZE → FUSE → EXPLAIN → ACT. Not Flask. Not live Postgres. Not a TensorFlow CNN.</p>
+
+  <h3>Slide 4 — Feasibility</h3>
+  <p>Technical: runs on a campus laptop with Python and Node. Operational: threat feeds cache 30 minutes on disk. Security: SSRF guard, bcrypt, report caps, 5 MB upload limit. Challenges we already mitigated: psychology false positives capped at 35; famous-site dump noise handled; intel miss is not treated as safe.</p>
+
+  <h3>Slide 5 — Impact</h3>
+  <p>Users: citizens and parents on Simple View; students and campus analysts on Technical View. Before: padlock plus a panic SMS. After: scan first, plain English, do not enter OTP. KPIs on the slide are proposed — time-to-warn, false-open rate — not claimed production results. We have no production user count.</p>
+
+  <h3>Slide 6 — Research</h3>
+  <p>SIH1454 / NTRO, Google Safe Browsing docs, OpenPhish, URLhaus, PhishTank, RDAP, OWASP phishing and SSRF, FastAPI, React, Chrome MV3, SQLite, OpenCV. No fake IEEE papers. If they ask for a citation we do not have: “That paper is not in our references. Our implementation is in these files.”</p>
+</section>
+
+<section class="section">
+  <h1>E. Diagrams you can redraw on a whiteboard</h1>
+
+  <h2>1. System architecture — one brain, many mouths</h2>
+  <div class="arch">[ React dashboard :5173 ]     [ Chrome extension gate / popup ]
+                 \                     /
+                  \     HTTP JSON     /
+                   v                 v
+                 [ FastAPI :8000  —  PHISHEYE API v2.0.0 ]
+                    |
+                    +-- URLChecker (single URL)
+                    +-- analyze_content (message / email / WA / QR / screenshot)
+                    +-- threat_intel (feeds; never fetches the attacker page to decide intel)
+                    +-- SQLite  backend/threats.db
+                    v
+                 [ Simple View + Technical View JSON ]</div>
+  <div class="flow">
+    <div class="n">INPUT<small>URL, text, QR, tab</small></div>
+    <div class="n">NORMALIZE<small>host, path, query</small></div>
+    <div class="n">ANALYZE<small>intel, brand, psych</small></div>
+    <div class="n">FUSE<small>0–100 + floors</small></div>
+    <div class="n">EXPLAIN<small>Simple + Technical</small></div>
+    <div class="n">ACT<small>save / open / refuse</small></div>
+  </div>
+
+  <h2>2. Website page map</h2>
+  <table>
+    <thead><tr><th>Path</th><th>Who</th><th>What to say</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code> Landing</td><td>Public</td><td>Brand PHISHEYE. Guest can scan URL or screenshot.</td></tr>
+      <tr><td><code>/login</code> <code>/signup</code></td><td>Public</td><td>JWT in localStorage key cg_token. bcrypt in SQLite.</td></tr>
+      <tr><td><code>/dashboard</code></td><td>01</td><td>Cards from real url_checks, not fake numbers.</td></tr>
+      <tr><td><code>/scanner</code></td><td>02</td><td>Six tabs: URL, Message, Email, WhatsApp/SMS, Screenshot, QR.</td></tr>
+      <tr><td><code>/scan-result</code></td><td>03</td><td>Score, Simple / Technical, intel, flag actions.</td></tr>
+      <tr><td><code>/history</code> <code>/reports</code> <code>/statistics</code></td><td>04–06</td><td>Past scans, community flags, Recharts.</td></tr>
+      <tr><td><code>/privacy</code> <code>/advisor</code> <code>/settings</code></td><td>07–09</td><td>Honest privacy. Advisor is FAQ, not an LLM.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. URL scan sequence</h2>
+  <div class="flow">
+    <div class="n">A Normalize<small>drop #fragment</small></div>
+    <div class="n">B Intel<small>feeds, never fetch page</small></div>
+    <div class="n">C Network<small>DNS, age, TLS, SSRF</small></div>
+    <div class="n">D Heuristics<small>lookalike, TLD, IP</small></div>
+    <div class="n">E Decision<small>intel floors</small></div>
+    <div class="n">F Explain<small>two views</small></div>
+    <div class="n">G Persist<small>url_checks</small></div>
+  </div>
+  <table>
+    <thead><tr><th>Situation</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Confirmed intel, exact URL</td><td>Floor score 85</td></tr>
+      <tr><td>Confirmed, normalized URL</td><td>Floor 80</td></tr>
+      <tr><td>Confirmed, hostname</td><td>Floor 72</td></tr>
+      <tr><td>Confirmed, registered domain</td><td>Floor 55</td></tr>
+      <tr><td>Reported, unverified</td><td>Floor 58, SUSPICIOUS</td></tr>
+      <tr><td>Feed miss + weak heuristics</td><td>NO_MALICIOUS_EVIDENCE — not a clean bill of health</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. Message / QR pipeline</h2>
+  <p>normalize_content → psychology on full text → URLChecker on each extracted link → brand impersonation (mention + bad domain + extra scam signal) → optional sender From / Reply-To → community reputation → fuse() → if any child URL was confirmed malicious, fused score cannot fall below that URL’s decision score → save content_scans if logged in.</p>
+  <p>QR: OpenCV decode, PIL fallback, 5 MB cap. Destination URL is not fetched. Screenshot: QR always; OCR only if Tesseract is installed on that PC.</p>
+
+  <h2>5. Extension gate sequence</h2>
+  <div class="flow">
+    <div class="n">Click<small>gate-clicks.js</small></div>
+    <div class="n">Hold<small>preventDefault</small></div>
+    <div class="n">Panel<small>panel.html</small></div>
+    <div class="n">Scan<small>check-url</small></div>
+    <div class="n">LOW<small>auto-open</small></div>
+    <div class="n">MED<small>Open anyway?</small></div>
+    <div class="n">HIGH<small>stay closed</small></div>
+  </div>
+  <p>Session allow-list is by registered domain. Scan every page default OFF. Backend down → UNAVAILABLE, never SAFE. Typed omnibox URLs: Chrome MV3 cannot always cancel the first byte. Do not claim we always prevent it.</p>
+
+  <h2>6. Decision engine vs fusion</h2>
+  <div class="two">
+    <div class="tile">
+      <h3>URL path — decision engine</h3>
+      <p>Used by URLChecker. Confirmed intel is a floor. Heuristics cannot wash a feed hit down to LOW. <code>ml_score</code> is the lexical/heuristic URL score copy.</p>
+    </div>
+    <div class="tile">
+      <h3>Message path — weighted fuse</h3>
+      <p>url 0.22, domain 0.16, ml 0.10, nlp 0.10, psychological 0.10, threat_intel 0.10, brand 0.08, sender 0.05, community 0.05, redirect 0.04. Starting defaults, not proven-optimal. Then raise the floor if a child URL was confirmed malicious.</p>
+    </div>
+  </div>
+  <p>Levels: LOW 0–29 · MEDIUM 30–49 · HIGH 50–69 · CRITICAL 70–100. <code>scam_risk</code> is the same integer, not a calibrated probability. <code>model_confidence</code> = 35 + 10 × (signals ≥ 20), cap 95.</p>
+</section>
+
+<section class="section">
+  <h1>F. 40 viva questions — spoken answers</h1>
+  <p class="muted">Repeat the question in five words, then answer. One person answers. If you do not know: “That is not in our current build. Today we do X. It is on the roadmap.”</p>
+<div class="q"><div class="qh">Q1. What is PHISHEYE?</div><div class="qa"><strong>Say:</strong> A multi-channel phishing and scam intelligence prototype: a React website, a Chrome Manifest V3 extension, and one FastAPI brain that scores URLs, pasted messages, QR codes, and the browser tab in Simple English and Technical evidence.</div><div class="qp"><strong>If they push back:</strong> If they say it is just a VirusTotal clone: we add lookalike heuristics, Hinglish psychology, an explainable decision engine, and a scan-before-open gate. We do not claim we replace national intel.</div></div>
+<div class="q"><div class="qh">Q2. What is SIH1454?</div><div class="qa"><strong>Say:</strong> NTRO asked for an intelligent system using AI/ML to detect phishing domains that imitate the look and feel of genuine domains. Software track, Blockchain and Cybersecurity theme. We implemented cybersecurity.</div><div class="qp"><strong>If they push back:</strong> If they read the word AI/ML: intelligence today is multi-signal fusion plus threat intel plus lookalike heuristics. A supervised model is phase two after curated labelled reports.</div></div>
+<div class="q"><div class="qh">Q3. Where is the AI?</div><div class="qa"><strong>Say:</strong> Explainable fusion, public threat feeds, and lookalike heuristics. There is no neural net in this repository. The fusion channel named ml is a copy of the lexical URL score so a low ML number cannot be used as proof of safety.</div><div class="qp"><strong>If they push back:</strong> If they demand a CNN file: there is no SavedModel, no sklearn pickle, no BERT. Show url_checker.py, decision_engine.py, risk_engine.py.</div></div>
+<div class="q"><div class="qh">Q4. Why FastAPI, not Flask?</div><div class="qa"><strong>Say:</strong> The live API is FastAPI with Uvicorn. Pydantic validates bodies. /docs is automatic Swagger for the jury. Flask is not the running backend.</div><div class="qp"><strong>If they push back:</strong> If an old comment says Flask: leftover naming. Open http://127.0.0.1:8000/docs.</div></div>
+<div class="q"><div class="qh">Q5. Is the database PostgreSQL?</div><div class="qa"><strong>Say:</strong> Planned for multi-user production. Live today is SQLite file backend/threats.db. SQLAlchemy model files exist but live queries use sqlite3 with parameterized placeholders.</div><div class="qp"><strong>If they push back:</strong> If they call that amateur: zero-ops MVP on a campus laptop. Scale path is Postgres. Do not say we run Postgres today.</div></div>
+<div class="q"><div class="qh">Q6. How do you detect paypa1.com?</div><div class="qa"><strong>Say:</strong> Known phishing fragment list, leet table where digit 1 maps toward L, and Levenshtein distance to paypal. Combined with TLD and brand rules. That is lookalike detection, which is the heart of SIH1454.</div><div class="qp"><strong>If they push back:</strong> If they type paypal.com: official domain, trusted path, should be LOW if DNS exists.</div></div>
+<div class="q"><div class="qh">Q7. Do you handle homoglyphs?</div><div class="qa"><strong>Say:</strong> Limited Cyrillic-to-Latin mapping inside the URL checker. Not a full Unicode IDN suite. We say limited on purpose.</div><div class="qp"><strong>If they push back:</strong> If they push punycode: we normalize the URL and score the host. Full IDNA hardening is not specified as complete in this build.</div></div>
+<div class="q"><div class="qh">Q8. Why not blacklist only?</div><div class="qa"><strong>Say:</strong> Feeds lag. A new sbi-login.xyz can steal OTPs for hours before OpenPhish lists it. We add heuristics, brand distance, and psychology on the message text.</div><div class="qp"><strong>If they push back:</strong> If they say blacklists are enough: absence from a feed is no_match, not SAFE.</div></div>
+<div class="q"><div class="qh">Q9. Why not ML only?</div><div class="qa"><strong>Say:</strong> We do not have a curated labelled production dataset yet. A black box fails viva. Parents need a sentence they can act on, not a silent probability.</div><div class="qp"><strong>If they push back:</strong> If they want F1: we have no official product F1. Closed-world scripts must be labelled simulations if mentioned at all. Prefer not to quote a percentage.</div></div>
+<div class="q"><div class="qh">Q10. Is no_match safe?</div><div class="qa"><strong>Say:</strong> No. It means the feed was queried and nothing was found. Zero-day phishing will miss. We still run heuristics and brand checks.</div><div class="qp"><strong>If they push back:</strong> If they say then why use feeds: confirmed hits become floors so they cannot be averaged away.</div></div>
+<div class="q"><div class="qh">Q11. What does unavailable mean?</div><div class="qa"><strong>Say:</strong> A feed timed out or errored. It is not no_match and it is not SAFE. The extension treats backend-down the same way: UNAVAILABLE, never SAFE.</div><div class="qp"><strong>If they push back:</strong> If they ask what the user sees: we do not auto-open. Dangerous default is keep closed.</div></div>
+<div class="q"><div class="qh">Q12. Can psychology mark CRITICAL alone?</div><div class="qa"><strong>Say:</strong> No. If psychology is high and URL, domain, intel, brand, and community are all weak, fused score is capped at 35, which is LOW or MEDIUM. A sale SMS that says act now is not phishing.</div><div class="qp"><strong>If they push back:</strong> If they paste a bank OTP SMS with sbi-login.xyz: that is not psychology alone. The lookalike URL carries it.</div></div>
+<div class="q"><div class="qh">Q13. Are community reports proof?</div><div class="qa"><strong>Say:</strong> No. Signal only, weight 0.05 in fusion. Logged-in users, rate limited: one URL per 24 hours per user, twenty reports per day. Not a court document.</div><div class="qp"><strong>If they push back:</strong> If they ask about brigading: that is why the caps exist. Still a prototype control, not a full abuse desk.</div></div>
+<div class="q"><div class="qh">Q14. Does HTTPS mean the site is genuine?</div><div class="qa"><strong>Say:</strong> No. A padlock is encryption. Certificates are cheap. Fake SBI pages routinely have HTTPS. We even add a little risk if HTTPS is missing, but presence of HTTPS does not make it safe.</div><div class="qp"><strong>If they push back:</strong> If they show a green lock on a phish kit: that is the India story. OTP still leaves.</div></div>
+<div class="q"><div class="qh">Q15. Do you visit the phishing page?</div><div class="qa"><strong>Say:</strong> Not to decide threat intel. Ads and clutter fetch is skipped if intel already confirmed, so we do not load the kit. QR does not visit. Shortener unwrap uses an SSRF guard.</div><div class="qp"><strong>If they push back:</strong> If they want screenshots of live kits: we refuse in the jury room. Use lookalikes and screenshots already saved.</div></div>
+<div class="q"><div class="qh">Q16. What is SSRF protection?</div><div class="qa"><strong>Say:</strong> When we fetch an attacker-controlled URL, we block localhost, private RFC1918, and cloud metadata 169.254.169.254. That stops the scanner from becoming an open proxy into the campus network.</div><div class="qp"><strong>If they push back:</strong> If they ask for the file: backend/app/services/ssrf.py.</div></div>
+<div class="q"><div class="qh">Q17. Does the extension read WhatsApp?</div><div class="qa"><strong>Say:</strong> Only visible links on WhatsApp Web after the page rendered. No native WhatsApp. No phone SMS. Chrome cannot read the phone.</div><div class="qp"><strong>If they push back:</strong> If they want Android SMS: planned companion, not implemented. mobile_source is not a live ingest.</div></div>
+<div class="q"><div class="qh">Q18. Do you OAuth Gmail?</div><div class="qa"><strong>Say:</strong> No. Paste the email text, or type From and Reply-To, or scan visible links. Sender analysis only works if the user types those fields.</div><div class="qp"><strong>If they push back:</strong> If they say that is weak: it is an honest browser limit plus privacy. Inbox OAuth is roadmap if legally allowed.</div></div>
+<div class="q"><div class="qh">Q19. Is QR a malware scanner?</div><div class="qa"><strong>Say:</strong> We decode the payload with OpenCV. We do not execute it. Then we score extracted URLs with the same engine. Destination is not fetched.</div><div class="qp"><strong>If they push back:</strong> If decode fails: say so. Try a clearer PNG, or paste the URL.</div></div>
+<div class="q"><div class="qh">Q20. What about OCR?</div><div class="qa"><strong>Say:</strong> Optional Tesseract. If it is not installed on that PC, paste the text or use the QR tab. Partial, not a claim of full screenshot reading.</div><div class="qp"><strong>If they push back:</strong> Do not say we always read the screenshot.</div></div>
+<div class="q"><div class="qh">Q21. How do you avoid burning YouTube?</div><div class="qa"><strong>Say:</strong> Official Google, YouTube, GitHub are trusted destinations. A dump row for one /watch video does not match every video. Query must overlap on generic paths. User-content hosts — sites.google.com, github.io — stay fully scanned.</div><div class="qp"><strong>If they push back:</strong> If they type youtube.com: expect LOW unless confirmed intel wins, which is rare and we still allow confirmed intel to win.</div></div>
+<div class="q"><div class="qh">Q22. Are fusion weights optimal?</div><div class="qa"><strong>Say:</strong> No. They are documented starting defaults that sum to 1.0. We can change DEFAULT_WEIGHTS. We do not claim a grid-search paper.</div><div class="qp"><strong>If they push back:</strong> If they want proof: show risk_engine.py and say starting defaults.</div></div>
+<div class="q"><div class="qh">Q23. SQL injection?</div><div class="qa"><strong>Say:</strong> Parameterized queries with question-mark placeholders. We do not concatenate user URLs into SQL strings.</div><div class="qp"><strong>If they push back:</strong> If they ask ORM: SQLAlchemy is in requirements and unused for live queries. Do not pretend we run an ORM today.</div></div>
+<div class="q"><div class="qh">Q24. How are passwords stored?</div><div class="qa"><strong>Say:</strong> bcrypt via passlib. JWT HS256 after login. Token in localStorage key cg_token. Prototype, not a bank-grade KMS.</div><div class="qp"><strong>If they push back:</strong> If they want refresh tokens and rotation: not specified as implemented.</div></div>
+<div class="q"><div class="qh">Q25. CORS?</div><div class="qa"><strong>Say:</strong> allow_origins star. Prototype limitation. Say it before they find it. Production must lock origins.</div><div class="qp"><strong>If they push back:</strong> Do not say we are production hardened.</div></div>
+<div class="q"><div class="qh">Q26. Where is the blockchain?</div><div class="qa"><strong>Say:</strong> Theme includes cybersecurity. Phishing intelligence does not require a ledger for this MVP. We did not implement smart contracts.</div><div class="qp"><strong>If they push back:</strong> One sentence, then stop. Do not lecture on Ethereum.</div></div>
+<div class="q"><div class="qh">Q27. What accuracy do you claim?</div><div class="qa"><strong>Say:</strong> None as a product guarantee. No official F1. Model confidence is agreement, not accuracy. We will not say 99 percent.</div><div class="qp"><strong>If they push back:</strong> If a teammate quoted a simulation: label it closed-world, stubbed network, not production.</div></div>
+<div class="q"><div class="qh">Q28. Who is the user?</div><div class="qa"><strong>Say:</strong> Two people. A parent or first-time UPI user sees Simple View: do not enter OTP. A CSE student or campus analyst sees Technical View: providers, registered domain, tags.</div><div class="qp"><strong>If they push back:</strong> Do not say only CISOs. Do not say we arrest gangs.</div></div>
+<div class="q"><div class="qh">Q29. What is future work?</div><div class="qa"><strong>Say:</strong> PostgreSQL, a trained model on curated reports, Android SMS companion, inbox OAuth if legally allowed, global API rate limit, CORS lockdown.</div><div class="qp"><strong>If they push back:</strong> Do not sell future work as built.</div></div>
+<div class="q"><div class="qh">Q30. Why SQLite?</div><div class="qa"><strong>Say:</strong> Zero-ops MVP, one file, campus demo, init_db on API start. Charts read real rows. Scale later with Postgres.</div><div class="qp"><strong>If they push back:</strong> If the dashboard is empty: the API was not started, so the file was not initialized.</div></div>
+<div class="q"><div class="qh">Q31. Why Manifest V3?</div><div class="qa"><strong>Say:</strong> Chrome requirement. Service worker. We cannot use MV2 blocking webRequest the old way, so we use a gate page: scan first, then open or refuse.</div><div class="qp"><strong>If they push back:</strong> Admit the omnibox blank-flash limit in the same sentence.</div></div>
+<div class="q"><div class="qh">Q32. Is Advisor a chatbot?</div><div class="qa"><strong>Say:</strong> No. Static FAQ. There is no LLM classifier and no ChatGPT inside the app.</div><div class="qp"><strong>If they push back:</strong> If they used ChatGPT to write slides: tools helped; we own the design and the honesty.</div></div>
+<div class="q"><div class="qh">Q33. Do you store images?</div><div class="qa"><strong>Say:</strong> No. Processed in memory. We do store URLs and scan metadata in url_checks and content_scans for history and charts.</div><div class="qp"><strong>If they push back:</strong> Do not say we store nothing.</div></div>
+<div class="q"><div class="qh">Q34. How does Learn work?</div><div class="qa"><strong>Say:</strong> Logged-in Mark Scam, Risky, or Safe increments domain_reputation counters. Small fusion weight. Signal, not proof.</div><div class="qp"><strong>If they push back:</strong> If they mark Google as scam: rate limits plus trusted-domain logic. Still a prototype.</div></div>
+<div class="q"><div class="qh">Q35. Decision engine versus fusion?</div><div class="qa"><strong>Say:</strong> URL path uses decision_engine so intel cannot be averaged away. Message path uses weighted fuse, then raises a floor if a child URL was confirmed malicious.</div><div class="qp"><strong>If they push back:</strong> If they want one formula: two pipelines, one product. That is intentional.</div></div>
+<div class="q"><div class="qh">Q36. Free-host phishing?</div><div class="qa"><strong>Say:</strong> login, otp, bank tokens on vercel.app, lovable.app, pages.dev and similar extra-score. hdfc-login.vercel.app is a teaching example.</div><div class="qp"><strong>If they push back:</strong> Do not claim we vendor-block every PaaS.</div></div>
+<div class="q"><div class="qh">Q37. Piracy sites?</div><div class="qa"><strong>Say:</strong> A separate name list and malvertising tags. We do not scan every torrent. It is extra signal, not a piracy product.</div><div class="qp"><strong>If they push back:</strong> Keep it one sentence. Return to lookalike banks.</div></div>
+<div class="q"><div class="qh">Q38. Why NTRO?</div><div class="qa"><strong>Say:</strong> National-scale phishing harm on UPI, net banking, IRCTC, DigiLocker. They can audit an explainable prototype: feeds plus lookalikes match the problem statement.</div><div class="qp"><strong>If they push back:</strong> Do not claim official NTRO deployment.</div></div>
+<div class="q"><div class="qh">Q39. What does the extension not do?</div><div class="qa"><strong>Say:</strong> It does not read passwords, OTPs, cookies, or SMS. It sends the URL, and optionally visible link URLs, to the local FastAPI engine.</div><div class="qp"><strong>If they push back:</strong> If they fear spyware: show the manifest permissions and say it out loud.</div></div>
+<div class="q"><div class="qh">Q40. Show me a file.</div><div class="qa"><strong>Say:</strong> main.py FastAPI. url_checker.py lookalikes. decision_engine.py floors. risk_engine.py weights. psychology.py Hinglish. qr_analyzer.py OpenCV. extension/manifest.json version 1.8.0. connection.py SQLite schema.</div><div class="qp"><strong>If they push back:</strong> Never invent a filename. If you forgot, say so and open the repo map.</div></div>
+</section>
+
+<section class="section">
+  <h1>H. How Indian college panels actually mark</h1>
+  <p>Typical internal: 8–12 minutes plus 3–5 questions. Panel is HOD, two CSE faculty, sometimes MBA or ECE, rarely a real NTRO person. They mix problem understanding, originality versus GitHub clones, technical depth, feasibility on this laptop, teamwork, and Q&amp;A honesty.</p>
+
+  <h2>To get shortlisted</h2>
+  <ol>
+    <li>Demo must work in the first minutes of the demo block. Boot servers in the corridor.</li>
+    <li>One story. If Lead says FastAPI and a teammate says Flask, you fail.</li>
+    <li>Map every feature back to imitate genuine domains. The extension is Protect. Do not let it steal the problem statement.</li>
+    <li>Dual audience: HOD hears Simple View and OTP. CSE hears decision floors and SSRF.</li>
+    <li>Admit limits in the same sentence as the mitigation. Faculty hate bluff more than a missing CNN.</li>
+    <li>Title card with Team ID, Team Name, PS ID. Internals are bureaucratic.</li>
+    <li>Two live URLs only: Google, then paypa1 or sbi-login.xyz.</li>
+    <li>Never cut the demo to save architecture.</li>
+    <li>Blockchain question: one sentence, stop.</li>
+    <li>Do not say ChatGPT built this.</li>
+    <li>Dark UI, 125% zoom. After feeds cache, airplane mode is allowed — TTL is 30 minutes on disk.</li>
+    <li>Print this PDF. Internal panels remember paper.</li>
+    <li>Practice with a friend whose only job is “show me the CNN.” Stay calm.</li>
+    <li>GitHub is a plus. Do not claim production users.</li>
+    <li>After questions, repeat the closing sentence if they look unconvinced.</li>
+  </ol>
+
+  <h2>Roles</h2>
+  <div class="roles">
+    <div class="tile"><h3>Lead</h3><p>Opens, closes, keeps time. Silent during demo clicks.</p></div>
+    <div class="tile"><h3>Backend</h3><p>Engine, intel, SQLite. Silent on CSS.</p></div>
+    <div class="tile"><h3>Frontend</h3><p>Pages, Simple / Technical. Silent on extension internals.</p></div>
+    <div class="tile"><h3>Extension</h3><p>Gate, privacy, MV3 limit. Silent on fusion weights.</p></div>
+  </div>
+  <p>Floater restarts uvicorn and holds this PDF. Never argues with the HOD.</p>
+
+  <h2>Green flags vs red flags</h2>
+  <div class="two">
+    <div class="box say">
+      <strong>Green.</strong> Unavailable is not safe. Psychology cannot solo-CRITICAL. Same engine as Chrome. We can open /docs. pytest exists. Trusted-domain explanation when they type youtube.com.
+    </div>
+    <div class="box never">
+      <strong>Red.</strong> Arguing with HOD. Opening a live phish kit. Two people answering. Staring at Cursor. 99% ResNet. We use blockchain for URLs. Empty dashboard because the API was never started.
+    </div>
+  </div>
+
+  <h3>Body language</h3>
+  <p>Stand beside the screen. Put the cursor on the score. Repeat the question in five words. Pause two seconds after the closing line. Simple formal dress. One laptop, one HDMI adapter.</p>
+  <p>Night before: cold start both servers, load the extension, run Google and paypa1, print this pack, sleep.</p>
+
+  <h2>Forbidden claims</h2>
+  <p>Flask · live PostgreSQL · trained CNN, ResNet, YOLO, BERT, TensorFlow SavedModel, sklearn pickle in this repo · intercept native WhatsApp or phone SMS · OAuth-read Gmail · 98–99% accuracy · padlock means genuine SBI · community report is legal proof · model confidence is accuracy · we store nothing · ZKP or federated learning implemented · blockchain implemented · we always block the first byte of a typed URL · we visit every phishing page to screenshot it · official NTRO deployment.</p>
+
+  <div class="closebox">
+    Closing sentence, last time:<br/>
+    PHISHEYE is a working SIH1454 prototype: one FastAPI threat engine, Simple and Technical views, public threat feeds plus lookalike heuristics, and a Chrome gate that opens clear sites and keeps the rest closed — without claiming a trained CNN, live Postgres, or inbox access we do not have.
+  </div>
+</section>
+
+</body>
+</html>

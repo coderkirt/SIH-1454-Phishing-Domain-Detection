@@ -77,12 +77,8 @@ def _activity_suspicion(activity: Optional[Dict]) -> int:
         suspicion = max(suspicion, min(55, 22 + risky * 4))
     if high_risk:
         suspicion = max(suspicion, min(52, 16 + high_risk * 5))
-    if browser_opens:
-        suspicion = max(suspicion, min(24, 8 + browser_opens * 3))
-    if opens or users_opened:
-        suspicion = max(suspicion, min(26, 8 + opens * 2 + users_opened * 2))
-    if scans:
-        suspicion = max(suspicion, min(18, 6 + min(scans, 12)))
+    # Repeat scans and ordinary opens are not evidence. YouTube and other
+    # legitimate sites are visited often and must not pick up a 12-point floor.
     return suspicion
 
 

@@ -39,7 +39,8 @@ def build_explanation(result: Dict) -> Dict[str, Any]:
     # Attempt to enrich explanation using standalone RAG service
     rag_explanation = result.get("rag_explanation")
     if not rag_explanation:
-        scan_url = result.get("url")
+        details = result.get("details") or {}
+        scan_url = details.get("final_url") or result.get("url")
         if not scan_url and result.get("links") and isinstance(result["links"], list):
             first_link = result["links"][0]
             scan_url = first_link.get("url") if isinstance(first_link, dict) else str(first_link)

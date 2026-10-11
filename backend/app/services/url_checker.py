@@ -5,7 +5,7 @@ from typing import Dict, Optional
 from app.services.psychology import analyze_text
 from app.services.external_intel import check_domain_exists, get_domain_age_days
 from app.services.ad_signals import check_ad_signals, score_page_clutter
-from app.services.redirects import expand_url, is_shortener
+from app.services.redirects import expand_url, should_unwrap
 from app.services.ssl_certs import inspect_tls
 from app.services.warnings import build_simple_view, build_technical_view
 from app.services.url_normalize import get_registrable_domain, normalize_url
@@ -331,6 +331,14 @@ def _finalize_intel(details: dict, intel: dict = None, tags: list = None) -> Non
     )
 
 
+def _is_loopback_host(host: str) -> bool:
+    """True only for this computer. A public or LAN IP is still scored as suspicious."""
+    name = (host or "").split("%")[0].strip().lower().strip("[]")
+    if name in {"localhost", "localhost.localdomain", "::1"}:
+        return True
+    return name.startswith("127.")
+
+
 class URLChecker:
     """Analyze URLs for phishing, piracy, brand impersonation and urgency tricks."""
 
@@ -379,7 +387,7 @@ class URLChecker:
 
         try:
             candidate = url if "://" in url else f"https://{url}"
-            if is_shortener(candidate):
+            if should_unwrap(candidate):
                 expansion = expand_url(candidate)
             else:
                 expansion = {
@@ -397,21 +405,17 @@ class URLChecker:
             details["shortened"] = expansion["shortened"]
             details["redirect_hops"] = expansion["hops"]
 
-            if expansion["shortened"]:
+            if expansion["expanded"] and expansion["final_url"]:
+                # The mask is not the verdict. Score the address it actually opens.
+                url = expansion["final_url"]
+                details["unwrapped_url"] = expansion["final_url"]
+            elif expansion["shortened"]:
                 tags.append("shortened_url")
-                if expansion["expanded"]:
-                    risk_score += 12
-                    reasons.append(f"Short link unwrapped to {expansion['final_url']}")
-                    url = expansion["final_url"]
-                else:
-                    risk_score += 20
-                    reasons.append(
-                        expansion["error"]
-                        or "Short link detected — the real destination is hidden"
-                    )
-                if expansion["hops"] > 2:
-                    risk_score += 10
-                    reasons.append(f"Long redirect chain ({expansion['hops']} hops)")
+                risk_score += 15
+                reasons.append(
+                    expansion["error"]
+                    or "This short link hid its real address, so that address could not be checked"
+                )
 
             parsed = urlparse(url)
             domain = parsed.netloc.lower()
@@ -427,12 +431,13 @@ class URLChecker:
             details["domain"] = features["hostname"] or domain or registrable
             details["normalization"] = features
             lookup_host = features["hostname"] or (domain.split(":")[0] if domain else registrable)
+            loopback = _is_loopback_host(lookup_host)
 
             intel = lookup_threat_intelligence(url, providers=intel_providers)
             details["threat_intelligence"] = intel
 
-            valid_host = bool(lookup_host) and (
-                re.match(r"^\d+\.\d+\.\d+\.\d+$", lookup_host) or "." in lookup_host
+            valid_host = loopback or (
+                bool(lookup_host) and (re.match(r"^\d+\.\d+\.\d+\.\d+$", lookup_host) or "." in lookup_host)
             )
             if not valid_host:
                 details["domain_exists"] = False
@@ -472,8 +477,8 @@ class URLChecker:
                 and details["domain_exists"] is not False
                 and not intel.get("confirmed")
             ):
-                keep_tags = [t for t in tags if t == "shortened_url"]
-                keep_reasons = [r for r in reasons if "unwrapped" in r.lower() or "redirect" in r.lower()]
+                keep_tags = []
+                keep_reasons = []
                 activity = _safe_local_activity(url, registrable, browser_activity)
                 rag = _safe_rag(
                     url,
@@ -533,7 +538,7 @@ class URLChecker:
                     break
 
             # 2b. Aggressive popup / malware-style ads (not normal Google Ads)
-            if details["domain_exists"] is not False and not intel.get("confirmed"):
+            if details["domain_exists"] is not False and not intel.get("confirmed") and not loopback:
                 ads = check_ad_signals(url if "://" in url else f"https://{url}")
                 details["aggressive_ads"] = ads["flagged"]
                 details["ad_signal_label"] = ads["label"]
@@ -580,21 +585,25 @@ class URLChecker:
                 tags.append("suspicious_tld")
 
             # 5. Suspicious keywords in the URL
-            for keyword in SUSPICIOUS_KEYWORDS:
-                if keyword in full_url:
-                    risk_score += 5
-                    reasons.append(f"Contains suspicious keywords: {keyword}")
-                    break
+            if not loopback:
+                for keyword in SUSPICIOUS_KEYWORDS:
+                    if keyword in full_url:
+                        risk_score += 5
+                        reasons.append(f"Contains suspicious keywords: {keyword}")
+                        break
 
-            # 6. IP-based host
-            if re.match(r"^\d+\.\d+\.\d+\.\d+", domain):
+            # 6. IP-based host. 127.0.0.1 is this computer, not a remote phishing host.
+            if re.match(r"^\d+\.\d+\.\d+\.\d+", domain) and not loopback:
                 risk_score += 30
                 reasons.append("IP-based domain (highly suspicious)")
                 tags.append("ip_url")
+            elif loopback:
+                reasons.append("This address is on your own computer (localhost), not a public website")
+                tags.append("localhost")
 
             # 7. Too many subdomains
             subdomain_count = domain.count(".")
-            if subdomain_count > 2:
+            if subdomain_count > 2 and not loopback:
                 risk_score += 10
                 reasons.append(f"Too many subdomains ({subdomain_count})")
 
@@ -604,7 +613,7 @@ class URLChecker:
                 reasons.append("Unusually long URL")
 
             # 9. HTTPS scheme + TLS certificate
-            if not url.startswith("https://"):
+            if not url.startswith("https://") and not loopback:
                 risk_score += 5
                 reasons.append("Not using HTTPS (less secure)")
                 tags.append("no_https")
@@ -621,7 +630,7 @@ class URLChecker:
                 reasons.append("Email address in domain (suspicious)")
 
             # 11. Psychological threat patterns in the URL itself
-            psych = analyze_text(full_url)
+            psych = {"score": 0, "findings": [], "tags": []} if loopback else analyze_text(full_url)
             if psych["score"]:
                 risk_score += psych["score"]
                 reasons.extend(psych["findings"])

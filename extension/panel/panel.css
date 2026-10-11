@@ -1,6 +1,6 @@
 html, body {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 body {
@@ -28,12 +28,12 @@ body {
 .gate {
   flex: 1;
   min-height: 0;
-  width: min(720px, calc(100% - 32px));
+  width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 12px 0 14px;
+  padding: 8px 0 12px;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-rows: auto auto auto auto;
+  gap: 8px;
 }
 
 .brand-block {
@@ -92,11 +92,36 @@ h1 {
 
 .site {
   min-height: 0;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "head head"
+    "headline metrics"
+    "message message"
+    "reasons reasons"
+    "brief brief";
+  gap: 8px 16px;
+  align-items: start;
+  overflow: visible;
+}
+
+.result-head { grid-area: head; }
+.headline { grid-area: headline; }
+.metrics { grid-area: metrics; margin-top: 0; }
+.message { grid-area: message; }
+#reasons { grid-area: reasons; }
+.rag-brief { grid-area: brief; margin-top: 0; }
+
+.site.tone-critical,
+.site.tone-high {
+  border-color: rgba(255, 42, 42, 0.85);
+  box-shadow: 0 0 0 1px rgba(255, 42, 42, 0.35), 0 18px 50px rgba(255, 0, 0, 0.18);
+}
+
+.site.tone-medium {
+  border-color: rgba(245, 196, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(245, 196, 0, 0.28), 0 16px 40px rgba(245, 196, 0, 0.1);
 }
 
 .site.idle {
@@ -125,7 +150,7 @@ h1 {
 
 .headline {
   margin: 0;
-  font-size: clamp(22px, 3.6vh, 34px);
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -134,21 +159,17 @@ h1 {
 
 .message {
   margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 4px;
-  flex-shrink: 0;
+  margin-top: 0;
+  min-width: 280px;
 }
 
 .metric {
@@ -159,32 +180,195 @@ h1 {
 .metric strong {
   display: block;
   margin-top: 2px;
-  font-size: 20px;
+  font-size: 22px;
   font-family: "Space Grotesk", sans-serif;
   line-height: 1.1;
 }
 
+.tone-critical .metric strong,
+.tone-high .metric strong {
+  color: #ff4d4d;
+}
+
 #reasons {
-  margin: 4px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-height: 0;
-  overflow: hidden;
+  gap: 6px;
+}
+
+#reasons[hidden] {
+  display: none !important;
 }
 
 #reasons li {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  padding-left: 14px;
+  position: relative;
+}
+
+#reasons li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  background: #ff4d4d;
+}
+
+.rag-brief {
+  display: block;
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.brief-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 42, 42, 0.45);
+  background: linear-gradient(90deg, rgba(255, 42, 42, 0.16), rgba(255, 42, 42, 0.04));
+}
+
+.brief-kicker,
+.brief-card h3,
+.brief-sub {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ff6b6b;
+}
+
+.brief-pill {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.brief-pill.grounded {
+  border-color: rgba(255, 42, 42, 0.7);
+  color: #ffb4b4;
+  background: rgba(255, 42, 42, 0.12);
+}
+
+.brief-card {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.brief-playbook {
+  border-color: rgba(255, 42, 42, 0.55);
+  box-shadow: inset 3px 0 0 #ff2a2a;
+}
+
+.brief-action {
+  border-color: rgba(255, 196, 0, 0.55);
+  background: rgba(255, 196, 0, 0.06);
+}
+
+.brief-card p,
+.brief-list,
+.brief-note {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.brief-title {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.3;
+}
+
+.brief-id,
+.cite-meta {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brief-sub {
+  margin-top: 10px;
+}
+
+.brief-list {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.brief-list li {
   padding-left: 12px;
   position: relative;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.brief-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  background: #ff4d4d;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.chip {
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.cite + .cite {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.cite-link {
+  display: block;
+  margin-top: 4px;
+  color: #ff8a8a;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.brief-note {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 #reasons li::before {
@@ -228,9 +412,28 @@ h1 {
   text-overflow: ellipsis;
 }
 
-@media (max-width: 640px) {
+.brief-rule {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+@media (max-width: 800px) {
   .search-row { grid-template-columns: 1fr auto; }
   .lead { white-space: normal; }
   .actions { flex-direction: column; }
   .host { max-width: 58%; }
+  .brief-grid { grid-template-columns: 1fr; }
+  .site {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "headline"
+      "metrics"
+      "message"
+      "reasons"
+      "brief";
+  }
+  .metrics { min-width: 0; }
 }

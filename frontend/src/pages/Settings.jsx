@@ -34,7 +34,7 @@ export default function Settings() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
-        section="08 / Settings"
+        section="09 / Settings"
         title="Configuration"
         subtitle="Profile data comes from the backend. Preferences stay in this browser."
       />

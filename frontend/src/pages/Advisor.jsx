@@ -4,7 +4,7 @@ import TechnicalPanel from "../components/TechnicalPanel";
 const topics = [
   {
     q: "What does HIGH risk mean?",
-    a: "The backend found several warning signs, such as a fake brand name, a known phishing pattern, or a suspicious domain ending. Treat the site as unsafe. Do not enter a password, OTP, or card number.",
+    a: "Several warning signs matched, such as a fake brand name, a known phishing pattern, or a suspicious domain ending. Treat the site as unsafe. Do not enter a password, OTP, or card number.",
   },
   {
     q: "What does CRITICAL risk mean?",
@@ -19,8 +19,8 @@ const topics = [
     a: "Check the spelling in the address bar. Fake pages often use numbers in brand names (paypa1), extra words (sbi-login), or unusual endings (.xyz, .tk). Real banks never rush you with 'act now or your account will be blocked'.",
   },
   {
-    q: "Does this use a chatbot or LLM?",
-    a: "Not in this version. Guidance here is rule-based and written for non-technical users. An AI advisor bot is planned for a later phase.",
+    q: "A link says verify my account. Is that a prize or a login trap?",
+    a: "If the link says verify, login, or your account is locked, treat it as someone trying to steal the login. A prize or lottery only applies when the message says you won money. Do not enter a password or OTP. Open the real app or type the real website yourself.",
   },
 ];
 
@@ -28,7 +28,7 @@ export default function Advisor() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        section="07 / Advisor"
+        section="08 / Advisor"
         title="Security advisor"
         subtitle="Simple explanations. No technical jargon required."
       />

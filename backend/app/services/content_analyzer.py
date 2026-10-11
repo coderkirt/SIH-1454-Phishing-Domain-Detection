@@ -102,7 +102,10 @@ def analyze_content(
         or "confirmed_malicious" in (top.get("threat_tags") or [])
         or "threat_intel" in (top.get("threat_tags") or [])
     ) else (url_risk if top else 0)
-    redirect_risk = 40 if any(link.get("shortened") for link in link_results) else 0
+    redirect_risk = 25 if any(
+        link.get("shortened") and link.get("final_url") in (None, "", link.get("url"))
+        for link in link_results
+    ) else 0
     brand = detect_impersonation(
         normalized["raw_text"],
         [link["url"] for link in link_results],
