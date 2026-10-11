@@ -89,8 +89,13 @@ def _activity_suspicion(activity: Optional[Dict], *, count_dangers: bool = True)
     return suspicion
 
 
-def _apply_local_activity(score: int, tags: List[str], activity: Optional[Dict]) -> tuple:
-    """30-day PhishEye history and this-browser opens raise suspicion only. They never mark a link safe."""
+def _apply_local_activity(
+    score: int,
+    tags: List[str],
+    activity: Optional[Dict],
+    trusted_destination: bool = False,
+) -> tuple:
+    """30-day danger counts raise only when the current link is already suspicious."""
     activity = activity or {}
     extra_reasons = []
     extra_tags = []
@@ -102,28 +107,38 @@ def _apply_local_activity(score: int, tags: List[str], activity: Optional[Dict])
     opens = int(activity.get("opens") or 0)
     users_opened = int(activity.get("users_opened") or 0)
     browser_opens = int(activity.get("this_browser_opens") or 0)
-
     high_risk = int(activity.get("high_risk_scans") or 0)
     has_signal = scans or opens or users_opened or browser_opens or scam or risky or high_risk
     if status == "unknown" and not has_signal:
         return score, extra_reasons, extra_tags, meta
 
-    suspicion = _activity_suspicion(activity)
+    meta["this_browser_used"] = browser_opens > 0
+    count_dangers = _link_already_suspicious(score, tags, trusted_destination)
+    suspicion = _activity_suspicion(activity, count_dangers=count_dangers)
     floor = _activity_floor(suspicion)
     meta["suspicion_score"] = suspicion
-    meta["this_browser_used"] = browser_opens > 0
+
+    lookalike = any(tag in tags for tag in ("brand_impersonation", "phishing", "ip_url", "lookalike"))
+    if lookalike and (scans >= 5 or opens >= 5 or users_opened >= 3 or browser_opens >= 5):
+        extra_reasons.append(
+            f"{opens} PhishEye opens ({users_opened} users) in 30 days do not clear a lookalike or impersonation domain."
+        )
+
+    if not count_dangers:
+        return score, extra_reasons, extra_tags, meta
+
     if suspicion:
         meta["used"] = True
         extra_reasons.append(
-            f"PhishEye 30-day activity contributed {suspicion} suspicion "
-            f"({scans} scans, {high_risk} high-risk, {opens} opens / {users_opened} users, "
-            f"{browser_opens} in this browser). These counts cannot mark a link safe."
+            f"PhishEye 30-day danger counts contributed {suspicion} suspicion "
+            f"({high_risk} high-risk scans, {scam} scam reports, {risky} risky reports). "
+            f"Ordinary opens and scan volume are not counted."
         )
         extra_tags.append("local_activity")
     if floor:
         score = max(score, floor)
 
-    if high_risk >= 3 and not any(tag in tags for tag in LOOKALIKE_TAGS):
+    if high_risk >= 3 and not lookalike:
         raised = min(46, 28 + high_risk * 2)
         if raised > score:
             score = raised
@@ -150,12 +165,6 @@ def _apply_local_activity(score: int, tags: List[str], activity: Optional[Dict])
             f"{risky} time(s) in the last {activity.get('window_days') or 30} days."
         )
         extra_tags.append("local_scam_reports")
-
-    lookalike = any(tag in tags for tag in ("brand_impersonation", "phishing", "ip_url", "lookalike"))
-    if lookalike and (scans >= 5 or opens >= 5 or users_opened >= 3 or browser_opens >= 5):
-        extra_reasons.append(
-            f"{opens} PhishEye opens ({users_opened} users) in 30 days do not clear a lookalike or impersonation domain."
-        )
     return score, extra_reasons, extra_tags, meta
 
 
@@ -287,7 +296,9 @@ def calculate_final_risk(
     activity = local_activity if isinstance(local_activity, dict) else {}
     activity_meta = {"used": False, "suspicion_score": 0, "this_browser_used": False}
     if classification != "CONFIRMED_MALICIOUS":
-        score, activity_reasons, activity_tags, activity_meta = _apply_local_activity(score, tags, activity)
+        score, activity_reasons, activity_tags, activity_meta = _apply_local_activity(
+            score, tags, activity, trusted_destination
+        )
         for reason in activity_reasons:
             if reason not in reasons:
                 reasons.append(reason)
