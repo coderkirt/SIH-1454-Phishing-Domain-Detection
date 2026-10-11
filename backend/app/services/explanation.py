@@ -59,7 +59,7 @@ def build_explanation(result: Dict) -> Dict[str, Any]:
             logger.debug("RAG lookup failed: %s", exc)
             rag_explanation = None
 
-    if rag_explanation and rag_explanation.get("summary"):
+    if rag_explanation and str(rag_explanation.get("summary") or "").strip():
         verdict = (rag_explanation.get("verdict") or "PHISHING").upper()
         # RAG is explain-only. A BENIGN note cannot mark an unsafe lookalike safe.
         if unsafe and verdict in BENIGN_VERDICTS:
