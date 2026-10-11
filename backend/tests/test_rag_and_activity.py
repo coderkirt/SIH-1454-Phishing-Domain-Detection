@@ -194,8 +194,8 @@ def test_scam_reports_raise_and_scan_volume_does_not_clear_lookalike():
         threat_intelligence=_intel("no_match"),
         heuristic_score=20,
         ml_score=20,
-        heuristic_tags=[],
-        heuristic_reasons=[],
+        heuristic_tags=["brand_impersonation"],
+        heuristic_reasons=["Looks like a fake paypal website"],
         url_features=normalize_url("https://paypa1.com"),
         local_activity={"status": "observed", "scans": 4, "scam_reports": 4, "risky_reports": 1, "safe_reports": 0, "signed_in_users": 3, "high_risk_scans": 2, "window_days": 30},
     )
