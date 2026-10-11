@@ -69,6 +69,13 @@ class CorpusDocument:
     tactics: List[str] = field(default_factory=list)
     iocs: List[str] = field(default_factory=list)
     first_seen: str = "2024-01-01"
+    official_domains: List[str] = field(default_factory=list)
+    subdomain_rules: List[str] = field(default_factory=list)
+    phishing_patterns: List[str] = field(default_factory=list)
+    logo_phash: str = ""
+    contact_channels: List[str] = field(default_factory=list)
+    never_does: List[str] = field(default_factory=list)
+    regulatory_notes: str = ""
     fetched_at: str = ""
     source_hash: str = ""
     license: str = "Public Domain / Synthesized"
@@ -90,7 +97,9 @@ def _parse_scalar(raw: str) -> object:
         inner = raw[1:-1].strip()
         if not inner:
             return []
-        return [item.strip() for item in inner.split(",") if item.strip()]
+        return [item.strip().strip("\"'") for item in inner.split(",") if item.strip()]
+    if (raw.startswith('"') and raw.endswith('"')) or (raw.startswith("'") and raw.endswith("'")):
+        return raw[1:-1].strip()
     return raw
 
 
@@ -145,6 +154,13 @@ def parse_document(path: Path) -> CorpusDocument:
         tactics=list(meta.get("tactics", [])),
         iocs=list(meta.get("iocs", [])),
         first_seen=str(meta.get("first_seen", "2024-01-01")),
+        official_domains=list(meta.get("official_domains", [])),
+        subdomain_rules=list(meta.get("subdomain_rules", [])),
+        phishing_patterns=list(meta.get("phishing_patterns", [])),
+        logo_phash=str(meta.get("logo_phash", "")),
+        contact_channels=list(meta.get("contact_channels", [])),
+        never_does=list(meta.get("never_does", [])),
+        regulatory_notes=str(meta.get("regulatory_notes", "")),
         fetched_at=str(meta.get("fetched_at", meta.get("last_verified", "") + "T00:00:00Z")),
         source_hash=str(raw_hash),
         license=str(meta.get("license", "Public Domain / Synthesized")),

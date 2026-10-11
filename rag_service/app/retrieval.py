@@ -277,6 +277,27 @@ class HybridRetriever:
 
         # 5. Sort descending by fused RRF score
         retrieved.sort(key=lambda r: r.score, reverse=True)
+
+        if not hard_filter and top_k >= 3 and len(retrieved) > top_k:
+            categories_in_top = {r.category for r in retrieved[:top_k]}
+            # If playbook is absent from top_k, ensure top matching playbook is included
+            if "playbook" not in categories_in_top:
+                top_playbook = next((r for r in retrieved[top_k:] if r.category == "playbook"), None)
+                if top_playbook is not None:
+                    cat_counts: Dict[str, int] = {}
+                    for r in retrieved[:top_k]:
+                        cat_counts[r.category] = cat_counts.get(r.category, 0) + 1
+                    crowded_cat = max(cat_counts, key=cat_counts.get)
+                    if cat_counts[crowded_cat] > 1:
+                        # Find the lowest-scoring index of crowded_cat to replace
+                        replace_idx = min(
+                            [i for i in range(top_k) if retrieved[i].category == crowded_cat],
+                            key=lambda i: retrieved[i].score,
+                        )
+                        diversified = list(retrieved[:top_k])
+                        diversified[replace_idx] = top_playbook
+                        return diversified
+
         return retrieved[:top_k]
 
 

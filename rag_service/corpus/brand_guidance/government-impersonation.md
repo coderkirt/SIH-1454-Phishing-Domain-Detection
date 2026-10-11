@@ -11,6 +11,14 @@ channels: [email, sms, social]
 brands: [uidai, incometax]
 threat_tags: [brand_impersonation, authority_impersonation, fear_tactics, financial_pressure]
 mitre: [T1566.002, T1598.004]
+severity: critical
+official_domains: [uidai.gov.in, incometax.gov.in, epfindia.gov.in]
+subdomain_rules: [*.gov.in]
+logo_phash: 9f8e7d6c5b4a3120
+phishing_patterns: [incometax-refund-claim, aadhaar-kyc-verify, epfo-claim-status]
+never_does: ["Never sends refund approval links demanding bank card numbers", "Never threatens immediate police detention via SMS or WhatsApp"]
+contact_channels: [1930, helpdesk@uidai.gov.in]
+regulatory_notes: CERT-In Advisory on Government Department Impersonation Scams
 summary: Fraudsters pose as the Income Tax Department, UIDAI, or EPFO claiming pending refunds, Aadhaar suspension, or KYC failure, driving victims to fake portals or paid "activation."
 ---
 

@@ -11,6 +11,14 @@ channels: [sms, email, web, social]
 brands: [sbi, hdfc, icici, axis]
 threat_tags: [brand_impersonation, authority_impersonation, credential_pressure, fear_tactics]
 mitre: [T1566.002]
+severity: high
+official_domains: [onlinesbi.sbi, sbi.co.in, hdfcbank.com, icicibank.com, axisbank.com]
+subdomain_rules: [*.sbi, *.hdfcbank.com, *.icicibank.com, *.axisbank.com]
+logo_phash: a3f0c1b4892c5d1e
+phishing_patterns: [onlinesbi-kyc, hdfc-netbanking-verify, icici-rewards, axis-card-update]
+never_does: ["Never asks for netbanking password or ATM PIN over SMS", "Never requests remote desktop applications like AnyDesk or TeamViewer"]
+contact_channels: [1930, report.phishing@sbi.co.in]
+regulatory_notes: RBI Master Direction on Digital Payment Security Controls
 summary: Phishing mimicking Indian banks via KYC-update lures, fake reward points, blocked-card warnings, and lookalike domains such as onlinesbi-login.example.
 ---
 

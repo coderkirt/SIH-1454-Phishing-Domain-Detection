@@ -11,6 +11,14 @@ channels: [social, sms]
 brands: [whatsapp]
 threat_tags: [brand_impersonation, emotional_manipulation, secrecy, financial_pressure]
 mitre: [T1566.003]
+severity: high
+official_domains: [whatsapp.com, web.whatsapp.com]
+subdomain_rules: [*.whatsapp.com]
+logo_phash: 3b9c71a4f0d82e56
+phishing_patterns: [web-whatsapp-login, whatsapp-qr-sync, wa-verify]
+never_does: ["Never messages users requesting payment or verification codes", "Never requires scanning unknown QR codes to avoid account deletion"]
+contact_channels: [support@whatsapp.com]
+regulatory_notes: Meta Security Center & CERT-In Messaging Scam Guidelines
 summary: Scammers pose as family or friends on WhatsApp ("new phone, new number") requesting money, OTP forwarding, or link clicks, sometimes claiming the account will be hacked.
 ---
 

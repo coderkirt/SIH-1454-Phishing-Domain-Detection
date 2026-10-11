@@ -11,6 +11,14 @@ channels: [email, web]
 brands: [paypal]
 threat_tags: [brand_impersonation, urgency_detected, financial_pressure, credential_pressure]
 mitre: [T1566.002, T1598.002]
+severity: high
+official_domains: [paypal.com, paypal.me]
+subdomain_rules: [*.paypal.com]
+logo_phash: e4b2d1c9a7f30841
+phishing_patterns: [paypal-security-check, paypal-account-verify, paypa1.com]
+never_does: ["Never asks for full debit/credit card CVV via email link", "Never asks users to confirm SMS OTP via third-party form"]
+contact_channels: [phishing@paypal.com]
+regulatory_notes: FTC Consumer Sentinel Network Fraud Directives
 summary: How phishing pages imitate PayPal: lookalike domains, "unusual activity" account alerts, fake invoice/payment notifications, and fake dispute-resolution forms.
 ---
 

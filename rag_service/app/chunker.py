@@ -69,6 +69,9 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         "mitre": doc.mitre if doc.mitre else ["_none_"],
         "tactics": doc.tactics if doc.tactics else ["_none_"],
         "iocs": doc.iocs if doc.iocs else ["_none_"],
+        "official_domains": doc.official_domains if doc.official_domains else ["_none_"],
+        "logo_phash": doc.logo_phash if doc.logo_phash else "",
+        "regulatory_notes": doc.regulatory_notes if doc.regulatory_notes else "",
         # Comma-separated strings for lexical filtering and text dumps
         "brands_csv": ",".join(doc.brands),
         "threat_tags_csv": ",".join(doc.threat_tags),
@@ -76,6 +79,8 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         "mitre_csv": ",".join(doc.mitre),
         "tactics_csv": ",".join(doc.tactics),
         "iocs_csv": ",".join(doc.iocs),
+        "official_domains_csv": ",".join(doc.official_domains),
+        "never_does_csv": "; ".join(doc.never_does),
     }
 
     # 1. Overview Chunk
@@ -86,6 +91,10 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
     ]
     if doc.brands:
         overview_text_parts.append(f"Target Brands: {', '.join(doc.brands)}")
+    if doc.official_domains:
+        overview_text_parts.append(f"Official Verified Domains: {', '.join(doc.official_domains)}")
+    if doc.never_does:
+        overview_text_parts.append(f"Security Rules (Never Does): {'; '.join(doc.never_does)}")
     if doc.threat_tags:
         overview_text_parts.append(f"Threat Indicators: {', '.join(doc.threat_tags)}")
     if doc.channels:

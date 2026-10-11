@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import httpx
 
+from app.brand_verifier import get_brand_registry
 from app.config import settings
 from app.prompt import build_grounded_prompt
 from app.retrieval import RetrievedChunk
@@ -179,44 +180,43 @@ def synthesize_deterministic(
 
     if brand_chunk or flagged_brand:
         target_name = flagged_brand or (brand_chunk.doc_title if brand_chunk else "Unknown")
-        official_domains = []
-        lookalike_tells = []
-        never_does = []
+        brand_profile = get_brand_registry().get_profile(target_name)
 
-        if brand_chunk:
-            text = brand_chunk.text
-            # Look for domain mentions (e.g., `example.com`)
-            found_domains = re.findall(r"`([a-zA-Z0-9\.\-]+)`", text)
-            for d in found_domains:
-                if "." in d and not d.endswith(".example"):
-                    official_domains.append(d)
-                elif "example" in d:
-                    lookalike_tells.append(d)
-
-        if not official_domains and flagged_brand:
-            default_map = {
-                "sbi": ["onlinesbi.sbi", "sbi.co.in"],
-                "hdfc": ["hdfcbank.com"],
-                "icici": ["icicibank.com"],
-                "axis": ["axisbank.com"],
-                "paypal": ["paypal.com"],
-                "uidai": ["uidai.gov.in"],
-                "incometax": ["incometax.gov.in"],
-                "whatsapp": ["whatsapp.com"],
-            }
-            official_domains = default_map.get(flagged_brand.lower(), [])
+        if brand_profile:
+            official_domains = brand_profile.official_domains
+            lookalike_tells = [
+                f"Domains appending '{pat}' or deceptive prefixes to '{brand_profile.brand}'"
+                for pat in brand_profile.phishing_patterns
+            ] or [
+                f"Domains appending words like '-secure', '-login', or '-kyc' to '{brand_profile.brand}'",
+                "Subdomains on generic hosting providers hiding the true apex domain",
+            ]
+            never_does_rules = brand_profile.never_does or [
+                f"Legitimate {target_name.upper()} communications never ask for OTPs, PINs, or netbanking passwords over SMS/Email.",
+                "Official services never threaten permanent account closure within hours to compel clicking a message link.",
+            ]
+        else:
+            official_domains = []
+            if brand_chunk:
+                text = brand_chunk.text
+                found_domains = re.findall(r"`([a-zA-Z0-9\.\-]+)`", text)
+                for d in found_domains:
+                    if "." in d and not d.endswith(".example"):
+                        official_domains.append(d)
+            lookalike_tells = [
+                f"Domains appending words like '-secure', '-login', or '-kyc' to '{target_name}'",
+                "Subdomains on generic hosting providers hiding the true apex domain",
+            ]
+            never_does_rules = [
+                f"Legitimate {target_name.upper()} communications never ask for OTPs, PINs, or netbanking passwords over SMS/Email.",
+                "Official services never threaten permanent account closure within hours to compel clicking a message link.",
+            ]
 
         brand_analysis = BrandAnalysis(
             impersonated_brand=target_name,
             official_domains=list(dict.fromkeys(official_domains))[:4],
-            lookalike_tells=list(dict.fromkeys(lookalike_tells)) or [
-                f"Domains appending words like '-secure', '-login', or '-kyc' to '{target_name}'",
-                "Subdomains on generic hosting providers hiding the true apex domain",
-            ],
-            never_does_rules=[
-                f"Legitimate {target_name.upper()} communications never ask for OTPs, PINs, or netbanking passwords over SMS/Email.",
-                "Official services never threaten permanent account closure within hours to compel clicking a message link.",
-            ],
+            lookalike_tells=list(dict.fromkeys(lookalike_tells))[:4],
+            never_does_rules=never_does_rules[:4],
         )
 
     # 4. Threat Indicators Breakdown
