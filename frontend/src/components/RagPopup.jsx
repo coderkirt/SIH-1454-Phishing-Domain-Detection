@@ -24,16 +24,26 @@ export function ragPopupCopy(rag) {
 export default function RagPopup({ result, open, onClose }) {
   const [canClose, setCanClose] = useState(false);
   const onCloseRef = useRef(onClose);
+  const canCloseRef = useRef(false);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return undefined;
     setCanClose(false);
-    const unlock = window.setTimeout(() => setCanClose(true), RAG_POPUP_MS);
+    canCloseRef.current = false;
+    const unlock = window.setTimeout(() => {
+      canCloseRef.current = true;
+      setCanClose(true);
+    }, RAG_POPUP_MS);
     const hide = window.setTimeout(() => onCloseRef.current?.(), RAG_POPUP_MS + 400);
+    const onKey = (event) => {
+      if (event.key === "Escape" && canCloseRef.current) onCloseRef.current?.();
+    };
+    window.addEventListener("keydown", onKey);
     return () => {
       window.clearTimeout(unlock);
       window.clearTimeout(hide);
+      window.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
