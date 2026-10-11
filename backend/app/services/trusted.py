@@ -71,6 +71,7 @@ TRUSTED_DOMAINS = {
     "huggingface.co", "python.org", "pypi.org", "nodejs.org",
     "docker.com", "kubernetes.io", "ubuntu.com", "debian.org",
     "psitkanpur.com",
+    "psit.ac.in",
 }
 
 # Hosts that sit on a trusted registrable domain but serve arbitrary user pages.
