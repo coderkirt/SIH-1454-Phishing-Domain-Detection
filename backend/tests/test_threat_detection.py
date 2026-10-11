@@ -139,5 +139,63 @@ def test_nonexistent_domain():
     assert "does not exist" in result["simple_view"]["warning"].lower()
 
 
+def test_cloudflare_phishing_interstitial_is_not_safe():
+    """PhishTank suspected sites often show a Cloudflare 'Suspected Phishing' page."""
+    checker = URLChecker()
+    result = checker.analyze(
+        "https://recent-bank-login.test/session",
+        page_signals={
+            "title": "Warning | Suspected Phishing",
+            "heading": "Suspected Phishing",
+            "snippet": "This website has been reported for potential phishing. Phishing is when a site attempts to steal sensitive information.",
+            "buttons": 2,
+            "iframes": 1,
+            "popups": 0,
+            "overlays": 0,
+            "links": 2,
+        },
+        intel_providers=offline_providers(),
+    )
+    assert result["safe"] is False
+    assert result["risk_level"] in {"HIGH", "CRITICAL"}
+    assert result["risk_score"] >= 50
+    assert "vendor_phishing_interstitial" in result["threat_tags"]
+
+
+def test_phishtank_website_is_not_flagged_for_the_word_phishing():
+    checker = URLChecker()
+    result = checker.analyze(
+        "https://www.phishtank.com/phish_detail.php?phish_id=1",
+        page_signals={
+            "title": "PhishTank > Search",
+            "heading": "PhishTank",
+            "snippet": "Suspected phishing URLs submitted by the community.",
+        },
+        intel_providers=offline_providers(),
+    )
+    assert result["risk_level"] == "LOW"
+    assert result["safe"] is True
+    assert "vendor_phishing_interstitial" not in result["threat_tags"]
+
+
+def test_unverified_phishtank_report_overrides_empty_dump():
+    from app.services.threat_intel import build_feed_index
+
+    checker = URLChecker()
+    result = checker.analyze(
+        "https://suspected-phish.test/login",
+        intel_providers={
+            "openphish_index": build_feed_index([]),
+            "phishtank_index": build_feed_index([]),
+            "phishtank": lambda url: {"results": {"in_database": True, "verified": False, "valid": True}},
+            "urlhaus": lambda url: {"query_status": "no_results"},
+            "gsb": lambda url: [],
+        },
+    )
+    assert result["safe"] is False
+    assert result["risk_level"] in {"MEDIUM", "HIGH", "CRITICAL"}
+    assert "reported_phish" in result["threat_tags"] or "threat_intel" in result["threat_tags"]
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

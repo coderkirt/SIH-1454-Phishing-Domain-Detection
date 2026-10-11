@@ -75,7 +75,7 @@ Then open http://127.0.0.1:5173
 5. Select this `extension` folder
 6. Pin PHISHEYE
 7. Make sure the backend is running
-8. Reload the unpacked extension after code changes (this build is **1.7.0**)
+8. Reload the unpacked extension after code changes (this build is **1.8.1**)
 9. Type a website or click a link — you should see the PHISHEYE gate, not the live site
 10. A clear site opens by itself. A fishy or dangerous site stays on the gate
 

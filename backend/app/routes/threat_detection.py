@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from app.services.url_checker import URLChecker
 from app.services.content_analyzer import analyze_content
+from app.services.explanation import build_explanation
 from app.database.connection import get_db_connection
 
 router = APIRouter(prefix="/api/v1/threat", tags=["threat"])
@@ -16,6 +17,9 @@ class PageSignals(BaseModel):
     popups: int = Field(0, ge=0, le=10000)
     overlays: int = Field(0, ge=0, le=10000)
     links: int = Field(0, ge=0, le=100000)
+    title: str = Field("", max_length=300)
+    heading: str = Field("", max_length=300)
+    snippet: str = Field("", max_length=800)
 
 
 class URLCheckRequest(BaseModel):
@@ -117,6 +121,7 @@ async def check_url(request: URLCheckRequest):
         conn.close()
 
         result["url"] = url
+        result["explanation"] = build_explanation(result)
         return _pick_view(result, request.view)
 
     except HTTPException:
@@ -153,6 +158,7 @@ async def check_message(request: MessageCheckRequest):
         "simple_view": payload.get("simple_view"),
         "scan_id": payload.get("scan_id"),
         "model_confidence": payload.get("model_confidence"),
+        "explanation": payload.get("explanation"),
     }
 
 
@@ -194,7 +200,7 @@ async def intel_status():
     }
     status["note"] = (
         "OpenPhish, URLhaus, and Phishing Army use public lists. "
-        "The PhishTank dump is verified-only; PHISHTANK_API_KEY enables live lookup of unverified reports. "
+        "The PhishTank dump is verified-only; live checkurl is also queried for unverified/suspected reports. "
         "Google Safe Browsing needs GOOGLE_SAFE_BROWSING_API_KEY. A missing key does not invent matches."
     )
     return status

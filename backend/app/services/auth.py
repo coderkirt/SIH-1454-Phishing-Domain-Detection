@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
+try:
+    from jose import JWTError, jwt
+except ImportError:
+    import jwt
+    JWTError = jwt.PyJWTError
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os

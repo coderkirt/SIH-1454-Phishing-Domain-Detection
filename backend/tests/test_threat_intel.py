@@ -308,6 +308,41 @@ def test_phishtank_unverified_report_is_not_clean():
     assert decision["classification"] != "CONFIRMED_MALICIOUS"
 
 
+def test_phishtank_dump_miss_still_flags_unverified_live_report():
+    """Suspected PhishTank listings are not in the verified dump."""
+    result = lookup_phishtank(
+        normalize_url("https://suspected-phish.test/login"),
+        index=build_feed_index([]),
+        query=lambda url: {"results": {"in_database": True, "verified": "n", "valid": "y"}},
+    )
+    assert result["found"] is True
+    assert result["status"] == "reported_malicious"
+
+
+def test_phishtank_y_n_flags_are_parsed():
+    confirmed = lookup_phishtank(
+        normalize_url(FEED_URL),
+        query=lambda url: {"results": {"in_database": "y", "verified": "y", "valid": "y"}},
+    )
+    assert confirmed["status"] == "confirmed_malicious"
+    suspected = lookup_phishtank(
+        normalize_url("https://suspected-phish.test/login"),
+        query=lambda url: {"results": {"in_database": "yes", "verified": "no"}},
+    )
+    assert suspected["status"] == "reported_malicious"
+
+
+def test_phishtank_registered_domain_dump_match():
+    index = build_feed_index(["https://phish-bank.test/paypal/login"])
+    hit = match_against_index(normalize_url("https://login.phish-bank.test/"), index)
+    assert hit["match_type"] == "registered_domain"
+    sibling = match_against_index(normalize_url("https://innocuous.example.test/home"), build_feed_index([FEED_URL]))
+    assert sibling["match_type"] == "no_match"
+    result = lookup_phishtank(normalize_url("https://www.phish-bank.test/home"), index=index)
+    assert result["found"] is True
+    assert result["status"] == "confirmed_malicious"
+
+
 def test_free_host_health_name_is_flagged():
     from app.services.url_checker import _free_host_signal
 
