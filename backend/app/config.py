@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # RAG Intelligence Service
     rag_service_url: str = os.getenv("RAG_SERVICE_URL", "http://127.0.0.1:8001")
-    rag_timeout_seconds: float = float(os.getenv("RAG_TIMEOUT_SECONDS", "1.5"))
+    rag_timeout_seconds: float = float(os.getenv("RAG_TIMEOUT_SECONDS", "8"))
     rag_enabled: bool = os.getenv("RAG_ENABLED", "true").lower() in ("true", "1", "yes")
 
     class Config:
