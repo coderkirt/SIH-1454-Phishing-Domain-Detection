@@ -1,0 +1,87 @@
+# PHISHEYE Phishing Knowledge Feed Registry
+# Declares live and curated threat intelligence endpoints, refresh cadences, and license tracking.
+
+version: 1.0.0
+updated_at: "2026-10-11T14:12:00Z"
+
+sources:
+  - id: cisa_advisories
+    name: "CISA Cybersecurity Advisories & Alerts"
+    category: threat_report
+    endpoint: "https://www.cisa.gov/cybersecurity-advisories"
+    feed_url: "https://www.cisa.gov/news-events/cybersecurity-advisories"
+    feed_type: "rss"
+    refresh_cadence: "daily"
+    license: "U.S. Public Domain (17 U.S.C. § 105)"
+    attribution_required: false
+    enabled: true
+    description: "Authoritative cyber defense advisories on phishing tactics, session hijacking, and initial access vectors."
+
+  - id: cert_in_advisories
+    name: "CERT-In Cyber Security Notes & Warnings"
+    category: threat_report
+    endpoint: "https://www.cert-in.org.in/"
+    feed_url: "https://www.cert-in.org.in/advisories"
+    feed_type: "api"
+    refresh_cadence: "daily"
+    license: "Government Open Data License - India (GODL)"
+    attribution_required: true
+    enabled: true
+    description: "National nodal agency for responding to computer security incidents, UPI scams, and banking trojans in India."
+
+  - id: urlhaus_recent
+    name: "abuse.ch URLhaus Threat & Campaign Summary"
+    category: threat_report
+    endpoint: "https://urlhaus.abuse.ch/api/"
+    feed_url: "https://urlhaus-api.abuse.ch/v1/recent/"
+    feed_type: "json"
+    refresh_cadence: "hourly"
+    license: "Creative Commons CC0 1.0 Universal (Public Domain)"
+    attribution_required: false
+    enabled: true
+    description: "Database of verified malicious URLs, malware distribution sites, and active phishing campaigns."
+
+  - id: openphish_insights
+    name: "OpenPhish Threat Intelligence & Targeted Brands"
+    category: brand_guidance
+    endpoint: "https://openphish.com/"
+    feed_url: "https://openphish.com/phishing_activity"
+    feed_type: "json"
+    refresh_cadence: "daily"
+    license: "OpenPhish Community Edition (Attribution Required)"
+    attribution_required: true
+    enabled: true
+    description: "Automated phishing detection feed identifying high-volume targeted brands, spoofed TLDs, and hosting trends."
+
+  - id: apwg_trends
+    name: "Anti-Phishing Working Group (APWG) Trends Reports"
+    category: threat_report
+    endpoint: "https://apwg.org/trendsreports/"
+    feed_type: "curated_report"
+    refresh_cadence: "quarterly"
+    license: "APWG Research Fair Use / Synthesized"
+    attribution_required: true
+    enabled: true
+    description: "Global industry consortium tracking quarterly phishing attack volumes, targeted sectors, and quishing metrics."
+
+  - id: ftc_scam_guidance
+    name: "FTC Consumer Scam & Phishing Guidance"
+    category: playbook
+    endpoint: "https://consumer.ftc.gov/articles/how-recognize-avoid-phishing-scams"
+    feed_type: "curated_playbook"
+    refresh_cadence: "monthly"
+    license: "U.S. Public Domain"
+    attribution_required: false
+    enabled: true
+    description: "Federal Trade Commission plain-language consumer protection playbooks against impersonation and account takeover."
+
+  - id: rbi_financial_guidance
+    name: "Reserve Bank of India (RBI) Fraud Awareness Advisories"
+    category: brand_guidance
+    endpoint: "https://www.rbi.org.in/"
+    feed_type: "curated_guidance"
+    refresh_cadence: "monthly"
+    license: "Public Information / RBI Financial Literacy"
+    attribution_required: true
+    enabled: true
+    description: "Banking regulator circulars on fake reward points, KYC deactivation lures, and unauthorized electronic transactions."

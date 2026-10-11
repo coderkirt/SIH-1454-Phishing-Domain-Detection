@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from app.services.url_checker import URLChecker
 from app.services.content_analyzer import analyze_content
+from app.services.explanation import build_explanation
 from app.database.connection import get_db_connection
 
 router = APIRouter(prefix="/api/v1/threat", tags=["threat"])
@@ -120,6 +121,7 @@ async def check_url(request: URLCheckRequest):
         conn.close()
 
         result["url"] = url
+        result["explanation"] = build_explanation(result)
         return _pick_view(result, request.view)
 
     except HTTPException:
@@ -156,6 +158,7 @@ async def check_message(request: MessageCheckRequest):
         "simple_view": payload.get("simple_view"),
         "scan_id": payload.get("scan_id"),
         "model_confidence": payload.get("model_confidence"),
+        "explanation": payload.get("explanation"),
     }
 
 

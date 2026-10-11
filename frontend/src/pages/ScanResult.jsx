@@ -278,6 +278,108 @@ export default function ScanResult() {
         </TechnicalPanel>
       ) : null}
 
+      {result.explanation?.rag_grounded ? (
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {result.explanation?.matched_playbook ? (
+            <TechnicalPanel title="Matched Attack Playbook" accent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="status-pill risk-high">
+                    {result.explanation.matched_playbook.playbook_id?.replace("playbook-", "").toUpperCase() || "PLAYBOOK"}
+                  </span>
+                </div>
+                <p className="font-display text-base font-semibold text-ink">
+                  {result.explanation.matched_playbook.title}
+                </p>
+                <p className="text-xs leading-relaxed text-muted">
+                  {result.explanation.matched_playbook.mechanism}
+                </p>
+                {(result.explanation.matched_playbook.warning_signs || []).length ? (
+                  <div className="mt-3 border-t border-line pt-3">
+                    <p className="label-tech text-[10px]">Analyst Warning Signs</p>
+                    <ul className="mt-2 space-y-1.5 text-xs text-ink-soft">
+                      {result.explanation.matched_playbook.warning_signs.slice(0, 3).map((sign, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="dot dot-critical mt-1" aria-hidden="true" />
+                          <span>{sign}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            </TechnicalPanel>
+          ) : null}
+
+          {result.explanation?.brand_analysis ? (
+            <TechnicalPanel title="Brand Security & Allowlists" accent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="label-tech text-[10px]">Target Brand</span>
+                  <span className="font-mono text-xs font-bold text-accent uppercase">
+                    {result.explanation.brand_analysis.impersonated_brand}
+                  </span>
+                </div>
+                <div>
+                  <p className="label-tech text-[10px]">Official Verified Domains</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {(result.explanation.brand_analysis.official_domains || []).slice(0, 4).map((dom) => (
+                      <span key={dom} className="rounded bg-surface px-2 py-0.5 font-mono text-[11px] text-ink border border-line">
+                        {dom}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {(result.explanation.brand_analysis.never_does_rules || []).length ? (
+                  <div className="border-t border-line pt-3">
+                    <p className="label-tech text-[10px] text-risk-high">Official Brand Security Rules</p>
+                    <ul className="mt-2 space-y-1 text-xs text-muted">
+                      {result.explanation.brand_analysis.never_does_rules.slice(0, 3).map((rule, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-risk-high">✕</span>
+                          <span>{rule}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            </TechnicalPanel>
+          ) : null}
+
+          {(result.explanation?.citations || []).length ? (
+            <TechnicalPanel title="Authoritative Citations" accent>
+              <div className="space-y-3">
+                <p className="label-tech text-[10px]">Attributed Cybersecurity Sources</p>
+                <ul className="space-y-2.5">
+                  {result.explanation.citations.map((cite, idx) => (
+                    <li key={idx} className="border-b border-line pb-2.5 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <span className="rounded bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] text-accent font-semibold">
+                          [cite-{idx + 1}]
+                        </span>
+                        <span className="text-[10px] font-mono text-muted">{cite.source}</span>
+                      </div>
+                      <p className="mt-1 text-xs font-medium text-ink">{cite.title}</p>
+                      {cite.source_url ? (
+                        <a
+                          href={cite.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 block truncate text-[11px] text-accent hover:underline"
+                        >
+                          {cite.source_url}
+                        </a>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TechnicalPanel>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <TechnicalPanel title="Analysis evidence" accent>
           <div className="grid gap-px border border-line bg-line sm:grid-cols-2">
