@@ -142,6 +142,12 @@ html, body {
 
 input[type="checkbox"] { accent-color: var(--accent); }
 
+.btn-primary[hidden],
+.btn-secondary[hidden],
+.btn-danger[hidden] {
+  display: none !important;
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-danger {
