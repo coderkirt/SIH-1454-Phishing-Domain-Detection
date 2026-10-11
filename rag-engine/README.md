@@ -6,4 +6,6 @@ Small FastAPI service that scores **facts PhishEye already collected**. It never
 uvicorn app.main:app --port 8091
 ```
 
+`GET /health` reports that the process is up.
+
 `POST /assess-link` returns a suspicion-only assessment (`status=ok`) or the caller treats timeouts as unavailable. A missing score must be omitted, not treated as 0.
