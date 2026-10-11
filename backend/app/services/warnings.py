@@ -124,10 +124,13 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
             )
 
     extras = []
-    if "shortened_url" in tags:
+    final_url = (result.get("details") or {}).get("final_url") or ""
+    original_url = (result.get("details") or {}).get("original_url") or ""
+    if final_url and original_url and final_url.rstrip("/") != original_url.rstrip("/"):
+        extras.append(f"This link opens {final_url}. The score is for that address.")
+    elif "shortened_url" in tags:
         extras.append(
-            "This started as a short link. Always check the final website address "
-            "before you sign in or send money."
+            "This short link hid the real address, so the destination could not be checked."
         )
     if "tls_hostname_mismatch" in tags:
         extras.append(
