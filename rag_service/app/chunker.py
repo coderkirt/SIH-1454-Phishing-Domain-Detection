@@ -10,11 +10,13 @@ Produces typed Chunk objects with metadata formatted for ChromaDB indexing and f
 
 from __future__ import annotations
 
+import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
+from app.config import settings
 from app.corpus import CorpusDocument
 
 
@@ -28,6 +30,13 @@ class Chunk:
     chunk_type: str  # "overview" or "section"
     text: str
     metadata: Dict[str, Any] = field(default_factory=dict)
+    chunk_index: int = 0
+    char_start: int = 0
+    char_end: int = 0
+    paragraph_index: int = 0
+    embedding_model: str = ""
+    embedding_version: str = ""
+    content_hash: str = ""
 
     @property
     def word_count(self) -> int:
@@ -116,11 +125,19 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         overview_text_parts.append(f"ATT&CK Techniques: {', '.join(doc.mitre)}")
 
     overview_text = "\n".join(overview_text_parts)
+    overview_hash = hashlib.sha256(re.sub(r"\s+", " ", overview_text.strip()).encode("utf-8")).hexdigest()
     overview_meta = dict(base_metadata)
     overview_meta.update({
         "chunk_id": f"{doc.id}#overview",
         "section_title": "Overview",
         "chunk_type": "overview",
+        "chunk_index": 0,
+        "char_start": 0,
+        "char_end": len(overview_text),
+        "paragraph_index": 0,
+        "embedding_model": settings.EMBEDDING_MODEL,
+        "embedding_version": settings.EMBEDDING_VERSION,
+        "content_hash": overview_hash,
     })
 
     chunks.append(
@@ -133,12 +150,22 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
             chunk_type="overview",
             text=overview_text,
             metadata=overview_meta,
+            chunk_index=0,
+            char_start=0,
+            char_end=len(overview_text),
+            paragraph_index=0,
+            embedding_model=settings.EMBEDDING_MODEL,
+            embedding_version=settings.EMBEDDING_VERSION,
+            content_hash=overview_hash,
         )
     )
 
     # 2. Section Chunks (split on markdown headings '## ')
     # Match any section starting with '## '
     raw_sections = re.split(r"(?m)^##\s+", doc.body)
+    search_cursor = 0
+    chunk_counter = 1
+    para_counter = 1
 
     for raw in raw_sections:
         raw = raw.strip()
@@ -162,11 +189,31 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
             f"{body}"
         )
 
+        sec_heading_pattern = f"## {heading}"
+        pos = doc.body.find(sec_heading_pattern, search_cursor)
+        if pos != -1:
+            char_start = pos
+            char_end = pos + len(raw) + 3
+            search_cursor = char_end
+        else:
+            char_start = search_cursor
+            char_end = char_start + len(raw)
+            search_cursor = char_end
+
+        sec_hash = hashlib.sha256(re.sub(r"\s+", " ", section_text.strip()).encode("utf-8")).hexdigest()
+
         section_meta = dict(base_metadata)
         section_meta.update({
             "chunk_id": chunk_id,
             "section_title": heading,
             "chunk_type": "section",
+            "chunk_index": chunk_counter,
+            "char_start": char_start,
+            "char_end": char_end,
+            "paragraph_index": para_counter,
+            "embedding_model": settings.EMBEDDING_MODEL,
+            "embedding_version": settings.EMBEDDING_VERSION,
+            "content_hash": sec_hash,
         })
 
         chunks.append(
@@ -179,8 +226,17 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
                 chunk_type="section",
                 text=section_text,
                 metadata=section_meta,
+                chunk_index=chunk_counter,
+                char_start=char_start,
+                char_end=char_end,
+                paragraph_index=para_counter,
+                embedding_model=settings.EMBEDDING_MODEL,
+                embedding_version=settings.EMBEDDING_VERSION,
+                content_hash=sec_hash,
             )
         )
+        chunk_counter += 1
+        para_counter += 1
 
     return chunks
 

@@ -6,6 +6,7 @@ pip_install.log
 
 # ChromaDB persistent index + caches (rebuild via scripts/ingest.py)
 data/
+backups/
 *.log
 
 # Python

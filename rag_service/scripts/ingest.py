@@ -116,6 +116,9 @@ def main() -> int:
         elapsed = time.perf_counter() - t_start
         print(f"      Ingested {stats['total_chunks']} chunks from {stats['total_documents']} documents in {elapsed:.2f}s")
         print(f"      Collection total count: {stats['indexed_chunks']} chunks")
+        if "diff_report" in stats:
+            dr = stats["diff_report"]
+            print(f"      Diff Report: +{dr['added_count']} added | ~{dr['updated_count']} updated | ={dr['unchanged_count']} unchanged | -{dr['deleted_count']} deleted")
         print("\nChunks by category:")
         for cat, cnt in sorted(stats["categories"].items()):
             print(f"  - {cat:16s}: {cnt:3d} chunks")

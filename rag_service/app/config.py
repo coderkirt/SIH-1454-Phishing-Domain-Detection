@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     # Chroma collection settings
     COLLECTION_NAME: str = "phishing_knowledge"
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    EMBEDDING_VERSION: str = "v1.0.0"
+
+    # Backup & retention settings
+    BACKUP_DIR: Path = BASE_DIR / "backups"
+    BACKUP_RETENTION_DAYS: int = 30
 
     # Hybrid retrieval settings
     RRF_K: int = 60  # Standard Reciprocal Rank Fusion constant
