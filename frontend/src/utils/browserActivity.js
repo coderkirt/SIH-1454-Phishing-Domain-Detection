@@ -23,7 +23,13 @@ function loadStore() {
 }
 
 function saveStore(store) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  const now = Date.now();
+  const cleaned = {};
+  Object.entries(store || {}).forEach(([key, stamps]) => {
+    const kept = prune(stamps, now);
+    if (kept.length) cleaned[key] = kept;
+  });
+  localStorage.setItem(STORE_KEY, JSON.stringify(cleaned));
 }
 
 function prune(stamps, now) {
