@@ -20,6 +20,14 @@ export function ragPopupCopy(rag) {
   };
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
 export function showRagPopup(result) {
   if (!result || result.risk_score == null) return;
   document.getElementById(HOST_ID)?.remove();
@@ -31,10 +39,10 @@ export function showRagPopup(result) {
     <div class="rag-popup-scrim">
       <div class="panel rag-popup-card">
         <p class="label-tech">Knowledge-base (RAG)</p>
-        <p class="rag-popup-score">Score ready · ${result.risk_score ?? "—"}/100</p>
-        <p class="rag-popup-status">${copy.status}</p>
-        <p class="rag-popup-rule">${copy.rule}</p>
-        <p class="rag-popup-detail">${copy.detail}</p>
+        <p class="rag-popup-score">Score ready · ${escapeHtml(result.risk_score ?? "—")}/100</p>
+        <p class="rag-popup-status">${escapeHtml(copy.status)}</p>
+        <p class="rag-popup-rule">${escapeHtml(copy.rule)}</p>
+        <p class="rag-popup-detail">${escapeHtml(copy.detail)}</p>
       </div>
     </div>
   `;
