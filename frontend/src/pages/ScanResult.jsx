@@ -5,7 +5,8 @@ import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/PageHeader";
 import TechnicalPanel, { TechnicalRow } from "../components/TechnicalPanel";
 import FlagActions from "../components/FlagActions";
-import { loadLastScan, recommendationFor, riskColor } from "../utils/risk";
+import RagPopup from "../components/RagPopup";
+import { consumeRagPopupPending, loadLastScan, recommendationFor, riskColor } from "../utils/risk";
 
 function formatExists(value) {
   if (value === true) return "Registered";
@@ -71,7 +72,58 @@ function buildTechnicalRows(url, tech) {
     { label: "Safe browsing", value: formatSafeBrowsing(tech) },
     { label: "Normalized URL", value: tech.debug?.normalized_url || tech.original_url || "Unknown" },
     { label: "Classification", value: tech.classification || "Unknown" },
+    { label: "RAG rule", value: formatRag(tech.rag || tech.evidence?.rag) },
+    { label: "PhishEye opens (30d)", value: formatOpens(tech.local_activity || tech.evidence?.local_activity) },
+    { label: "This browser (30d)", value: formatBrowserOpens(tech.local_activity || tech.evidence?.local_activity) },
+    { label: "30-day activity", value: formatActivity(tech.local_activity || tech.evidence?.local_activity) },
   ];
+}
+
+function formatRag(rag) {
+  if (!rag || rag.status === "unavailable") return "Unavailable (weight omitted)";
+  if (rag.rule_id) return `${rag.rule_id} · suspicion ${rag.suspicion_score ?? "—"}`;
+  if (rag.status === "ok") return `Evaluated · suspicion ${rag.suspicion_score ?? 0}`;
+  return rag.status || "Unknown";
+}
+
+function formatOpens(activity) {
+  if (!activity) return "Unknown";
+  if (!(activity.opens || activity.users_opened || activity.scans) && activity.status === "unknown") {
+    return "Unknown — no PhishEye users opened this address in 30 days";
+  }
+  const used = activity.used ? ` · used in score · suspicion ${activity.suspicion_score ?? 0}` : "";
+  return `${activity.opens ?? 0} opens · ${activity.users_opened ?? 0} users · ${activity.scans ?? 0} scans${used}`;
+}
+
+function formatBrowserOpens(activity) {
+  const opens = Number(activity?.this_browser_opens) || 0;
+  if (opens > 0 || activity?.this_browser_status === "observed") {
+    const used = activity.this_browser_used || activity.used
+      ? ` · used in score · suspicion ${activity.suspicion_score ?? 0}`
+      : "";
+    return `${opens} open${opens === 1 ? "" : "s"} in this browser in 30 days${used}`;
+  }
+  if (!activity || activity.this_browser_status === "unavailable") {
+    return "Unknown — this browser has not recorded an open yet";
+  }
+  return "Unknown — this browser has no opens in 30 days";
+}
+
+function formatActivity(activity) {
+  if (!activity) return "Unknown";
+  if (activity.status === "unknown") return "Unknown — no scans, opens, or reports in 30 days";
+  const used = activity.used ? `Used in score · suspicion ${activity.suspicion_score ?? 0}` : "Recorded";
+  return [
+    used,
+    `${activity.opens ?? 0} PhishEye opens`,
+    `${activity.users_opened ?? 0} users`,
+    `${activity.scans ?? 0} scans`,
+    `${activity.signed_in_users ?? 0} signed-in users`,
+    `${activity.high_risk_scans ?? 0} high-risk`,
+    `${activity.scam_reports ?? 0} scam reports`,
+    `${activity.risky_reports ?? 0} risky reports`,
+    `${activity.safe_reports ?? 0} safe reports`,
+  ].join(" · ");
 }
 
 function buildEvidence(tech, reasons, tags) {
@@ -129,15 +181,77 @@ function buildEvidence(tech, reasons, tags) {
         : "No urgency language, odd TLD, or shortener",
       critical: manipulation.length > 0,
     },
+    {
+      name: "Knowledge-base (RAG)",
+      status: ragTile(tech.rag || tech.evidence?.rag).status,
+      detail: ragTile(tech.rag || tech.evidence?.rag).detail,
+      critical: ragTile(tech.rag || tech.evidence?.rag).critical,
+    },
+    {
+      name: "PhishEye 30-day history",
+      status: activityTile(tech.local_activity || tech.evidence?.local_activity).status,
+      detail: activityTile(tech.local_activity || tech.evidence?.local_activity).detail,
+      critical: activityTile(tech.local_activity || tech.evidence?.local_activity).critical,
+    },
+    {
+      name: "This browser (30d)",
+      status: browserTile(tech.local_activity || tech.evidence?.local_activity).status,
+      detail: browserTile(tech.local_activity || tech.evidence?.local_activity).detail,
+      critical: false,
+    },
   ];
+}
+
+function ragTile(rag) {
+  if (!rag || rag.status === "unavailable") {
+    return { status: "Unavailable", critical: false, detail: "RAG weight omitted — unavailable is not treated as zero." };
+  }
+  if (rag.status === "ok") {
+    return {
+      status: rag.used ? "Raised suspicion" : "Evaluated",
+      critical: Boolean(rag.used),
+      detail: rag.rule_summary || rag.rule_id || "Knowledge-base checked this URL.",
+    };
+  }
+  return { status: rag.status || "Unknown", critical: false, detail: rag.rule_summary || "Knowledge-base response was incomplete." };
+}
+
+function browserTile(activity) {
+  const opens = Number(activity?.this_browser_opens) || 0;
+  const observed = opens > 0 || activity?.this_browser_status === "observed";
+  return {
+    status: activity?.this_browser_used || (observed && activity?.used)
+      ? "Used in score"
+      : observed
+        ? "Observed"
+        : "Unknown",
+    critical: false,
+    detail: formatBrowserOpens(activity),
+  };
+}
+
+function activityTile(activity) {
+  if (!activity || activity.status === "unknown") {
+    return { status: "Unknown", critical: false, detail: "No PhishEye opens, scans, or reports in 30 days. Unknown is not safe." };
+  }
+  const scam = Number(activity.scam_reports) || 0;
+  const risky = Number(activity.risky_reports) || 0;
+  return {
+    status: activity.used ? "Used in score" : scam + risky ? "Reported" : "Observed",
+    critical: scam + risky > 0,
+    detail: formatActivity(activity),
+  };
 }
 
 export default function ScanResult() {
   const [result, setResult] = useState(null);
+  const [ragOpen, setRagOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setResult(loadLastScan());
+    const data = loadLastScan();
+    setResult(data);
+    if (data && consumeRagPopupPending()) setRagOpen(true);
   }, []);
 
   if (!result) {
@@ -171,6 +285,7 @@ export default function ScanResult() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
+      <RagPopup result={result} open={ragOpen} onClose={() => setRagOpen(false)} />
       <PageHeader
         section="03 / Reports"
         title="Security report"
@@ -183,43 +298,49 @@ export default function ScanResult() {
         }
       />
 
-      <section className="grid gap-6 xl:grid-cols-[280px_1fr_320px]">
+      <section className="grid items-stretch gap-6 xl:grid-cols-3">
         <TechnicalPanel title="Risk score" accent>
-          <div className="flex items-end gap-2">
-            <span className="font-display text-7xl font-semibold leading-none text-ink">{score}</span>
-            <span className="pb-2 font-mono text-sm text-muted">/100</span>
+          <div className="flex h-full flex-col justify-between gap-6">
+            <div className="flex items-end gap-2">
+              <span className="font-display text-7xl font-semibold leading-none text-ink">{score}</span>
+              <span className="pb-2 font-mono text-sm text-muted">/100</span>
+            </div>
+            <div>
+              <RiskBadge level={result.risk_level} />
+              <p className="mt-4 text-sm text-muted">{result.simple_view?.verdict}</p>
+            </div>
           </div>
-          <div className="mt-5">
-            <RiskBadge level={result.risk_level} />
-          </div>
-          <p className="mt-4 text-sm text-muted">{result.simple_view?.verdict}</p>
         </TechnicalPanel>
 
         <TechnicalPanel title="Classification" accent>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className={`status-pill ${result.safe ? "risk-low" : "risk-high"}`}>
-              <span className={`dot ${result.safe ? "dot-active" : "dot-critical"}`} aria-hidden="true" />
-              {result.classification === "CONFIRMED_MALICIOUS"
-                ? "Confirmed malicious"
-                : result.classification === "SUSPICIOUS"
-                  ? "Suspicious"
-                  : result.safe
-                    ? "No malicious indicators"
-                    : "Unsafe"}
-            </span>
-            <span className="status-pill risk-unknown">{result.risk_level || "UNKNOWN"}</span>
-          </div>
-          {explanationText ? (
-            <p className="mt-4 text-sm text-ink-soft">{explanationText}</p>
-          ) : null}
-          <div className="mt-6 rule pt-6">
-            <p className="label-tech">Recommendation</p>
-            <p className="mt-3 text-sm leading-6 text-ink-soft">{recommendationFor(result.risk_level, warning)}</p>
+          <div className="flex h-full flex-col justify-between gap-6">
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`status-pill ${result.safe ? "risk-low" : "risk-high"}`}>
+                  <span className={`dot ${result.safe ? "dot-active" : "dot-critical"}`} aria-hidden="true" />
+                  {result.classification === "CONFIRMED_MALICIOUS"
+                    ? "Confirmed malicious"
+                    : result.classification === "SUSPICIOUS"
+                      ? "Suspicious"
+                      : result.safe
+                        ? "No malicious indicators"
+                        : "Unsafe"}
+                </span>
+                <span className="status-pill risk-unknown">{result.risk_level || "UNKNOWN"}</span>
+              </div>
+              {explanationText ? (
+                <p className="mt-4 text-sm leading-6 text-ink-soft">{explanationText}</p>
+              ) : null}
+            </div>
+            <div className="rule pt-6">
+              <p className="label-tech">Recommendation</p>
+              <p className="mt-3 text-sm leading-6 text-ink-soft">{recommendationFor(result.risk_level, warning)}</p>
+            </div>
           </div>
         </TechnicalPanel>
 
         <TechnicalPanel title="System metadata">
-          <dl className="space-y-3 meta-tech">
+          <dl className="flex h-full flex-col justify-between meta-tech">
             <div className="flex justify-between gap-3 border-b border-line pb-3">
               <dt>Target</dt>
               <dd className="text-right text-ink-soft break-all">{tech.domain || "Unknown"}</dd>
@@ -280,6 +401,19 @@ export default function ScanResult() {
 
       {result.explanation?.rag_grounded ? (
         <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {!result.explanation?.matched_playbook && result.explanation?.what ? (
+            <TechnicalPanel title="Knowledge-base evaluation" accent>
+              <p className="text-sm leading-relaxed text-ink-soft">{result.explanation.what}</p>
+              {(result.explanation.why || []).length ? (
+                <ul className="mt-3 space-y-1.5 text-xs text-muted">
+                  {result.explanation.why.slice(0, 3).map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </TechnicalPanel>
+          ) : null}
+
           {result.explanation?.matched_playbook ? (
             <TechnicalPanel title="Matched Attack Playbook" accent>
               <div className="space-y-3">
@@ -381,7 +515,7 @@ export default function ScanResult() {
       ) : null}
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <TechnicalPanel title="Analysis evidence" accent>
+        <TechnicalPanel title="Analysis evidence" accent collapsible hint={`${evidence.length} signals · click to open`}>
           <div className="grid gap-px border border-line bg-line sm:grid-cols-2">
             {evidence.map((item, index) => (
               <div key={item.name} className="bg-surface p-4">
@@ -410,7 +544,7 @@ export default function ScanResult() {
           ) : null}
         </TechnicalPanel>
 
-        <TechnicalPanel title="Technical data">
+        <TechnicalPanel title="Technical data" collapsible hint={`${technicalRows.length} fields · click to open`}>
           <dl>
             {technicalRows.map((row, index) => (
               <TechnicalRow key={row.label} index={index + 1} label={row.label} value={row.value} />

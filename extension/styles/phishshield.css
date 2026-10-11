@@ -243,3 +243,35 @@ input[type="checkbox"] { accent-color: var(--accent); }
   border-bottom: 1px solid var(--line);
   background: var(--header);
 }
+
+.rag-popup-scrim {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  z-index: 80;
+  display: block;
+  padding: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.rag-popup-card {
+  pointer-events: auto;
+  width: min(22rem, calc(100vw - 24px));
+  padding: 14px;
+}
+.rag-popup-score {
+  margin: 10px 0 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px;
+}
+.rag-popup-status {
+  margin: 8px 0 0;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.rag-popup-rule { margin: 10px 0 0; font-family: "IBM Plex Mono", Consolas, monospace; font-size: 13px; }
+.rag-popup-detail { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }

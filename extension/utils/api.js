@@ -5,6 +5,7 @@ import {
   REQUEST_TIMEOUT_MS,
   SKIP_PROTOCOLS,
   STORAGE_KEYS,
+  registeredDomain,
 } from "./config.js";
 
 const api = typeof browser !== "undefined" ? browser : chrome;
@@ -119,13 +120,76 @@ async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT_M
  * Same endpoint and payload as the React web app.
  * POST /api/v1/threat/check-url  { url, view: "both" }
  */
-export function checkUrl(url, pageSignals) {
+export function checkUrl(url, pageSignals, extra = {}) {
   const body = { url, view: "both" };
   if (pageSignals && typeof pageSignals === "object") body.page_signals = pageSignals;
+  if (extra.this_browser_opens != null) body.this_browser_opens = extra.this_browser_opens;
+  if (extra.this_browser_status) body.this_browser_status = extra.this_browser_status;
   return request("/api/v1/threat/check-url", {
     method: "POST",
     body,
   });
+}
+
+export async function getInstallId() {
+  const data = await api.storage.local.get(STORAGE_KEYS.installId);
+  let id = data[STORAGE_KEYS.installId];
+  if (!id || String(id).length < 8) {
+    id = (crypto.randomUUID && crypto.randomUUID()) || `pe-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    await api.storage.local.set({ [STORAGE_KEYS.installId]: id });
+  }
+  return id;
+}
+
+export async function recordVisit(url) {
+  try {
+    if (!isScannableUrl(url) || await isOwnAppUrl(url)) return;
+    const client_id = await getInstallId();
+    await request("/api/v1/visits", {
+      method: "POST",
+      body: { url, client_id },
+      timeout: 4000,
+    });
+  } catch {
+    // Fire-and-forget. A missed visit must not block the badge.
+  }
+}
+
+export async function countBrowserOpens(url) {
+  if (!isScannableUrl(url) || !api.history || !api.history.search) {
+    return { this_browser_opens: 0, this_browser_status: "unavailable" };
+  }
+  try {
+    const parsed = new URL(url);
+    const domain = registeredDomain(parsed.hostname);
+    const startTime = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const items = await api.history.search({
+      text: parsed.hostname,
+      startTime,
+      maxResults: 200,
+    });
+    let opens = 0;
+    for (const item of items || []) {
+      try {
+        const itemHost = new URL(item.url).hostname;
+        if (registeredDomain(itemHost) !== domain) continue;
+        if (api.history.getVisits) {
+          const visits = await api.history.getVisits({ url: item.url });
+          opens += (visits || []).filter((visit) => Number(visit.visitTime || 0) >= startTime).length;
+        } else {
+          opens += Number(item.visitCount || 1);
+        }
+      } catch {
+        // Skip a single history row that cannot be parsed.
+      }
+    }
+    return {
+      this_browser_opens: opens,
+      this_browser_status: opens > 0 ? "observed" : "unknown",
+    };
+  } catch {
+    return { this_browser_opens: 0, this_browser_status: "unavailable" };
+  }
 }
 
 export function analyzeContent(payload) {

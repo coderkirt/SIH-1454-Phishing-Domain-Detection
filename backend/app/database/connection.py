@@ -123,6 +123,21 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_extracted_url ON extracted_links(url)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_extracted_class ON extracted_links(classification)")
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS url_visits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        normalized_url VARCHAR(500) NOT NULL,
+        registered_domain VARCHAR(200),
+        client_id VARCHAR(80) NOT NULL,
+        user_id INTEGER,
+        opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_visits_domain_time ON url_visits(registered_domain, opened_at)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_visits_client_url_time ON url_visits(client_id, normalized_url, opened_at)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_visits_opened ON url_visits(opened_at)")
+
     conn.commit()
     conn.close()
     print("Database initialized successfully!")

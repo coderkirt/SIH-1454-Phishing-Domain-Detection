@@ -14,6 +14,13 @@ export async function loadTheme() {
   return applyTheme(data[THEME_KEY] === "light" ? "light" : "dark");
 }
 
+export function fillVersionLabels() {
+  const version = chrome.runtime?.getManifest?.()?.version || "1.8.2";
+  document.querySelectorAll("[data-extension-version]").forEach((el) => {
+    el.textContent = `v${version}`;
+  });
+}
+
 export async function toggleTheme() {
   const current = document.documentElement.classList.contains("light") ? "light" : "dark";
   const next = current === "dark" ? "light" : "dark";

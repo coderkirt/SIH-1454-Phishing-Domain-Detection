@@ -8,3 +8,5 @@ frontend/node_modules/
 frontend/dist/
 backend/data/feeds/*
 !backend/data/feeds/.gitkeep
+rag-engine/eval_results.json
+rag-engine/qa_audit_report.json

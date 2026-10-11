@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyzeImage, getErrorMessage } from "../services/api";
-import { saveLastScan } from "../utils/risk";
+import { markRagPopupPending, saveLastScan } from "../utils/risk";
 
 const MAX_BYTES = 5_000_000;
 
@@ -73,6 +73,7 @@ export default function ScreenshotUploader({ mode = "screenshot", compact = fals
     try {
       const { data } = await analyzeImage(isQr ? "/api/v1/analyze/qr" : "/api/v1/analyze/screenshot", file, hint);
       saveLastScan(data);
+      markRagPopupPending();
       navigate("/scan-result");
     } catch (err) {
       setError(getErrorMessage(err));

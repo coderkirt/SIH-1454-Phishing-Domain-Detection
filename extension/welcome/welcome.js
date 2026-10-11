@@ -1,4 +1,4 @@
-import { loadTheme } from "../utils/theme.js";
+import { fillVersionLabels, loadTheme } from "../utils/theme.js";
 
 const startPanel = document.getElementById("start-panel");
 const nextPanel = document.getElementById("next-panel");
@@ -35,4 +35,5 @@ document.getElementById("continue").addEventListener("click", async () => {
   window.close();
 });
 
+fillVersionLabels();
 loadTheme();

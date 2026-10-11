@@ -176,6 +176,16 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
         extras.append(
             "Queried feeds had no match. That is not a confirmation that the site is legitimate."
         )
+    if "rag_suspicious" in tags:
+        extras.append(
+            "A local knowledge-base rule raised suspicion for this address. "
+            "That extra evidence cannot mark a link safe by itself."
+        )
+    if "local_scam_reports" in tags:
+        extras.append(
+            "PhishEye users recently reported this domain as scam or risky. "
+            "Local reports raise caution; they do not prove the site is safe."
+        )
 
     full_warning = " ".join([warning] + extras)
 
@@ -225,4 +235,6 @@ def build_technical_view(result: Dict) -> Dict:
         "tls_days_remaining": (details.get("tls") or {}).get("days_remaining"),
         "tls_hostname_ok": (details.get("tls") or {}).get("hostname_ok"),
         "tls_chain_ok": (details.get("tls") or {}).get("chain_ok"),
+        "rag": (result.get("evidence") or {}).get("rag") or details.get("rag_assessment") or {},
+        "local_activity": (result.get("evidence") or {}).get("local_activity") or details.get("local_activity") or {},
     }

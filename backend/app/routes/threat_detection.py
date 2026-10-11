@@ -26,6 +26,9 @@ class URLCheckRequest(BaseModel):
     url: str
     view: str = "both"  # simple | technical | both
     page_signals: Optional[PageSignals] = None
+    this_browser_opens: Optional[int] = Field(None, ge=0, le=100000)
+    this_browser_status: Optional[str] = None
+    client_id: Optional[str] = Field(None, min_length=8, max_length=80)
 
 
 class MessageCheckRequest(BaseModel):
@@ -99,9 +102,19 @@ async def check_url(request: URLCheckRequest):
         if not url.startswith("http://") and not url.startswith("https://"):
             url = f"https://{url}"
 
+        if request.client_id:
+            from app.services.visit_service import record_visit
+            record_visit(url, request.client_id)
+        browser_activity = None
+        if request.this_browser_opens is not None or request.this_browser_status:
+            browser_activity = {
+                "this_browser_opens": request.this_browser_opens,
+                "this_browser_status": request.this_browser_status,
+            }
         result = url_checker.analyze(
             url,
             page_signals=request.page_signals.model_dump() if request.page_signals else None,
+            browser_activity=browser_activity,
         )
 
         conn = get_db_connection()

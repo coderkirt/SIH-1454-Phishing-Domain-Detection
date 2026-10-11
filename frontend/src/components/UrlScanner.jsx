@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkUrl, getErrorMessage } from "../services/api";
-import { saveLastScan } from "../utils/risk";
+import { markRagPopupPending, saveLastScan } from "../utils/risk";
 
 export default function UrlScanner({ compact = false }) {
   const [url, setUrl] = useState("");
@@ -21,6 +21,7 @@ export default function UrlScanner({ compact = false }) {
     try {
       const { data } = await checkUrl(value);
       saveLastScan(data);
+      markRagPopupPending();
       navigate("/scan-result");
     } catch (err) {
       setError(getErrorMessage(err));

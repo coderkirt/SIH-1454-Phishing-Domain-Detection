@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.connection import init_db
-from app.routes import threat_detection, user, stats, analyze, reports, scans
+from app.routes import threat_detection, user, stats, analyze, reports, scans, visits
 from contextlib import asynccontextmanager
 import os
 import threading
@@ -62,6 +62,7 @@ app.include_router(stats.router)
 app.include_router(analyze.router)
 app.include_router(reports.router)
 app.include_router(scans.router)
+app.include_router(visits.router)
 
 
 # Root endpoint
@@ -80,6 +81,7 @@ async def root():
             "POST /api/v1/analyze/email",
             "POST /api/v1/analyze/qr",
             "POST /api/v1/analyze/screenshot",
+            "POST /api/v1/visits",
             "POST /api/v1/report",
             "POST /api/v1/feedback",
             "GET /api/v1/reputation/domain/{domain}",
@@ -94,8 +96,18 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Health check"""
-    return {"status": "ok"}
+    """Health check, including whether the local assess-link RAG is reachable."""
+    rag = {"assess_link": "unknown"}
+    try:
+        from urllib.request import urlopen
+        from app.services.rag_client import RAG_ASSESS_URL
+
+        health_url = RAG_ASSESS_URL.replace("/assess-link", "/health")
+        with urlopen(health_url, timeout=0.4) as response:
+            rag["assess_link"] = "ok" if response.status == 200 else f"http_{response.status}"
+    except Exception:
+        rag["assess_link"] = "unavailable"
+    return {"status": "ok", "rag": rag}
 
 
 if __name__ == "__main__":

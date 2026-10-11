@@ -20,6 +20,17 @@ body {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.version-chip {
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
 }
 .status { margin: 4px 0 0; }
 

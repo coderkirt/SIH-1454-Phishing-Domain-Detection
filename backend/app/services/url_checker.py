@@ -12,6 +12,8 @@ from app.services.url_normalize import get_registrable_domain, normalize_url
 from app.services.trusted import is_trusted_destination
 from app.services.threat_intel import lookup_threat_intelligence
 from app.services.decision_engine import calculate_final_risk
+from app.services.local_activity import empty_activity, get_local_activity_30d
+from app.services.rag_client import assess_link, collect_facts
 
 # Known phishing / fake-brand fragments
 PHISHING_DOMAINS = [
@@ -252,6 +254,53 @@ def _detect_brand(domain: str, label: str) -> Optional[str]:
     return None
 
 
+def _safe_local_activity(url: str, domain: str = "", browser_activity: Optional[Dict] = None) -> dict:
+    browser = browser_activity or {}
+    try:
+        payload = get_local_activity_30d(
+            url,
+            domain,
+            this_browser_opens=browser.get("this_browser_opens"),
+            this_browser_status=browser.get("this_browser_status"),
+        )
+        payload["scans"] = int(payload.get("scans") or 0) + 1
+        if payload.get("this_browser_opens"):
+            payload["this_browser_status"] = "observed"
+        if payload["scans"] or payload.get("opens") or payload.get("this_browser_opens"):
+            payload["status"] = "observed"
+        return payload
+    except Exception:
+        payload = empty_activity(domain or "")
+        if browser.get("this_browser_status"):
+            payload["this_browser_status"] = browser.get("this_browser_status")
+            payload["this_browser_opens"] = int(browser.get("this_browser_opens") or 0)
+        return payload
+
+
+def _safe_rag(url, features, details, tags, brand, message_context, activity, trusted=False):
+    try:
+        facts = collect_facts(
+            url,
+            features=features,
+            details=details,
+            tags=tags,
+            brand_impersonated=brand,
+            message_context=message_context,
+            local_activity=activity,
+            trusted_destination=trusted,
+        )
+        return assess_link(facts)
+    except Exception:
+        return {
+            "suspicion_score": None,
+            "rule_id": None,
+            "rule_summary": None,
+            "status": "unavailable",
+            "citations": [],
+            "reason": "error",
+        }
+
+
 def _finalize_intel(details: dict, intel: dict = None, tags: list = None) -> None:
     """Keep a readable intel label. Never rewrite unavailable/no-match as clean."""
     intel = intel or details.get("threat_intelligence") or {}
@@ -288,7 +337,14 @@ class URLChecker:
     PHISHING_DOMAINS = PHISHING_DOMAINS
     SUSPICIOUS_KEYWORDS = SUSPICIOUS_KEYWORDS
 
-    def analyze(self, url: str, page_signals: Optional[Dict] = None, intel_providers: Optional[Dict] = None) -> Dict:
+    def analyze(
+        self,
+        url: str,
+        page_signals: Optional[Dict] = None,
+        intel_providers: Optional[Dict] = None,
+        message_context: Optional[str] = None,
+        browser_activity: Optional[Dict] = None,
+    ) -> Dict:
         risk_score = 0
         reasons = []
         tags = []
@@ -418,6 +474,19 @@ class URLChecker:
             ):
                 keep_tags = [t for t in tags if t == "shortened_url"]
                 keep_reasons = [r for r in reasons if "unwrapped" in r.lower() or "redirect" in r.lower()]
+                activity = _safe_local_activity(url, registrable, browser_activity)
+                rag = _safe_rag(
+                    url,
+                    features,
+                    details,
+                    keep_tags,
+                    None,
+                    message_context,
+                    activity,
+                    trusted=True,
+                )
+                details["local_activity"] = activity
+                details["rag_assessment"] = rag
                 decision = calculate_final_risk(
                     threat_intelligence=intel,
                     heuristic_score=min(risk_score, 20),
@@ -425,6 +494,9 @@ class URLChecker:
                     ml_score=min(risk_score, 20),
                     url_features=features,
                     heuristic_reasons=keep_reasons,
+                    rag_assessment=rag,
+                    local_activity=activity,
+                    trusted_destination=True,
                 )
                 _finalize_intel(details, intel, decision["threat_tags"])
                 result = {
@@ -558,8 +630,15 @@ class URLChecker:
             risk_score = min(risk_score, 100)
 
         except Exception as e:
-            risk_score = 20
-            reasons = [f"Error parsing URL: {str(e)}"]
+            error_reason = f"Error parsing URL: {str(e)}"
+            lookalike = any(tag in tags for tag in ("phishing", "brand_impersonation", "ip_url"))
+            if lookalike:
+                risk_score = max(int(risk_score or 0), 50)
+                if error_reason not in reasons:
+                    reasons.append(error_reason)
+            else:
+                risk_score = 20
+                reasons = [error_reason]
 
         seen = set()
         unique_tags = []
@@ -568,13 +647,34 @@ class URLChecker:
                 seen.add(tag)
                 unique_tags.append(tag)
 
+        features = features or details.get("normalization") or {}
+        activity = _safe_local_activity(
+            url,
+            features.get("registered_domain") or details.get("domain") or "",
+            browser_activity,
+        )
+        rag = _safe_rag(
+            url,
+            features,
+            details,
+            unique_tags,
+            brand_impersonated,
+            message_context,
+            activity,
+            trusted=False,
+        )
+        details["local_activity"] = activity
+        details["rag_assessment"] = rag
         decision = calculate_final_risk(
             threat_intelligence=intel,
             heuristic_score=min(risk_score, 100),
             heuristic_tags=unique_tags,
             ml_score=min(risk_score, 100),
-            url_features=features or details.get("normalization") or {},
+            url_features=features,
             heuristic_reasons=reasons,
+            rag_assessment=rag,
+            local_activity=activity,
+            trusted_destination=False,
         )
         _finalize_intel(details, intel, decision["threat_tags"])
         result = {

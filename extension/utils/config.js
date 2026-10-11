@@ -30,6 +30,7 @@ export const STORAGE_KEYS = {
   cache: "cg_scan_cache",
   continued: "cg_continued",
   gateAllow: "cg_gate_allow",
+  installId: "cg_install_id",
 };
 
 export const MULTI_TLDS = [

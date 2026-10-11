@@ -12,7 +12,7 @@
   </head>
   <body>
     <main class="page panel panel-accent">
-      <p class="label-tech">00 / Welcome</p>
+      <p class="label-tech">00 / Welcome <span data-extension-version>v1.8</span></p>
       <div class="logo-eye lg" aria-hidden="true">
         <svg viewBox="0 0 32 32" fill="none">
           <path d="M16 3L27 8.2v8.1c0 7.2-5.3 12.4-11 14.7C10.3 28.7 5 23.5 5 16.3V8.2L16 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
@@ -22,13 +22,14 @@
         </svg>
       </div>
       <h1 class="font-display">PHISHEYE</h1>
-      <p class="lead">Real-time browser protection using the same detection engine as the dashboard.</p>
+      <p class="lead">Version 1.8 real-time browser protection using the same detection engine as the dashboard.</p>
       <ol>
         <li>PHISHEYE intercepts the website before it opens. You see the gate, not the live page.</li>
-        <li>The same FastAPI engine as the dashboard scans the address. Extra ads, popups, and buttons can mark a page FISHY.</li>
+        <li>The same FastAPI engine scans the address, including PhishTank suspected listings and Google Safe Browsing when configured.</li>
+        <li>Cloudflare “Suspected Phishing” pages are treated as threats, not as safe.</li>
         <li>A clear result opens the site by itself. Fishy sites stay closed unless you press Open anyway. HIGH and CRITICAL stay closed.</li>
       </ol>
-      <p class="note">The extension sends the page URL to your backend. It does not collect passwords, OTPs, or card numbers.</p>
+      <p class="note">The extension sends the page URL, plus title and heading for warning-page detection. It does not collect passwords, OTPs, or card numbers.</p>
       <div id="start-panel">
         <button id="get-started" class="btn-primary" type="button">Get started</button>
       </div>

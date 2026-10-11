@@ -492,6 +492,37 @@ input[type="checkbox"] {
   50% { opacity: 1; }
 }
 
+.rag-popup-scrim {
+  position: fixed;
+  top: 4.75rem;
+  right: 1.25rem;
+  left: auto;
+  bottom: auto;
+  z-index: 80;
+  display: block;
+  padding: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.rag-popup-card {
+  pointer-events: auto;
+  width: min(22rem, calc(100vw - 2.5rem));
+  padding: 1rem 1.1rem 1.1rem;
+  animation: ragPopIn 220ms ease-out;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes ragPopIn {
+  from { transform: translateX(16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rag-popup-card { animation: none; }
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   .scan-pulse .dot-active {
     animation: none;

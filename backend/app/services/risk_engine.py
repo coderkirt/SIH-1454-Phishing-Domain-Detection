@@ -38,13 +38,22 @@ def risk_level_for_score(score: int) -> str:
 
 def fuse(signals: Dict[str, float], weights: Dict[str, float] = None) -> Dict:
     weights = dict(weights or DEFAULT_WEIGHTS)
-    cleaned = {key: max(0.0, min(100.0, float(signals.get(key, 0) or 0))) for key in weights}
+    # RAG is optional. Unavailable / omitted must not be treated as 0.
+    if "rag" in (signals or {}) and signals.get("rag") is not None:
+        weights.setdefault("rag", 0.08)
+    else:
+        weights.pop("rag", None)
+    cleaned = {}
+    for key in weights:
+        if key == "rag" and (signals is None or signals.get("rag") is None):
+            continue
+        cleaned[key] = max(0.0, min(100.0, float((signals or {}).get(key, 0) or 0)))
 
     raw = sum(cleaned[key] * weights[key] for key in weights)
     score = int(round(min(raw, 100)))
 
     # False-positive guard: psychology / marketing language alone stays LOW/MEDIUM
-    strong = any(cleaned[key] >= 40 for key in ("url", "domain", "threat_intel", "brand", "community"))
+    strong = any(cleaned.get(key, 0) >= 40 for key in ("url", "domain", "threat_intel", "brand", "community", "rag"))
     psych_only = cleaned["psychological"] >= 20 and not strong
     if psych_only:
         score = min(score, 35)

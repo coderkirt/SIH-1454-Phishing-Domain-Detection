@@ -50,9 +50,10 @@ def analyze_content(
         "fear": "fear_tactics" in psych["tags"],
     }
 
+    message_context = normalized.get("raw_text") or text or ""
     link_results = []
     for item in normalized["urls"]:
-        analyzed = url_checker.analyze(item["url"])
+        analyzed = url_checker.analyze(item["url"], message_context=message_context)
         extra["suspicious_domain"] = extra.get("suspicious_domain") or analyzed.get("safe") is False
         classification = analyzed.get("risk_level", "LOW")
         details = analyzed.get("details") or {}
@@ -73,7 +74,7 @@ def analyze_content(
         })
 
     if not link_results and source_type == "url" and text:
-        analyzed = url_checker.analyze(text)
+        analyzed = url_checker.analyze(text, message_context=message_context)
         details = analyzed.get("details") or {}
         link_results.append({
             "url": analyzed.get("url") or text,
@@ -110,7 +111,7 @@ def analyze_content(
     sender_info = analyze_sender(normalized["sender"], normalized["raw_text"])
     community = get_reputation(top["domain"]) if top and top.get("domain") else get_reputation("")
 
-    fused = fuse({
+    fuse_signals = {
         "url": url_risk,
         "domain": domain_risk,
         "ml": url_risk,
@@ -121,7 +122,11 @@ def analyze_content(
         "redirect": redirect_risk,
         "sender": sender_info["score"],
         "community": community.get("reputation_score", 0),
-    })
+    }
+    rag = ((top or {}).get("evidence") or {}).get("rag") or ((top or {}).get("details") or {}).get("rag_assessment") or {}
+    if rag.get("status") == "ok" and rag.get("suspicion_score") is not None:
+        fuse_signals["rag"] = rag["suspicion_score"]
+    fused = fuse(fuse_signals)
     if top and (
         top.get("decision_classification") == "CONFIRMED_MALICIOUS"
         or "confirmed_malicious" in (top.get("threat_tags") or [])
@@ -187,6 +192,7 @@ def analyze_content(
     payload["explanation"] = build_explanation(payload)
     payload["simple_view"] = build_simple_view(payload, source="message" if normalized["raw_text"] else "url")
     payload["url"] = (top or {}).get("url") or ""
+    payload["evidence"] = (top or {}).get("evidence") or {}
     payload["technical_view"] = {
         **build_technical_view({
             "risk_score": payload["risk_score"],
@@ -195,6 +201,7 @@ def analyze_content(
             "reasons": payload["reasons"],
             "brand_impersonated": brand["impersonated"],
             "details": (top or {}).get("details") or {},
+            "evidence": payload["evidence"],
         }),
         "signals": fused["signals"],
         "model_probability": fused["model_probability"],

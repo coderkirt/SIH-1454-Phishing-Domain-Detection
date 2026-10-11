@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "PHISHEYE",
-  "version": "1.8.1",
-  "description": "PHISHEYE browser protection: intercepts navigation, scans first, opens clear sites automatically, and keeps fishy or dangerous sites closed. Uses the same FastAPI engine as the dashboard. Does not read passwords, OTPs, cookies, or phone SMS.",
+  "version": "1.8.2",
+  "version_name": "1.8",
+  "description": "PHISHEYE 1.8 browser protection: intercepts navigation, scans first, flags PhishTank suspected listings and Cloudflare phishing warnings, and uses the same FastAPI engine as the dashboard. Does not read passwords, OTPs, cookies, or phone SMS.",
   "action": {
     "default_title": "PHISHEYE",
     "default_popup": "popup/popup.html",
@@ -35,7 +36,7 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": ["tabs", "storage", "webNavigation"],
+  "permissions": ["tabs", "storage", "webNavigation", "history"],
   "host_permissions": [
     "http://127.0.0.1/*",
     "http://localhost/*",
