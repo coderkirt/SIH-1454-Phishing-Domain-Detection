@@ -692,7 +692,19 @@ cd backend
 pip install -r requirements.txt
 ```
 
-Start the backend using the command configured by the project.
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Knowledge-base RAG (assess-link) and explanation RAG are separate processes:
+
+```bash
+cd ../rag-engine
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8091
+
+cd ../rag_service
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+```
 
 ## Frontend
 
