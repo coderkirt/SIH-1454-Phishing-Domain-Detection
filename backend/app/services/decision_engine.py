@@ -61,6 +61,15 @@ def _activity_floor(suspicion: int) -> int:
     return 0
 
 
+def _link_already_suspicious(score: int, tags: List[str], trusted_destination: bool = False) -> bool:
+    """Danger counts apply only when this scan is already suspicious."""
+    lookalike = any(tag in tags for tag in LOOKALIKE_TAGS) or "lookalike" in tags
+    rag_flag = "rag_suspicious" in tags
+    if trusted_destination and not lookalike and not rag_flag:
+        return False
+    return lookalike or rag_flag or score >= 30
+
+
 def _activity_suspicion(activity: Optional[Dict]) -> int:
     activity = activity or {}
     scam = int(activity.get("scam_reports") or 0)
