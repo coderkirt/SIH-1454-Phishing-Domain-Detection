@@ -11,6 +11,10 @@ channels: [qr, email, web, print]
 brands: []
 threat_tags: [credential_pressure, financial_pressure, urgency_detected]
 mitre: [T1566.002]
+severity: high
+tactics: [qr_obfuscation, mobile_credential_harvest, physical_sticker_overlay, fake_meter]
+iocs: [untrusted_qr_image, parking_meter_sticker, short_link_in_qr]
+first_seen: 2024-01-01
 summary: Attackers place or send QR codes that open phishing pages or payment endpoints; the code hides the true URL from the victim and from many scanners.
 ---
 

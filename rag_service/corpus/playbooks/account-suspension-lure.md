@@ -11,6 +11,10 @@ channels: [email, sms, web]
 brands: []
 threat_tags: [urgency_detected, fear_tactics, credential_pressure, coercion, countdown]
 mitre: [T1566.002]
+severity: high
+tactics: [credential_harvest, account_takeover, fake_login, urgency_pressure]
+iocs: [verify_login_subdomain, account_closure_deadline, lookalike_auth_page]
+first_seen: 2024-01-01
 summary: Scammers claim your account will be suspended or closed unless you "verify" it through a link that leads to a fake login page harvesting your credentials.
 ---
 

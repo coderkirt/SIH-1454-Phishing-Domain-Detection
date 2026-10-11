@@ -11,6 +11,10 @@ channels: [social, app]
 brands: [naukri, linkedin]
 threat_tags: [financial_pressure, greed_bait, urgency_detected, secrecy]
 mitre: [T1566.002, T1598.002]
+severity: high
+tactics: [task_scam, telegram_prepaid_task, ponzi_deposit, fake_recruitment]
+iocs: [youtube_like_task, telegram_vip_salary, crypto_merchant_deposit]
+first_seen: 2024-01-01
 summary: Victims are recruited via messaging apps for easy "online tasks" or investment plans; early small payouts build trust before larger deposits are stolen.
 ---
 

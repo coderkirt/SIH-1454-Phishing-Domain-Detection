@@ -65,6 +65,10 @@ class CorpusDocument:
     brands: List[str] = field(default_factory=list)
     threat_tags: List[str] = field(default_factory=list)
     mitre: List[str] = field(default_factory=list)
+    severity: str = "medium"
+    tactics: List[str] = field(default_factory=list)
+    iocs: List[str] = field(default_factory=list)
+    first_seen: str = "2024-01-01"
     fetched_at: str = ""
     source_hash: str = ""
     license: str = "Public Domain / Synthesized"
@@ -137,6 +141,10 @@ def parse_document(path: Path) -> CorpusDocument:
         brands=list(meta.get("brands", [])),
         threat_tags=list(meta.get("threat_tags", [])),
         mitre=list(meta.get("mitre", [])),
+        severity=str(meta.get("severity", "medium")),
+        tactics=list(meta.get("tactics", [])),
+        iocs=list(meta.get("iocs", [])),
+        first_seen=str(meta.get("first_seen", "2024-01-01")),
         fetched_at=str(meta.get("fetched_at", meta.get("last_verified", "") + "T00:00:00Z")),
         source_hash=str(raw_hash),
         license=str(meta.get("license", "Public Domain / Synthesized")),
@@ -154,6 +162,8 @@ def _validate(doc: CorpusDocument) -> None:
             raise CorpusError(f"{doc.path}: missing required field '{name}'")
     if doc.category not in CATEGORIES:
         raise CorpusError(f"{doc.path}: unknown category '{doc.category}'")
+    if doc.severity not in {"low", "medium", "high", "critical"}:
+        raise CorpusError(f"{doc.path}: invalid severity '{doc.severity}' (must be low, medium, high, or critical)")
     if not doc.source_url.startswith(("http://", "https://")):
         raise CorpusError(f"{doc.path}: source_url must be an http(s) URL")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", doc.last_verified):

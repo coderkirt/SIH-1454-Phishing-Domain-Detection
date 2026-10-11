@@ -11,6 +11,10 @@ channels: [sms, voice, email, social]
 brands: [sbi, hdfc, icici, axis, uidai]
 threat_tags: [credential_pressure, authority_impersonation, urgency_detected, coercion]
 mitre: [T1566.004, T1598.004]
+severity: critical
+tactics: [otp_harvest, kyc_deactivation_threat, vishing, credential_interception]
+iocs: [pan_aadhaar_form, urgent_account_hold, otp_input_box, reverse_caller_id]
+first_seen: 2024-01-01
 summary: A caller or message posing as a bank or "KYC department" persuades the victim to read out an OTP, UPI PIN, or Aadhaar details to complete a fake KYC update.
 ---
 

@@ -11,6 +11,10 @@ channels: [email, sms, social]
 brands: []
 threat_tags: [greed_bait, urgency_detected, financial_pressure, secrecy]
 mitre: [T1566.002]
+severity: medium
+tactics: [advance_fee_fraud, lottery_bait, claim_charge, lucky_draw_spoof]
+iocs: [unsolicited_winnings, upfront_processing_charge, kbc_lottery_letter]
+first_seen: 2024-01-01
 summary: Victims are told they have won a lottery, lucky draw, or cashback and must pay a fee, share payment details, or install an app to "claim" the prize.
 ---
 

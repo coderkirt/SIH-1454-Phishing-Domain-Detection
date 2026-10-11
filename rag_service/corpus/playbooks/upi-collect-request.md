@@ -11,6 +11,10 @@ channels: [sms, social, app]
 brands: [paytm, phonepe, google]
 threat_tags: [financial_pressure, greed_bait, urgency_detected, credential_pressure]
 mitre: [T1566.002]
+severity: critical
+tactics: [upi_collect_fraud, pin_theft, refund_disguise, reverse_payment_trap]
+iocs: [upi_collect_notification, pin_to_receive_claim, fake_cashback_banner]
+first_seen: 2024-01-01
 summary: Scammers send UPI collect requests or payment links disguised as refunds, prize winnings, or "pending payments" — approving them debits money instead of crediting it.
 ---
 

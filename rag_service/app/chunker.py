@@ -60,16 +60,22 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         "source_hash": doc.source_hash,
         "fetched_at": doc.fetched_at,
         "version": doc.version,
+        "severity": doc.severity,
+        "first_seen": doc.first_seen,
         # ChromaDB requires non-empty lists for list-type metadata
         "brands": doc.brands if doc.brands else ["_none_"],
         "threat_tags": doc.threat_tags if doc.threat_tags else ["_none_"],
         "channels": doc.channels if doc.channels else ["_none_"],
         "mitre": doc.mitre if doc.mitre else ["_none_"],
+        "tactics": doc.tactics if doc.tactics else ["_none_"],
+        "iocs": doc.iocs if doc.iocs else ["_none_"],
         # Comma-separated strings for lexical filtering and text dumps
         "brands_csv": ",".join(doc.brands),
         "threat_tags_csv": ",".join(doc.threat_tags),
         "channels_csv": ",".join(doc.channels),
         "mitre_csv": ",".join(doc.mitre),
+        "tactics_csv": ",".join(doc.tactics),
+        "iocs_csv": ",".join(doc.iocs),
     }
 
     # 1. Overview Chunk

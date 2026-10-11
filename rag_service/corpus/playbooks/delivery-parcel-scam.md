@@ -11,6 +11,10 @@ channels: [sms, email, social]
 brands: [fedex, dhl, amazon]
 threat_tags: [financial_pressure, urgency_detected, credential_pressure]
 mitre: [T1566.002]
+severity: medium
+tactics: [redelivery_fee_bait, card_theft, address_update_harvest, courier_spoof]
+iocs: [unpaid_shipping_fee, package_tracking_shortener, fake_fedex_portal]
+first_seen: 2024-01-01
 summary: Fake delivery notices claim a parcel is held pending a small fee or address confirmation; the link leads to a payment page that steals card details.
 ---
 

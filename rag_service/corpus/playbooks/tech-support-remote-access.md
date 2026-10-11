@@ -11,6 +11,10 @@ channels: [web, voice, email]
 brands: [microsoft, apple]
 threat_tags: [authority_impersonation, fear_tactics, urgency_detected, credential_pressure]
 mitre: [T1566.001, T1566.004]
+severity: high
+tactics: [remote_access_trojan, fake_virus_alert, phone_helpline_lure, screen_share_access]
+iocs: [browser_lock_popup, toll_free_support_number, anydesk_teamviewer_lure, zeus_trojan_popup]
+first_seen: 2024-01-01
 summary: Pop-ups or calls claim the victim's computer is infected; the "technician" requests remote access, then steals credentials or installs malware.
 ---
 
