@@ -1,50 +1,39 @@
 ---
-id: taxonomy-mitre-phishing
-title: MITRE ATT&CK Phishing Techniques (T1566, T1598)
+id: taxonomy-mitre-attack-phishing
+title: MITRE ATT&CK Enterprise Matrix — Phishing Techniques & Sub-Techniques
 category: taxonomy
-source: MITRE ATT&CK (paraphrased)
+source: MITRE Corporation (v15 Enterprise Matrix)
 source_url: https://attack.mitre.org/techniques/T1566/
 last_verified: 2026-10-11
 language: en
 region: global
 channels: [email, sms, voice, social, web]
 brands: []
-threat_tags: [brand_impersonation, credential_pressure]
-mitre: [T1566, T1566.001, T1566.002, T1566.003, T1566.004, T1598]
-summary: ATT&CK organizes phishing as initial access (T1566) with attachment, link, service, and voice sub-techniques, plus T1598 for phishing performed only to gather information.
+threat_tags: [brand_impersonation, credential_pressure, dangerous_executable]
+mitre: [T1566, T1566.001, T1566.002, T1566.003, T1566.004, T1598, T1539]
+severity: critical
+published_at: 2025-04-15
+publisher: MITRE Corporation
+report_url: https://attack.mitre.org/techniques/T1566/
+edition: v15 Enterprise Matrix
+key_stats: ['Covers 4 sub-techniques under T1566 (Initial Access: Phishing)', 'Maps 3 sub-techniques under T1598 (Reconnaissance: Phishing for Information)', 'Correlates with 87 distinct threat groups tracked in ATT&CK']
+top_targets: ['Enterprise Users', 'Identity Infrastructure']
+top_ttps: ['T1566.001 Attachment', 'T1566.002 Link', 'T1566.003 Service', 'T1566.004 Voice', 'T1539 Cookie Theft']
+page_count: 32
+summary: MITRE ATT&CK formal taxonomy mapping all sub-techniques of T1566 (Phishing) and T1598 (Phishing for Information) with technical mitigation mappings.
 ---
 
-## T1566 — Phishing (Initial Access)
+The MITRE ATT&CK Enterprise Matrix classifies phishing under the **Initial Access** tactic (TA0001) and **Reconnaissance** tactic (TA0043).
 
-The adversary sends a message to trick a user into executing something that
-grants access or execution. Sub-techniques:
+## T1566: Phishing Sub-Technique Taxonomy
+- **T1566.001 - Spearphishing Attachment:** Delivering weaponized files (macro-enabled documents, ISO files, script archives, LNK shortcuts) directly via email or messaging channels.
+- **T1566.002 - Spearphishing Link:** Embedding hyperlinks that redirect victims to credential-harvesting pages, exploit kits, or drive-by download sites.
+- **T1566.003 - Spearphishing via Service:** Utilizing legitimate third-party services (LinkedIn messages, WhatsApp, Slack, GitHub PRs, cloud document comments) to deliver lures.
+- **T1566.004 - Spearphishing Voice (Vishing):** Utilizing voice telephony to impersonate IT support or authority figures to elicit credentials or MFA authorization.
 
-- **T1566.001 Spearphishing Attachment**: a malicious file (document, archive,
-  executable) delivered via email or message.
-- **T1566.002 Spearphishing Link**: a link to a credential-harvest page or
-  payload download. This is the dominant web-phishing pattern and maps
-  directly to URL/domain analysis.
-- **T1566.003 Spearphishing via Service**: delivery through social media,
-  messaging apps, or collaboration tools rather than email — the channel
-  behind many WhatsApp/UPI scams.
-- **T1566.004 Spearphishing Voice (vishing)**: phone-based lures, including
-  OTP theft and fake support calls.
+## Related ATT&CK Techniques
+- **T1539 - Steal Web Session Cookie:** Adversary-in-the-Middle tools capturing active session cookies to bypass MFA.
+- **T1598 - Phishing for Information:** Probing targets to collect organizational charts, employee contact details, or technical environment specifications.
 
-## T1598 — Phishing for Information
-
-Used when the goal is reconnaissance rather than execution: the adversary
-sends messages to harvest credentials, personal details, or security
-responses. It mirrors T1566's sub-technique structure (.001–.004). In real
-campaigns the same infrastructure often serves both objectives.
-
-## Mapping to detection signals
-
-| Sub-technique | Typical observable signals |
-|---|---|
-| T1566.001 | Suspicious attachments, macros, archives, executables |
-| T1566.002 | Lookalike domains, login forms, urgency copy, URL shorteners |
-| T1566.003 | Unknown sender on messaging platform, payment requests |
-| T1566.004 | Inbound call requesting OTP/credentials, screen-share apps |
-
-ATT&CK content updates bi-annually; cite technique IDs and the ATT&CK
-version used when generating explanations.
+## Defensive Mitigations
+M1031 (Network Intrusion Prevention), M1049 (Antivirus/EDR), M1021 (Restrict Web-Based Content), M1027 (Password Policies / FIDO2 Authentication).

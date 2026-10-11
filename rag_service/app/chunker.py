@@ -81,6 +81,13 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         "iocs_csv": ",".join(doc.iocs),
         "official_domains_csv": ",".join(doc.official_domains),
         "never_does_csv": "; ".join(doc.never_does),
+        "published_at": doc.published_at if doc.published_at else "",
+        "publisher": doc.publisher if doc.publisher else "",
+        "edition": doc.edition if doc.edition else "",
+        "report_url": doc.report_url if doc.report_url else "",
+        "key_stats_csv": "; ".join(doc.key_stats),
+        "top_targets_csv": ", ".join(doc.top_targets),
+        "top_ttps_csv": ", ".join(doc.top_ttps),
     }
 
     # 1. Overview Chunk
@@ -89,6 +96,12 @@ def chunk_document(doc: CorpusDocument) -> List[Chunk]:
         f"Source: {doc.source}",
         f"Summary: {doc.summary}",
     ]
+    if doc.published_at:
+        overview_text_parts.append(f"Published: {doc.published_at} ({doc.edition}) by {doc.publisher}")
+    if doc.key_stats:
+        overview_text_parts.append(f"Key Threat Statistics: {'; '.join(doc.key_stats)}")
+    if doc.top_targets:
+        overview_text_parts.append(f"Primary Targeted Sectors: {', '.join(doc.top_targets)}")
     if doc.brands:
         overview_text_parts.append(f"Target Brands: {', '.join(doc.brands)}")
     if doc.official_domains:

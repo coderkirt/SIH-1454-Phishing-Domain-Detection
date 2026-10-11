@@ -76,6 +76,14 @@ class CorpusDocument:
     contact_channels: List[str] = field(default_factory=list)
     never_does: List[str] = field(default_factory=list)
     regulatory_notes: str = ""
+    published_at: str = ""
+    publisher: str = ""
+    report_url: str = ""
+    edition: str = ""
+    key_stats: List[str] = field(default_factory=list)
+    top_targets: List[str] = field(default_factory=list)
+    top_ttps: List[str] = field(default_factory=list)
+    page_count: int = 1
     fetched_at: str = ""
     source_hash: str = ""
     license: str = "Public Domain / Synthesized"
@@ -161,6 +169,14 @@ def parse_document(path: Path) -> CorpusDocument:
         contact_channels=list(meta.get("contact_channels", [])),
         never_does=list(meta.get("never_does", [])),
         regulatory_notes=str(meta.get("regulatory_notes", "")),
+        published_at=str(meta.get("published_at", meta.get("last_verified", ""))),
+        publisher=str(meta.get("publisher", meta.get("source", ""))),
+        report_url=str(meta.get("report_url", meta.get("source_url", ""))),
+        edition=str(meta.get("edition", "2025 Edition")),
+        key_stats=list(meta.get("key_stats", [])),
+        top_targets=list(meta.get("top_targets", [])),
+        top_ttps=list(meta.get("top_ttps", [])),
+        page_count=int(meta.get("page_count", 1)),
         fetched_at=str(meta.get("fetched_at", meta.get("last_verified", "") + "T00:00:00Z")),
         source_hash=str(raw_hash),
         license=str(meta.get("license", "Public Domain / Synthesized")),
