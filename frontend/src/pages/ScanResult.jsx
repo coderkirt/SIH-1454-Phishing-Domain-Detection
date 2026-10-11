@@ -243,6 +243,92 @@ function activityTile(activity) {
   };
 }
 
+const BANDS = [
+  { name: "Low", until: 29 },
+  { name: "Medium", until: 49 },
+  { name: "High", until: 69 },
+  { name: "Critical", until: 100 },
+];
+
+function readingFor(level) {
+  switch ((level || "").toUpperCase()) {
+    case "CRITICAL":
+    case "HIGH":
+      return {
+        meaning: "This page is not safe to open.",
+        next: "Do not type a password, OTP, or card number. Close it and open the real site yourself.",
+      };
+    case "MEDIUM":
+      return {
+        meaning: "A few things on this page look off.",
+        next: "Read the address before you sign in or pay.",
+      };
+    default:
+      return {
+        meaning: "Nothing here looks like a scam.",
+        next: "You can open it. Still check the address before you sign in.",
+      };
+  }
+}
+
+function ScoreBoard({ score, level, verdict, color, tech }) {
+  const reading = readingFor(level);
+  const mark = Math.min(100, Math.max(0, Number(score) || 0));
+  const https = tech.https ? "Uses HTTPS" : "Not using HTTPS";
+  const domain = tech.domain_exists === false ? "Domain is not registered" : tech.domain_exists === true ? "Domain is registered" : "Domain status unknown";
+  const intel = intelTile(tech);
+  return (
+    <section className={`panel panel-accent ${color.border}`}>
+      <div className="border-b border-line px-5 py-3">
+        <p className="label-tech">Risk score</p>
+      </div>
+      <div className="grid items-center gap-8 p-5 lg:grid-cols-[200px_1fr_280px]">
+        <div>
+          <div className="flex items-end gap-2">
+            <span className={`font-display text-7xl font-semibold leading-none ${color.text}`}>{score}</span>
+            <span className="pb-2 font-mono text-sm text-muted">/100</span>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <RiskBadge level={level} />
+          </div>
+          {verdict ? <p className="mt-3 text-sm text-muted">{verdict}</p> : null}
+          {tech.final_url && tech.original_url && tech.final_url.replace(/\/$/, "") !== tech.original_url.replace(/\/$/, "") ? (
+            <p className="mt-3 break-all text-sm text-ink-soft">Opens {tech.final_url}</p>
+          ) : null}
+        </div>
+
+        <div>
+          <p className="label-tech">Where this score sits</p>
+          <div className="relative mt-4 h-2 bg-line">
+            <div className="absolute inset-y-0 left-0 bg-[var(--accent)]" style={{ width: `${mark}%` }} />
+            <span
+              className="absolute top-1/2 h-4 w-px -translate-y-1/2 bg-ink"
+              style={{ left: `calc(${mark}% - 1px)` }}
+              aria-hidden="true"
+            />
+          </div>
+          <div className="mt-2 grid grid-cols-4 font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
+            {BANDS.map((band) => (
+              <span key={band.name}>{band.name}</span>
+            ))}
+          </div>
+          <p className="mt-4 text-sm leading-6 text-ink">{reading.meaning}</p>
+          <p className="mt-1 text-sm leading-6 text-ink-soft">{reading.next}</p>
+        </div>
+
+        <div className="border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+          <p className="label-tech">What we checked</p>
+          <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+            <li>{https}</li>
+            <li>{domain}</li>
+            <li>Threat feeds: {intel.status}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function ScanResult() {
   const [result, setResult] = useState(null);
   const [ragOpen, setRagOpen] = useState(false);
@@ -257,7 +343,7 @@ export default function ScanResult() {
   if (!result) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader section="03 / Reports" title="Security report" subtitle="No analysis available." />
+        <PageHeader section="03 / Last result" title="Security report" subtitle="No analysis available." />
         <EmptyState
           title="No data available"
           body="Analyze a URL first to view the security report."
@@ -287,7 +373,7 @@ export default function ScanResult() {
     <div className="mx-auto max-w-6xl space-y-8">
       <RagPopup result={result} open={ragOpen} onClose={() => setRagOpen(false)} />
       <PageHeader
-        section="03 / Reports"
+        section="03 / Last result"
         title="Security report"
         subtitle={targetUrl || result.source_type || "Screenshot / QR scan"}
         meta
@@ -298,20 +384,15 @@ export default function ScanResult() {
         }
       />
 
-      <section className="grid items-stretch gap-6 xl:grid-cols-3">
-        <TechnicalPanel title="Risk score" accent>
-          <div className="flex h-full flex-col justify-between gap-6">
-            <div className="flex items-end gap-2">
-              <span className="font-display text-7xl font-semibold leading-none text-ink">{score}</span>
-              <span className="pb-2 font-mono text-sm text-muted">/100</span>
-            </div>
-            <div>
-              <RiskBadge level={result.risk_level} />
-              <p className="mt-4 text-sm text-muted">{result.simple_view?.verdict}</p>
-            </div>
-          </div>
-        </TechnicalPanel>
+      <ScoreBoard
+        score={score}
+        level={result.risk_level}
+        verdict={result.simple_view?.verdict}
+        color={color}
+        tech={tech}
+      />
 
+      <section className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
         <TechnicalPanel title="Classification" accent>
           <div className="flex h-full flex-col justify-between gap-6">
             <div>
