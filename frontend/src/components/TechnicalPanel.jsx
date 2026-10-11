@@ -10,7 +10,7 @@ export default function TechnicalPanel({ title, accent = false, className = "", 
         collapsible ? (
           <button
             type="button"
-            className="flex w-full shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-3 text-left"
+            className="flex w-full shrink-0 cursor-pointer items-center justify-between gap-3 border-b border-line bg-transparent px-5 py-3 text-left"
             aria-expanded={expanded}
             onClick={() => setOpen((value) => !value)}
           >
