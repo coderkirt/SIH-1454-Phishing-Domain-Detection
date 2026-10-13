@@ -1,0 +1,62 @@
+[
+  {
+    "category": "Marine Plastic Detection",
+    "is_negative": false,
+    "question": "What is the key difference between the backbone architectures of YOLOv4 and YOLOv5 as discussed in the marine plastic research?",
+    "expected_answer": "YOLOv4 utilizes the CSPDarknet-53 backbone, while YOLOv5 also uses a CSP structure but is optimized for a smaller, lightweight model size which significantly increases inference speed."
+  },
+  {
+    "category": "Marine Plastic Detection",
+    "is_negative": false,
+    "question": "What specific image augmentation techniques were used to expand the dataset for marine plastic detection?",
+    "expected_answer": "Procedures included flipping, rotating, color correction, adjusting brightness, and converting images to grayscale to simulate various marine plastic conditions."
+  },
+  {
+    "category": "Threat Intelligence",
+    "is_negative": false,
+    "question": "How does the SANS paper suggest threat intelligence teams overcome the 'It's too expensive' pushback from executives?",
+    "expected_answer": "Teams should demonstrate the cost savings of risk avoidance and show the financial impact of not having an active threat intelligence function, framing intelligence value in business terms."
+  },
+  {
+    "category": "Threat Intelligence",
+    "is_negative": false,
+    "question": "Why is it important for threat intelligence teams to move beyond just producing technical reports?",
+    "expected_answer": "To bridge the Intelligence-Stakeholder Gap, teams must ensure their outputs are relevant to senior stakeholders' business risk priorities rather than just providing purely technical data."
+  },
+  {
+    "category": "Sustainable Development In India",
+    "is_negative": false,
+    "question": "How does the Brundtland report define sustainable development according to the provided paper?",
+    "expected_answer": "It defines sustainable development as development that meets the needs of the present without compromising the ability of future generations to meet their own needs."
+  },
+  {
+    "category": "Virtual Network Embedding",
+    "is_negative": true,
+    "question": "Does the VNE paper propose the use of reinforcement learning to solve the virtual network embedding problem?",
+    "expected_answer": "No, the paper focuses on adapting the Conflict-Based Search (CBS) framework and algorithms like VNE-CBS and iVNE-CBS, not reinforcement learning."
+  },
+  {
+    "category": "Marine Plastic Detection",
+    "is_negative": true,
+    "question": "Does the marine plastic paper claim that YOLOv5 is significantly faster than YOLOv4 in all testing scenarios?",
+    "expected_answer": "No, the paper notes that while YOLOv5-S is lightweight and fast, some studies show accuracy vs. speed trade-offs depending on specific configurations and UAV landing spot detection tasks."
+  },
+  {
+    "category": "Threat Intelligence",
+    "is_negative": true,
+    "question": "Does the SANS paper advocate for replacing all human analysts with automated threat detection software?",
+    "expected_answer": "No, the paper emphasizes the importance of the threat intelligence function's influence and the need for human analysts to effectively communicate risks to stakeholders."
+  },
+  {
+    "category": "Cross-Domain Synthesis",
+    "is_negative": false,
+    "question": "How could deep learning object detection methods from the marine plastic paper be adapted for the sustainable development goals mentioned in the India-focused paper?",
+    "expected_answer": "Techniques like YOLO object detection could be applied to monitor natural resource degradation or waste management compliance, directly supporting the SDG goal of responsible consumption and production."
+  },
+  {
+    "category": "Cross-Domain Synthesis",
+    "is_negative": false,
+    "question": "What is the common role of 'efficiency' in both the VNE research and the SANS threat intelligence white paper?",
+    "expected_answer": "The VNE paper uses efficiency in the sense of optimizing the allocation of physical network resources for traffic. The SANS white paper does not use the term efficiency at all, so a correct grounded answer reports the VNE usage and explicitly states that the SANS paper does not address efficiency, instead of inventing a parallel that is not in the corpus."
+  }
+]
