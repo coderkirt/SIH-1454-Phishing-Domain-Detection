@@ -494,8 +494,8 @@ input[type="checkbox"] {
 
 .rag-popup-scrim {
   position: fixed;
-  top: 4.75rem;
-  right: 1.25rem;
+  top: 1rem;
+  right: 1rem;
   left: auto;
   bottom: auto;
   z-index: 80;
@@ -507,10 +507,19 @@ input[type="checkbox"] {
 
 .rag-popup-card {
   pointer-events: auto;
-  width: min(22rem, calc(100vw - 2.5rem));
-  padding: 1rem 1.1rem 1.1rem;
+  width: min(18rem, calc(100vw - 2rem));
+  max-height: min(40vh, 16rem);
+  overflow: auto;
+  padding: 0.75rem 0.9rem 0.85rem;
   animation: ragPopIn 220ms ease-out;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+.rag-popup-card .text-muted {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @keyframes ragPopIn {

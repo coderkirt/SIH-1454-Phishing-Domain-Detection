@@ -1,4 +1,4 @@
-const MIN_MS = 3000;
+const MIN_MS = 5000;
 const HOST_ID = "phisheye-rag-popup";
 
 export function extractRag(result) {
