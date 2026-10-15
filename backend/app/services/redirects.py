@@ -15,7 +15,8 @@ from app.services.ssrf import UnsafeURLError, assert_public_http_url, safe_to_fe
 SHORTENER_DOMAINS = {
     "bit.ly", "bitly.com", "j.mp", "tinyurl.com", "tiny.cc", "t.co",
     "goo.gl", "ow.ly", "is.gd", "cutt.ly", "rebrand.ly", "shorturl.at",
-    "rb.gy", "lnkd.in", "fb.me", "amzn.to", "youtu.be", "pin.it",
+    "rb.gy", "lnkd.in", "fb.me", "amzn.to", "amzn.in", "amzn.eu", "amzn.asia", "a.co",
+    "youtu.be", "pin.it",
     "buff.ly", "adf.ly", "bc.vc", "s.id", "v.gd", "trib.al",
     "t.ly", "short.gy", "u.to", "cli.re", "bl.ink", "short.io",
     "soo.gd", "chilp.it", "qr.ae", "wa.link",
