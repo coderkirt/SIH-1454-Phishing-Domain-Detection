@@ -40,9 +40,11 @@ def classify_threat_type(result: dict) -> str:
     tags = result.get("threat_tags") or []
     if "confirmed_malicious" in tags or "threat_intel" in tags:
         return "phishing"
+    if "piracy_scam" in tags:
+        return "piracy"
     if "phishing" in tags or "brand_impersonation" in tags:
         return "phishing"
-    if "piracy_scam" in tags or "malvertising" in tags:
+    if "malvertising" in tags:
         return "malware"
     if "ip_url" in tags:
         return "malware"

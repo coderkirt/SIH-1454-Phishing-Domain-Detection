@@ -533,15 +533,19 @@ class URLChecker:
             for piracy in PIRACY_DOMAINS:
                 if piracy in domain:
                     risk_score += 35
-                    reasons.append("Known piracy/scam streaming site")
+                    reasons.append("Piracy movie website with heavy ads and popups")
                     tags.append("piracy_scam")
+                    tags.append("heavy_ads")
+                    details["aggressive_ads"] = True
+                    details["ad_signal_label"] = "Piracy movie page packed with ads and popups"
                     break
 
             # 2b. Aggressive popup / malware-style ads (not normal Google Ads)
             if details["domain_exists"] is not False and not intel.get("confirmed") and not loopback:
                 ads = check_ad_signals(url if "://" in url else f"https://{url}")
-                details["aggressive_ads"] = ads["flagged"]
-                details["ad_signal_label"] = ads["label"]
+                if "heavy_ads" not in tags:
+                    details["aggressive_ads"] = ads["flagged"]
+                    details["ad_signal_label"] = ads["label"]
                 if ads["flagged"]:
                     risk_score += 20
                     reasons.append(ads["label"])
