@@ -49,6 +49,19 @@ def test_url_without_protocol():
     assert isinstance(result, dict)
 
 
+def test_moviesflix_is_suspicious_piracy():
+    checker = URLChecker()
+    result = checker.analyze("https://themoviesflix.fast/", intel_providers=offline_providers())
+    assert result["safe"] is False
+    assert result["classification"] == "SUSPICIOUS"
+    assert result["risk_score"] >= 30
+    assert "piracy_scam" in result["threat_tags"]
+    assert "heavy_ads" in result["threat_tags"]
+    warning = (result["simple_view"]["warning"] or "").lower()
+    assert "piracy movie" in warning
+    assert "ads" in warning
+
+
 def test_piracy_url():
     """Piracy / streaming scam domains should be flagged"""
     checker = URLChecker()
@@ -123,7 +136,17 @@ def test_shortener_detected():
 
     assert is_shortener("https://bit.ly/abc123") is True
     assert is_shortener("https://tinyurl.com/abc") is True
+    assert is_shortener("https://amzn.in/d/0gP6keO6") is True
     assert is_shortener("https://www.google.com") is False
+
+
+def test_official_amazon_short_link_is_not_critical():
+    checker = URLChecker()
+    result = checker.analyze("https://amzn.in/d/0gP6keO6", intel_providers=offline_providers())
+    assert result["safe"] is True
+    assert result["risk_level"] == "LOW"
+    assert result["risk_score"] < 30
+    assert "brand_impersonation" not in result["threat_tags"]
 
 
 def test_nonexistent_domain():
