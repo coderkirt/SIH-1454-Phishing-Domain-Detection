@@ -335,9 +335,14 @@ export default function ScanResult() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const data = loadLastScan();
-    setResult(data);
-    if (data && consumeRagPopupPending()) setRagOpen(true);
+    const load = () => {
+      const data = loadLastScan();
+      setResult(data);
+      if (data && consumeRagPopupPending()) setRagOpen(true);
+    };
+    load();
+    window.addEventListener("phisheye-report", load);
+    return () => window.removeEventListener("phisheye-report", load);
   }, []);
 
   if (!result) {
@@ -365,6 +370,9 @@ export default function ScanResult() {
   const tech = result.technical_view || {};
   const qrPayloads = result.qr_payloads || [];
   const qrUrls = result.qr_urls || [];
+  const qrCodes = (result.qr_codes && result.qr_codes.length)
+    ? result.qr_codes
+    : qrPayloads.map((payload) => ({ payload, type: "Text", urls: [], details: [] }));
   const targetUrl = result.url || qrUrls[0] || result.links?.[0]?.url || tech.url || "";
   const technicalRows = buildTechnicalRows(targetUrl, tech);
   const evidence = buildEvidence(tech, reasons, tags);
@@ -378,9 +386,24 @@ export default function ScanResult() {
         subtitle={targetUrl || result.source_type || "Screenshot / QR scan"}
         meta
         actions={
-          <button onClick={() => navigate("/scanner")} className="btn-secondary px-4 py-2.5 text-xs">
-            Analyze another URL
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {["HIGH", "CRITICAL"].includes(String(result.risk_level || "").toUpperCase()) ? null : (
+              <button
+                type="button"
+                onClick={() => {
+                  const open = targetUrl;
+                  if (window.PhishEyeNative?.openCheckedUrl) window.PhishEyeNative.openCheckedUrl(open);
+                  else window.open(open, "_blank", "noopener,noreferrer");
+                }}
+                className="btn-secondary px-4 py-2.5 text-xs"
+              >
+                Open website
+              </button>
+            )}
+            <button onClick={() => navigate("/scanner")} className="btn-secondary px-4 py-2.5 text-xs">
+              Analyze another URL
+            </button>
+          </div>
         }
       />
 
@@ -442,18 +465,34 @@ export default function ScanResult() {
         </TechnicalPanel>
       </section>
 
-      {result.source_type === "qr" || qrPayloads.length || qrUrls.length ? (
-        <TechnicalPanel title="Decoded from QR" accent>
-          <p className="label-tech">Payload</p>
-          <p className="mt-2 break-all font-mono text-sm text-ink">{qrPayloads[0] || result.decoded_text || "No text payload"}</p>
-          {(qrUrls.length || result.links?.length) ? (
-            <ul className="mt-4 space-y-2">
-              {(qrUrls.length ? qrUrls : (result.links || []).map((link) => link.url)).map((url) => (
-                <li key={url} className="break-all font-mono text-sm text-accent">{url}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-muted">The QR did not contain an http(s) website. The raw payload is shown above.</p>
+      {result.source_type === "qr" || qrCodes.length || qrUrls.length ? (
+        <TechnicalPanel title={qrCodes.length > 1 ? `Decoded from QR (${qrCodes.length})` : "Decoded from QR"} accent>
+          {qrCodes.length ? qrCodes.map((code, index) => (
+            <div key={`${code.payload}-${index}`} className={index ? "mt-5 border-t border-line pt-5" : ""}>
+              <p className="label-tech">{code.type || "Payload"}{qrCodes.length > 1 ? ` ${index + 1}` : ""}</p>
+              <p className="mt-2 break-all font-mono text-sm text-ink">{code.payload || "No text payload"}</p>
+              {(code.details || []).length ? (
+                <dl className="mt-3 space-y-2">
+                  {code.details.map((item) => (
+                    <div key={`${item.label}-${item.value}`} className="flex justify-between gap-3 text-sm">
+                      <dt className="text-muted">{item.label}</dt>
+                      <dd className="break-all text-right font-mono text-ink">{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              {(code.urls || []).length ? (
+                <ul className="mt-3 space-y-2">
+                  {code.urls.map((url) => (
+                    <li key={url} className="break-all font-mono text-sm text-accent">{url}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-muted">This code has no website link. The payload above is what was encoded.</p>
+              )}
+            </div>
+          )) : (
+            <p className="text-sm text-muted">No QR code was decoded from this image.</p>
           )}
         </TechnicalPanel>
       ) : null}
