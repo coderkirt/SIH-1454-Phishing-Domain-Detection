@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PhishEye</string>
+    <string name="title_activity_main">PhishEye</string>
+    <string name="package_name">com.phisheye.app</string>
+    <string name="custom_url_scheme">com.phisheye.app</string>
+    <string name="guard_description">PhishEye checks the address bar in Chrome and other browsers. Dangerous pages are stopped before you sign in.</string>
+</resources>
