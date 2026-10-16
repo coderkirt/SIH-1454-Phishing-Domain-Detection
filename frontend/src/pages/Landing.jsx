@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import UrlScanner from "../components/UrlScanner";
 import ScreenshotUploader from "../components/ScreenshotUploader";
 import DotMatrixLogo from "../components/DotMatrixLogo";
+import ProtectHome from "./ProtectHome";
+import { isNativeApp } from "../utils/native";
 
 const pipeline = [
   "URL",
@@ -25,6 +27,9 @@ const steps = ["Enter URL", "Analyze", "Understand risk", "Stay protected"];
 
 export default function Landing() {
   const [scanMode, setScanMode] = useState("url");
+  if (isNativeApp()) {
+    return <ProtectHome />;
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-20">
