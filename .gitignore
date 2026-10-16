@@ -6,6 +6,13 @@ __pycache__/
 .pytest_cache/
 frontend/node_modules/
 frontend/dist/
+apk/node_modules/
+apk/android/.gradle/
+apk/android/app/build/
+apk/android/build/
+apk/android/local.properties
+apk/android/.idea/
+apk/android/captures/
 backend/data/feeds/*
 !backend/data/feeds/.gitkeep
 rag-engine/eval_results.json
