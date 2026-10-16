@@ -1,0 +1,40 @@
+
+SLIDE 2
+  Rectangle 8 y=6354762 text=
+  Title 1 y=0 text= | IDEA TITLE
+  TextBox 8 y=2064921 text=Proposed Solution (Describe your Idea/Solution/Prototype) | Detailed explanation of the pr
+  Slide Number Placeholder 5 y= text=2
+  Footer Placeholder 6 y=6356353 text=@SIH Idea submission- Template
+  Oval 9 y=252246 text=Your Team Name
+
+SLIDE 3
+  Rectangle 9 y=6354762 text=
+  Title 1 y= text=TECHNICAL APPROACH
+  TextBox 8 y=2533653 text=Technologies to be used (e.g. programming languages, frameworks, hardware) | Methodology a
+  Slide Number Placeholder 5 y= text=3
+  Footer Placeholder 6 y=6356353 text=@SIH Idea submission- Template
+  Oval 10 y=252246 text=Your Team Name
+
+SLIDE 4
+  Rectangle 9 y=6354762 text=
+  Title 1 y= text=FEASIBILITY AND VIABILITY
+  TextBox 8 y=2533653 text=Analysis of the feasibility of the idea | Potential challenges and risks | Strategies |  f
+  Slide Number Placeholder 5 y= text=4
+  Footer Placeholder 6 y=6356353 text=@SIH Idea submission- Template
+  Oval 11 y=252246 text=Your Team Name
+
+SLIDE 5
+  Rectangle 9 y=6354762 text=
+  Title 1 y= text=IMPACT AND BENEFITS
+  TextBox 8 y=2533653 text=Potential impact on the target audience | Benefits of the solution (social, economic, envi
+  Slide Number Placeholder 5 y= text=5
+  Footer Placeholder 6 y=6356353 text=@SIH Idea submission- Template
+  Oval 11 y=252246 text=Your Team Name
+
+SLIDE 6
+  Rectangle 9 y=6354762 text=
+  Title 1 y= text=RESEARCH  AND REFERENCES
+  TextBox 8 y=2795263 text=Details / Links of the reference and research work
+  Slide Number Placeholder 5 y= text=6
+  Footer Placeholder 6 y=6356353 text=@SIH Idea submission- Template
+  Oval 8 y=252246 text=Your Team Name

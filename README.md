@@ -550,6 +550,7 @@ SIH-1454-Phishing-Domain-Detection/
 ├── rag-engine/       assess-link service, port 8091
 ├── rag_service/      explanation service, port 8001
 ├── frontend/         React dashboard, including RAG cards
+├── apk/              Android wrapper that opens the dashboard
 ├── extension/        Chrome gate, including the knowledge brief
 ├── docs/
 │   ├── images/

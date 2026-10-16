@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#202124">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="#202124"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="@drawable/omnibox"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:id="@+id/lockIcon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="Connection"
+                    android:src="@drawable/ic_lock" />
+
+                <TextView
+                    android:id="@+id/address"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Search or type a link"
+                    android:textColor="#E8EAED"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/statusChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Checking"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:indeterminate="true"
+            android:indeterminateTint="#8AB4F8"
+            android:progressTint="#8AB4F8" />
+
+        <WebView
+            android:id="@+id/web"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#202124"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="Back"
+                android:padding="16dp"
+                android:src="@drawable/ic_back" />
+
+            <ImageView
+                android:id="@+id/btnForward"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="Forward"
+                android:padding="16dp"
+                android:src="@drawable/ic_forward" />
+
+            <ImageView
+                android:id="@+id/btnReload"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="Reload"
+                android:padding="16dp"
+                android:src="@drawable/ic_reload" />
+
+            <ImageView
+                android:id="@+id/btnHome"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="Home"
+                android:padding="16dp"
+                android:src="@drawable/ic_home" />
+
+            <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="Close"
+                android:padding="16dp"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/blockPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#202124"
+        android:fillViewport="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="28dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:id="@+id/blockLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DANGEROUS"
+                android:textColor="#F28B82"
+                android:textSize="12sp"
+                android:letterSpacing="0.12" />
+
+            <TextView
+                android:id="@+id/blockTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Deceptive site ahead"
+                android:textColor="#E8EAED"
+                android:textSize="28sp" />
+
+            <TextView
+                android:id="@+id/blockScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="72/100"
+                android:textColor="#9AA0A6"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="What we found"
+                android:textColor="#9AA0A6"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/blockBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="4dp"
+                android:text="This page looks like a scam."
+                android:textColor="#E8EAED"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="What you should do"
+                android:textColor="#9AA0A6"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/blockAction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="4dp"
+                android:text="Do not enter a password, OTP, or card number."
+                android:textColor="#E8EAED"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Address"
+                android:textColor="#9AA0A6"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/blockUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#BDC1C6"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/blockMeta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Connection: not secure"
+                android:textColor="#9AA0A6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/keepClosed"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/chrome_button"
+                android:gravity="center"
+                android:text="Back to safety"
+                android:textColor="#202124"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

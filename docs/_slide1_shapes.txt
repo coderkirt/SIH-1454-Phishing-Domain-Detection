@@ -1,0 +1,5 @@
+Rectangle 24 x=1524000 y=0 cx=None cy=None text=
+Freeform: Shape 26 x=5656780 y=851521 cx=None cy=None text=
+Subtitle 3 x=1245686 y=648614 cx=8534400 cy=1752600 text=TITLE PAGE
+Title 7 x=331286 y=-526757 cx=10363200 cy=2076450 text=SMART INDIA HACKATHON  | 2026
+TextBox 9 x=331286 y=2076450 cx=5924550 cy=4703019 text=Problem Statement ID – | Problem Statement Title- | Theme- | PS Category- Software/Hardware | Team ID- | Team Name (Regi

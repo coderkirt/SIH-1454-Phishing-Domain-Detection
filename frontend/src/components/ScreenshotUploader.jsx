@@ -55,10 +55,19 @@ export default function ScreenshotUploader({ mode = "screenshot", compact = fals
   };
 
   const onPaste = (event) => {
-    const item = [...(event.clipboardData?.items || [])].find((entry) => entry.type.startsWith("image/"));
-    if (item) {
+    const pastedFile = event.clipboardData?.files?.[0];
+    if (pastedFile) {
       event.preventDefault();
-      takeFile(item.getAsFile());
+      takeFile(pastedFile);
+      return;
+    }
+    const item = [...(event.clipboardData?.items || [])].find(
+      (entry) => entry.kind === "file" || (entry.type || "").startsWith("image/")
+    );
+    const file = item?.getAsFile?.();
+    if (file) {
+      event.preventDefault();
+      takeFile(file);
     }
   };
 

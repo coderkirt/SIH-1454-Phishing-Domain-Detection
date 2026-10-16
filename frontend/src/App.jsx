@@ -1,7 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 import PublicLayout from "./layouts/PublicLayout";
 import AppLayout from "./layouts/AppLayout";
 import Landing from "./pages/Landing";
@@ -17,8 +17,30 @@ import Privacy from "./pages/Privacy";
 import Settings from "./pages/Settings";
 import Advisor from "./pages/Advisor";
 import InstallExtension from "./pages/InstallExtension";
+import IncomingScan from "./pages/IncomingScan";
+import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./context/AuthContext";
+
+function ReportBridge() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onReport = (event) => {
+      const raw = event.detail;
+      if (!raw) return;
+      const text = typeof raw === "string" ? raw : JSON.stringify(raw);
+      sessionStorage.setItem("cg_last_scan", text);
+      navigate("/scan-result", { replace: true });
+    };
+    window.__phisheyeReportReady = true;
+    window.addEventListener("phisheye-report", onReport);
+    return () => {
+      window.__phisheyeReportReady = false;
+      window.removeEventListener("phisheye-report", onReport);
+    };
+  }, [navigate]);
+  return null;
+}
 
 function AdaptiveLayout() {
   const { isAuthenticated, loading } = useAuth();
@@ -33,6 +55,8 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ReportBridge />
+          <ErrorBoundary>
           <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Landing />} />
@@ -41,15 +65,10 @@ export default function App() {
             </Route>
             <Route element={<AdaptiveLayout />}>
               <Route path="/scan-result" element={<ScanResult />} />
+              <Route path="/incoming" element={<IncomingScan />} />
               <Route path="/extension" element={<InstallExtension />} />
             </Route>
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
+            <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/scanner" element={<Scanner />} />
               <Route path="/history" element={<History />} />
@@ -62,6 +81,7 @@ export default function App() {
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </ErrorBoundary>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getErrorMessage, getProfile, login as loginRequest, signup as signupRequest } from "../services/api";
+import { connectApi, getErrorMessage, getProfile, login as loginRequest, signup as signupRequest } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -16,6 +16,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    connectApi().catch(() => {});
     if (!token) {
       setLoading(false);
       return;

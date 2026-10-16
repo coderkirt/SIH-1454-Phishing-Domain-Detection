@@ -1,15 +1,110 @@
 import axios from "axios";
 import { getInstallId, recordBrowserOpen } from "../utils/browserActivity";
 
+let resolvedBase = "";
+
+function normalizeBase(value) {
+  return String(value || "").trim().replace(/\/$/, "");
+}
+
+export function syncNativeApi(url) {
+  try {
+    window.PhishEyeNative?.setApiUrl?.(url);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function setApiBase(url) {
+  const next = normalizeBase(url);
+  if (!/^https?:\/\//i.test(next)) return getApiBase();
+  resolvedBase = next;
+  try {
+    localStorage.setItem("cg_api_url", next);
+  } catch {
+    /* ignore */
+  }
+  syncNativeApi(next);
+  return next;
+}
+
+export function apiCandidates() {
+  const list = [];
+  const push = (value) => {
+    const next = normalizeBase(value);
+    if (/^https?:\/\//i.test(next) && !list.includes(next)) list.push(next);
+  };
+  try {
+    push(localStorage.getItem("cg_api_url"));
+  } catch {
+    /* ignore */
+  }
+  push(resolvedBase);
+  push(import.meta.env.VITE_API_URL);
+  push("http://10.12.4.184:8000");
+  push("http://172.16.33.52:8000");
+  push("http://192.168.137.1:8000");
+  push("http://192.168.1.1:8000");
+  push("http://192.168.0.1:8000");
+  push("http://10.0.0.1:8000");
+  push("http://127.0.0.1:8000");
+  return list;
+}
+
+export function getApiBase() {
+  if (resolvedBase) return resolvedBase;
+  try {
+    const stored = localStorage.getItem("cg_api_url");
+    if (stored && /^https?:\/\//i.test(stored.trim())) {
+      resolvedBase = normalizeBase(stored);
+      return resolvedBase;
+    }
+  } catch {
+    /* ignore */
+  }
+  resolvedBase = normalizeBase(import.meta.env.VITE_API_URL || "http://127.0.0.1:8000");
+  return resolvedBase;
+}
+
+async function fetchHealth(base) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2500);
+  try {
+    return await fetch(`${base}/health`, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function connectApi(preferred) {
+  const tries = apiCandidates();
+  if (preferred) tries.unshift(normalizeBase(preferred));
+  for (const base of tries) {
+    try {
+      const response = await fetchHealth(base);
+      if (response.ok) {
+        setApiBase(base);
+        return { ok: true, base };
+      }
+    } catch {
+      /* try next */
+    }
+  }
+  return { ok: false, base: getApiBase() };
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000",
-  timeout: 30000,
+  baseURL: getApiBase(),
+  timeout: 12000,
   headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use((config) => {
+  config.baseURL = getApiBase();
+  const path = String(config.url || "");
   const token = localStorage.getItem("cg_token");
-  if (token) {
+  const isAuthCall = path.includes("/user/login") || path.includes("/user/signup");
+  if (token && !isAuthCall) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   if (typeof FormData !== "undefined" && config.data instanceof FormData) {
@@ -24,11 +119,14 @@ api.interceptors.request.use((config) => {
 
 export function getErrorMessage(error) {
   if (!error.response) {
-    return "Unable to connect to the security server. Please make sure the backend is running.";
+    return "Phone cannot reach the PhishEye API. Use the same Wi-Fi as this PC, keep the backend running on port 8000, then save the PC address in Settings.";
   }
   const status = error.response.status;
   const detail = error.response.data?.detail;
-  if (status === 401) return "Your session has expired. Please sign in again.";
+  if (status === 401) {
+    if (typeof detail === "string" && detail.trim()) return detail;
+    return "That username or password was not accepted. Create an account if you have not signed up on this PC.";
+  }
   if (status === 403) return "You do not have permission to do that.";
   if (status === 400) return typeof detail === "string" ? detail : "Invalid request. Please check your input and try again.";
   if (status >= 500) return "The security server had an internal error. Please try again.";
@@ -56,7 +154,7 @@ export const analyzeImage = async (endpoint, file, hint = "") => {
   const body = new FormData();
   body.append("file", file, file.name || "upload.png");
   if (hint && String(hint).trim()) body.append("hint", String(hint).trim());
-  const base = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  const base = getApiBase();
   const token = localStorage.getItem("cg_token");
   const response = await fetch(`${base}${endpoint}`, {
     method: "POST",

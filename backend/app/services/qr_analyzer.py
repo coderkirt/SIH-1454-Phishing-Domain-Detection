@@ -2,6 +2,7 @@
 
 import re
 from typing import Dict, List, Optional
+from urllib.parse import parse_qs, unquote, urlparse
 
 from app.services.url_extractor import extract_urls
 
@@ -138,34 +139,166 @@ def _read_image(image_bytes: bytes):
         return None
 
 
+UPI_LABELS = {
+    "pa": "Payee",
+    "pn": "Name",
+    "am": "Amount",
+    "cu": "Currency",
+    "tn": "Note",
+    "mc": "Merchant code",
+    "url": "Website",
+    "mode": "Mode",
+    "tr": "Reference",
+}
+
+
+def _detail(label: str, value: str) -> Optional[Dict]:
+    text = (value or "").strip()
+    if not text:
+        return None
+    return {"label": label, "value": text}
+
+
+def _describe_payload(payload: str) -> Dict:
+    text = (payload or "").strip()
+    lower = text.lower()
+    details: List[Dict] = []
+    kind = "Text"
+    if lower.startswith("upi://") or (lower.startswith("upi:") and "pa=" in lower):
+        kind = "UPI"
+        query = urlparse(text if "://" in text else "upi://pay?" + text.split("?", 1)[-1]).query
+        fields = parse_qs(query)
+        for key, label in UPI_LABELS.items():
+            values = fields.get(key) or []
+            item = _detail(label, unquote(values[0]) if values else "")
+            if item:
+                details.append(item)
+    elif lower.startswith("wifi:"):
+        kind = "Wi-Fi"
+        for key, label in (("S", "Network"), ("T", "Security"), ("P", "Password"), ("H", "Hidden")):
+            match = re.search(rf"(?:^|;){key}:([^;]*)", text, re.I)
+            item = _detail(label, match.group(1) if match else "")
+            if item:
+                details.append(item)
+    elif lower.startswith("mailto:"):
+        kind = "Email"
+        item = _detail("Address", text.split(":", 1)[1].split("?", 1)[0])
+        if item:
+            details.append(item)
+    elif lower.startswith("tel:"):
+        kind = "Phone"
+        item = _detail("Number", text.split(":", 1)[1])
+        if item:
+            details.append(item)
+    elif lower.startswith("sms:"):
+        kind = "SMS"
+        item = _detail("To", text.split(":", 1)[1].split("?", 1)[0])
+        if item:
+            details.append(item)
+    elif lower.startswith("begin:vcard"):
+        kind = "Contact"
+        for key, label in (("FN", "Name"), ("TEL", "Phone"), ("EMAIL", "Email"), ("ORG", "Organization")):
+            match = re.search(rf"(?im)^{key}[^:]*:(.+)$", text)
+            item = _detail(label, match.group(1) if match else "")
+            if item:
+                details.append(item)
+    elif lower.startswith(("http://", "https://")):
+        kind = "Website"
+    return {"type": kind, "details": details}
+
+
+def _remember(found: List[str], seen: set, text: str):
+    payload = (text or "").strip().strip("\x00")
+    if payload and payload not in seen:
+        seen.add(payload)
+        found.append(payload)
+
+
+def _decode_zxing(image) -> List[str]:
+    import zxingcpp
+
+    found: List[str] = []
+    seen = set()
+    views = [image]
+    height, width = image.shape[:2]
+    longest = max(height, width)
+    import cv2
+
+    if longest < 900:
+        views.append(cv2.resize(image, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_NEAREST))
+    if longest > 2200:
+        factor = 1600 / longest
+        views.append(cv2.resize(image, None, fx=factor, fy=factor, interpolation=cv2.INTER_AREA))
+    for view in views:
+        for result in zxingcpp.read_barcodes(view):
+            label = str(getattr(result, "format", "") or "").upper()
+            if label and "QR" not in label and "AZTEC" not in label and "DATA" not in label and "PDF" not in label:
+                continue
+            _remember(found, seen, getattr(result, "text", "") or "")
+        if found:
+            break
+    return found
+
+
+def _decode_opencv(image) -> List[str]:
+    import cv2
+
+    found: List[str] = []
+    seen = set()
+    padded = cv2.copyMakeBorder(image, 24, 24, 24, 24, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+    detectors = [cv2.QRCodeDetector()]
+    if hasattr(cv2, "QRCodeDetectorAruco"):
+        detectors.append(cv2.QRCodeDetectorAruco())
+    for scaled in _scaled(padded):
+        for variant in _variants(scaled):
+            for detector in detectors:
+                try:
+                    ok, decoded, _points, _straight = detector.detectAndDecodeMulti(variant)
+                except Exception:
+                    ok, decoded = False, ()
+                if ok and decoded is not None:
+                    for item in decoded:
+                        _remember(found, seen, str(item or ""))
+                data, _points, _straight = detector.detectAndDecode(variant)
+                _remember(found, seen, data if isinstance(data, str) else "")
+            if found:
+                return found
+    return found
+
+
+def _build_codes(payloads: List[str]) -> List[Dict]:
+    codes = []
+    for payload in payloads:
+        described = _describe_payload(payload)
+        codes.append({
+            "payload": payload,
+            "type": described["type"],
+            "urls": _collect_urls([payload]),
+            "details": described["details"],
+        })
+    return codes
+
+
 def extract_qr_urls(image_bytes: bytes) -> Dict:
     payloads: List[str] = []
     error = None
     try:
-        import cv2
-
         image = _read_image(image_bytes)
         if image is None:
-            return {"urls": [], "payloads": [], "error": "Could not read that image."}
-
-        padded = cv2.copyMakeBorder(image, 24, 24, 24, 24, cv2.BORDER_CONSTANT, value=(255, 255, 255))
-        seen = set()
-        for scaled in _scaled(padded):
-            for variant in _variants(scaled):
-                for payload in _decode_with_detector(variant):
-                    if payload and payload not in seen:
-                        seen.add(payload)
-                        payloads.append(payload)
-                if payloads:
-                    break
-            if payloads:
-                break
+            return {"urls": [], "payloads": [], "codes": [], "error": "Could not read that image."}
+        try:
+            payloads = _decode_zxing(image)
+        except ImportError:
+            payloads = []
+        if not payloads:
+            payloads = _decode_opencv(image)
     except ImportError:
         error = "QR scanning needs opencv-python-headless. Paste the URL instead."
     except Exception as exc:
         error = str(exc)[:160]
 
+    codes = _build_codes(payloads)
     urls = _collect_urls(payloads)
     if not payloads and not error:
         error = "No QR code was found in that image."
-    return {"urls": urls, "payloads": payloads, "error": error}
+    return {"urls": urls, "payloads": payloads, "codes": codes, "error": error}
