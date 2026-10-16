@@ -88,6 +88,8 @@ Content Analysis → Visual Analysis
        ↓
 Feature Engineering → AI/ML → Risk Engine
        ↓
+Knowledge RAG → assess-link + cited explanation
+       ↓
 Explainable Result → Web Dashboard + Chrome Extension
 ```
 
@@ -129,6 +131,12 @@ Explainable Result → Web Dashboard + Chrome Extension
                              ▼
                        RISK ENGINE
                              │
+              ┌──────────────┴──────────────┐
+              ▼                             ▼
+        rag-engine :8091              rag_service :8001
+        assess the link               explain the score
+              │                             │
+              └──────────────┬──────────────┘
                              ▼
                     EXPLAINABLE RESULT
                          /        \
@@ -136,6 +144,8 @@ Explainable Result → Web Dashboard + Chrome Extension
                        ▼            ▼
                 WEB DASHBOARD   CHROME EXTENSION
 ```
+
+The risk engine decides the score. The two knowledge services explain that score from facts the scan already collected. They do not fetch the destination page, and they do not replace the verdict. If either process is down, the scan still returns and that part is marked unavailable.
 
 ---
 
@@ -209,6 +219,18 @@ secure-paypal.example
 ```
 
 PHISHEYE can consider character similarity, edit distance, token similarity, character substitutions, homoglyphs, brand keywords, and domain structure.
+
+Official Amazon short domains are treated as Amazon, then unwrapped to the page they open:
+
+```text
+amzn.in · amzn.to · amzn.eu · amzn.asia · a.co
+        ↓
+trusted brand domain + short-link unwrap
+        ↓
+score the Amazon page, not the short mask
+```
+
+An official Amazon short link stays low. A lookalike that only imitates those names is still brand impersonation.
 
 ---
 
@@ -298,6 +320,19 @@ EVIDENCE
 ● High visual similarity
 ```
 
+A known piracy movie site is its own case. It is tagged `piracy_scam`, classified as piracy, and kept at least suspicious when no threat feed has confirmed it. The warning says the page is packed with ads and popups, and tells the user not to download files or sign in.
+
+```text
+PIRACY MOVIE SITE
+       ↓
+tag: piracy_scam + heavy_ads
+       ↓
+classification: SUSPICIOUS
+score floor: 50
+       ↓
+"Do not download files or sign in."
+```
+
 ---
 
 # 10 — EXPLAINABLE DETECTION
@@ -322,20 +357,87 @@ A major focus of PHISHEYE is explaining **why** a website was flagged.
 │ BRAND MATCH              HIGH                │
 │ CONTENT                   SUSPICIOUS         │
 │ VISUAL                    HIGH                │
+│ KNOWLEDGE BRIEF           CITED               │
 └──────────────────────────────────────────────┘
 ```
+
+The score answers how risky the target is. The knowledge layer answers why, in plain language, with a source. Those are separate jobs. Mixing them would let a written explanation change the verdict, or let a missing explanation look like a safe score.
+
+```text
+SCAN FINISHES WITH A SCORE
+            │
+            ├────────────────────────────────┐
+            ▼                                ▼
+   rag-engine  :8091                  rag_service  :8001
+   POST /assess-link                  POST /api/explain-scan
+            │                                │
+   facts already collected            curated corpus only
+   never fetches the page             playbooks · brands · reports
+   a missing score is omitted         BM25 keywords + ChromaDB vectors
+   a timeout means unavailable        fused, then cited
+            │                                │
+            └──────────────┬─────────────────┘
+                           ▼
+                 DASHBOARD + EXTENSION
+              score · plain brief · sources
+```
+
+### Why the knowledge layer is two processes
+
+| Process | Port | Question it answers | What it refuses to do |
+|---|---|---|---|
+| `rag-engine` | 8091 | How suspicious is this link, using facts we already have? | Fetch the destination page. Invent a 30-day visit count. Treat a timeout or a missing score as 0. |
+| `rag_service` | 8001 | Why did this scan look like this, and which source says so? | Issue a new verdict. Hallucinate a citation. Block the scan if retrieval is offline. |
+
+`rag-engine` is the assess-link service. `GET /health` reports that the process is up, including whether assess-link can be reached. `POST /assess-link` returns `status=ok` with a suspicion-only assessment. The caller treats a timeout as unavailable.
+
+`rag_service` is the explanation service. The backend calls it through `backend/app/services/rag_client.py` at `/api/explain-scan`. The client sends the URL, detected brands, threat tags, the risk score, and a short channel label. It waits a short time, then falls back. An offline RAG service leaves the score in place and omits the brief.
+
+Inside `rag_service` the complexity is retrieval, not a second detector:
+
+```text
+SCAN FACTS
+    │
+    ├─ keyword search (BM25) over the corpus
+    ├─ vector search (ChromaDB) over the same chunks
+    │
+    ▼
+RECIPROCAL RANK FUSION
+    │  brand and threat-signal boosts
+    ▼
+GROUNDED PROMPT
+    │  answer only from the retrieved chunks
+    ▼
+CITED EXPLANATION
+    playbook match · brand-domain check · report citation
+```
+
+The corpus is curated, not a live crawl of the target site. It holds scam playbooks, brand-impersonation guidance for known brands, and paraphrased threat reports (including CERT-In, APWG, RBI, NPCI, and MITRE ATT&CK). A blank summary is dropped so an empty retrieval cannot look like a grounded answer.
+
+### What this changed in the product
+
+- The scan result page can show RAG cards next to the score.
+- The dashboard and the extension show the knowledge-base note for 5 seconds. Escape dismisses it immediately. The note has no countdown lock.
+- The extension gate can show the same knowledge brief.
+- A shortened or wrapped link is scored by the address it opens. Official Amazon short domains (`amzn.in`, `amzn.to`, `amzn.eu`, `amzn.asia`, `a.co`) unwrap to the Amazon page and stay low.
+- A piracy movie site stays suspicious as an ad-heavy page, with a score floor of 50 when no feed has confirmed it.
+- A confirmed threat-feed hit sets a score floor that later heuristics cannot lower.
+- Opens recorded in this browser over 30 days are a supporting signal. They are not proof, and they are not applied as a danger floor on a trusted destination.
+- Community reports and urgency language, including Hinglish, stay supporting signals. Language alone cannot mark a result critical.
 
 ---
 
 # 11 — WEB APPLICATION
 
-The web application provides URL scanning, domain analysis, DNS information, SSL/TLS information, threat intelligence, brand analysis, content and visual analysis, ML classification, risk assessment, detailed reports, scan history, and technical information.
+The web application provides URL scanning, domain analysis, DNS information, SSL/TLS information, threat intelligence, brand analysis, content and visual analysis, risk assessment, a cited knowledge brief, detailed reports, scan history, and technical information.
 
 ```text
 USER → ENTER URL → WEB FRONTEND → BACKEND API
      → SCAN ORCHESTRATOR → ANALYSIS PIPELINE
-     → ML + RISK ENGINE → DATABASE → SECURITY REPORT
+     → RISK ENGINE → KNOWLEDGE RAG → DATABASE → SECURITY REPORT
 ```
+
+The report keeps the score and the explanation side by side. The score comes from the risk engine. The explanation comes from `rag_service` when that process answers in time.
 
 ---
 
@@ -367,7 +469,7 @@ Indicator       Warning
              Web Security Report
 ```
 
-The extension and web application use the same backend analysis pipeline.
+The extension and web application use the same backend analysis pipeline. The full-screen gate can show the knowledge brief for the address that will actually open, including after a short link is unwrapped.
 
 ---
 
@@ -396,15 +498,24 @@ The extension and web application use the same backend analysis pipeline.
                            ▼
 ┌──────────────────────────────────────────────────────────┐
 │                   INTELLIGENCE LAYER                     │
-│ Feature Engineering → ML Model → Risk Engine             │
+│ Feature Engineering → Risk Engine                        │
+└──────────────────────────┬───────────────────────────────┘
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│                    KNOWLEDGE LAYER                       │
+│ rag-engine :8091          rag_service :8001              │
+│ assess-link               cited explanation              │
+│ facts already collected   corpus retrieval only          │
 └──────────────────────────┬───────────────────────────────┘
                            ▼
 ┌──────────────────────────────────────────────────────────┐
 │                       DATA LAYER                         │
-│                      PostgreSQL                          │
-│ Scans • Features • Evidence • Predictions • Reports      │
+│                        SQLite                            │
+│ Accounts • Scans • Evidence • Reports                    │
 └──────────────────────────────────────────────────────────┘
 ```
+
+The knowledge layer is optional at runtime. The API still returns a score when `rag-engine` or `rag_service` is not running. The live application store is SQLite.
 
 ---
 
@@ -421,11 +532,12 @@ The extension and web application use the same backend analysis pipeline.
 | DNS | dnspython | DNS analysis |
 | HTTP Analysis | HTTP client | Requests, redirects and headers |
 | HTML Analysis | HTML parser | Webpage/content analysis |
-| Machine Learning | scikit-learn / project ML stack | Classification |
-| Database | PostgreSQL | Persistent storage |
+| Knowledge assessment | `rag-engine` (FastAPI) | Suspicion score from facts already collected |
+| Knowledge explanation | `rag_service` (FastAPI, ChromaDB, BM25) | Cited explanation of a finished scan |
+| Database | SQLite | Accounts, scan history, and reports |
 | Extension | Chrome Manifest V3 | Browser protection |
 
-> The exact libraries and models should match the implementation in the repository.
+> This build does not ship a trained image or classical model, so no accuracy figure is claimed. The knowledge layer explains evidence. It is not a second verdict.
 
 ---
 
@@ -434,12 +546,15 @@ The extension and web application use the same backend analysis pipeline.
 ```text
 SIH-1454-Phishing-Domain-Detection/
 │
-├── backend/
-├── frontend/
-├── apk/
-├── extension/
+├── backend/          FastAPI scan pipeline and rag_client
+├── rag-engine/       assess-link service, port 8091
+├── rag_service/      explanation service, port 8001
+├── frontend/         React dashboard, including RAG cards
+├── apk/              Android wrapper that opens the dashboard
+├── extension/        Chrome gate, including the knowledge brief
 ├── docs/
-│   └── images/
+│   ├── images/
+│   └── WEEKLY_SYNOPSIS.md
 └── README.md
 ```
 
@@ -512,14 +627,15 @@ CREDENTIAL FORM DETECTED
 VISUAL SIMILARITY
 HIGH
 
-ML CLASSIFICATION
-HIGH PHISHING LIKELIHOOD
-
 FINAL ASSESSMENT
 HIGH RISK
+
+KNOWLEDGE BRIEF
+Cited playbook match and brand-domain check
+when rag_service answers in time
 ```
 
-The actual result depends on the evidence available for the target.
+The actual result depends on the evidence available for the target. A missing knowledge brief does not lower the score and does not turn the result into a safe one.
 
 ---
 
@@ -556,10 +672,14 @@ WEBPAGE ANALYSIS
         +
 VISUAL SIMILARITY
         +
-MACHINE LEARNING
+RISK ENGINE
+        +
+KNOWLEDGE RAG
         +
 EXPLAINABLE EVIDENCE
 ```
+
+The knowledge layer adds a cited explanation on top of the score. Retrieval can fail open. The score cannot be talked into a different label by the explanation text.
 
 The goal is to identify suspicious characteristics even when a domain has not already appeared in a known blacklist.
 
@@ -596,10 +716,11 @@ DNS                   ✓
 SSL/TLS               ✓
 THREAT INTELLIGENCE   —
 BRAND ANALYSIS        ✓
-ML                    ✓
+rag-engine            —
+rag_service           —
 ```
 
-The unavailable component should be clearly marked rather than treated as evidence that the website is safe.
+The unavailable component should be clearly marked rather than treated as evidence that the website is safe. A RAG timeout is unavailable. It is not a score of 0, and it is not a clean bill of health.
 
 ---
 
@@ -675,6 +796,20 @@ Sensitive API keys should never be embedded directly inside the Chrome extension
 - [ ] Security testing
 - [ ] End-to-end testing
 
+## Phase 07 — Knowledge RAG
+
+- [x] Standalone explanation service (`rag_service`, port 8001)
+- [x] Assess-link service (`rag-engine`, port 8091)
+- [x] Curated playbooks, brand guidance, and threat reports
+- [x] Hybrid retrieval with citations on the finished scan
+- [x] Backend client with a short timeout and offline fallback
+- [x] RAG cards on the scan result and the extension gate
+- [x] Short-link unwrapping before the score is applied
+- [x] Official Amazon short domains trusted and unwrapped
+- [x] Piracy movie pages scored as suspicious ad pages
+- [x] Knowledge-base note shown for 5 seconds, with no countdown lock
+- [ ] Trained classical or image model
+
 ---
 
 # 25 — LOCAL SETUP
@@ -691,13 +826,10 @@ cd SIH-1454-Phishing-Domain-Detection
 ```bash
 cd backend
 pip install -r requirements.txt
-```
-
-```bash
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-Knowledge-base RAG (assess-link) and explanation RAG are separate processes:
+Knowledge-base assessment and explanation RAG are separate processes. Start them when you want the brief and the assess-link score. The API still scans if they are stopped.
 
 ```bash
 cd ../rag-engine
@@ -743,24 +875,21 @@ Make sure the backend is running before testing automatic URL analysis.
 ## ⚙️ TEAM STRUCTURE
 
 ```text
-                         🛡️ PHISHEYE
-                              │
-               ┌──────────────┴──────────────┐
-               │                             │
-               ▼                             ▼
-       ⚡ BACKEND TEAM                🎨 FRONTEND + UI/UX
-               │                     + DOCUMENTATION
-               │                             │
-        ┌──────┴──────┐          ┌──────────┼──────────┐
-        ▼             ▼          ▼          ▼          ▼
-     HRITIK          KIRT     SHASHANK   AISHWARYA   ASTHA
-                                      │
-                                      ▼
-                                   PRAGATI
+                              🛡️ PHISHEYE
+                                   │
+            ┌──────────────────────┼──────────────────────┐
+            ▼                      ▼                      ▼
+     ⚡ BACKEND TEAM        🧠 KNOWLEDGE RAG       🎨 FRONTEND + UI/UX
+            │                      │                + DOCUMENTATION
+     ┌──────┴──────┐               │          ┌──────────┼──────────┐
+     ▼             ▼               ▼          ▼          ▼          ▼
+  HRITIK          KIRT          ADITYA     SHASHANK   AISHWARYA   ASTHA
+                                                         │
+                                                         ▼
+                                                      PRAGATI
 
-        APIs • Database • ML          UI • UX • Database
-        Authentication • Deploy       Documentation • PPT
-        Testing • Integration         Research • Presentation
+  APIs • Feeds • Scoring      Corpus • Retrieval     UI • UX • Database
+  Short links • Extension     Citations • Explain    Documentation • PPT
 ```
 
 ---
@@ -807,6 +936,22 @@ Deployment
 - Frontend ↔ Backend integration
 - API integration
 - Cross-module debugging
+
+---
+
+# 🧠 KNOWLEDGE RAG
+
+### Aditya Upadhyay
+
+| Area | Responsibility |
+|---|---|
+| 🧠 Explainability | Grounded explanation of a finished scan |
+| 📚 Corpus | Scam playbooks, brand guidance, and threat reports |
+| 🔎 Retrieval | BM25 keyword search, ChromaDB vectors, reciprocal rank fusion |
+| 📎 Citations | CERT-In, APWG, RBI, NPCI, and MITRE ATT&CK on the report |
+| 🔌 Integration | `rag_client` in the backend and RAG cards on the scan result |
+
+**Hritik** and **Kirt** carried that service into the live scan path: short-link unwrapping, threat-feed score floors, 30-day browser history as a supporting signal, the extension knowledge brief, and the weekly synopsis in `docs/WEEKLY_SYNOPSIS.md`.
 
 ---
 
@@ -949,6 +1094,31 @@ Responsibilities include:
 
 ---
 
+### Aditya
+
+**Primary:** Knowledge RAG and explainability
+
+```text
+Curated corpus
+   +
+Hybrid retrieval
+   +
+Cited explanation
+   +
+Backend and scan-result integration
+```
+
+Responsibilities include:
+
+- The standalone explanation service in `rag_service`
+- Scam-playbook, brand-guidance, and threat-report ingestion
+- BM25 and ChromaDB retrieval with reciprocal rank fusion
+- Grounded prompts so the brief stays tied to retrieved chunks
+- Brand-domain checks and citations on the scan report
+- The backend client and the RAG cards on the scan result page
+
+---
+
 # 🔗 TEAM CONNECTION
 
 ```text
@@ -957,21 +1127,23 @@ Responsibilities include:
         ┌───────────────────┴───────────────────┐
         │                                       │
         ▼                                       ▼
-   BACKEND TEAM                          FRONTEND TEAM
-   Hritik • Kirt                    Shashank • Aishwarya
-                                          Astha • Pragati
-        │                                       │
-        │                                       │
-        └───────────────┬───────────────────────┘
-                        │
-                        ▼
-                 DATABASE + APIs
-                        │
-                        ▼
-                 AI / ML PIPELINE
-                        │
-                        ▼
-                SECURITY ANALYSIS
+   BACKEND TEAM          KNOWLEDGE RAG         FRONTEND TEAM
+   Hritik • Kirt            Aditya          Shashank • Aishwarya
+                                                Astha • Pragati
+        │                      │                     │
+        └──────────────────────┼─────────────────────┘
+                               │
+                               ▼
+                        DATABASE + APIs
+                               │
+                               ▼
+                     ANALYSIS + RISK ENGINE
+                               │
+                               ▼
+                    rag-engine + rag_service
+                               │
+                               ▼
+                       SECURITY ANALYSIS
                         │
                         ▼
              WEB + CHROME EXTENSION
@@ -989,6 +1161,7 @@ Responsibilities include:
 | **Shashank** | 🟡 Support | 🟢 Primary | 🟢 Primary | 🟢 | 🟡 Support | 🟢 | 🟢 |
 | **Hritik** | 🟢 Primary | — | 🟢 | — | 🟢 | 🟡 | 🟡 |
 | **Kirt** | 🟢 Primary | — | 🟢 | — | 🟢 | 🟡 | 🟡 |
+| **Aditya** | 🟢 Primary | 🟡 Support | 🟢 | — | 🟢 Primary | 🟢 | — |
 | **Aishwarya** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
 | **Astha** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
 | **Pragati** | — | 🟢 | 🟡 | 🟢 | — | 🟢 | 🟢 |
@@ -1009,6 +1182,7 @@ Responsibilities include:
 <a href="https://www.linkedin.com/in/shashank-kumar-singh-a8aa9930a">Shashank</a> ·
 <a href="https://www.linkedin.com/in/kirt-raj-dixit-6573b6387/">Kirt</a> ·
 <a href="https://www.linkedin.com/in/hritik-kumar-srivastava-b52b7720b/">Hritik</a> ·
+<a href="https://github.com/upadhyayaditya7">Aditya</a> ·
 <a href="https://www.linkedin.com/in/aishwarya-keshari-37a270381/">Aishwarya</a> ·
 <a href="https://www.linkedin.com/in/pragati-singh-1147033b2">Pragati</a> ·
 <a href="https://www.linkedin.com/in/astha-mishra-891586423/">Astha</a>
@@ -1059,9 +1233,9 @@ Detection
     ↓
 Intelligence
     ↓
-Machine Learning
-    ↓
 Risk Assessment
+    ↓
+Knowledge RAG
     ↓
 Web Application
     ↓
@@ -1070,7 +1244,7 @@ Chrome Extension
 Testing
 ```
 
-Features should only be marked as complete once they are implemented and tested.
+The knowledge layer is in the repository as two processes. `rag-engine` assesses a link from facts the scan already collected. `rag_service` writes a cited explanation from the curated corpus. There is no trained image or classical model in this build. Features should only be marked as complete once they are implemented and tested.
 
 ---
 
