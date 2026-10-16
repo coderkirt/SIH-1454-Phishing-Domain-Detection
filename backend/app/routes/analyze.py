@@ -58,6 +58,18 @@ async def analyze_email(request: ContentRequest, credentials: HTTPAuthorizationC
     return analyze_content("email", request.text, request.urls, request.sender, request.language, _user_id(credentials))
 
 
+def _attach_qr(result: dict, decoded: dict) -> dict:
+    payloads = decoded.get("payloads") or []
+    urls = decoded.get("urls") or []
+    result["qr_payloads"] = payloads
+    result["qr_urls"] = urls
+    result["qr_codes"] = decoded.get("codes") or []
+    result["decoded_text"] = "\n".join(payloads)
+    if not result.get("url") and urls:
+        result["url"] = urls[0]
+    return result
+
+
 @router.post("/qr")
 async def analyze_qr(file: UploadFile = File(...), credentials: HTTPAuthorizationCredentials = Depends(optional_bearer)):
     data = await file.read()
@@ -71,14 +83,9 @@ async def analyze_qr(file: UploadFile = File(...), credentials: HTTPAuthorizatio
             status_code=400,
             detail=decoded.get("error") or "No QR code was found in that image. Try a closer, sharper photo of the code.",
         )
-    text = " ".join(payloads) if payloads else " ".join(urls)
+    text = "\n".join(payloads) if payloads else "\n".join(urls)
     result = analyze_content("qr", text=text, urls=urls, user_id=_user_id(credentials))
-    result["qr_payloads"] = payloads
-    result["qr_urls"] = urls
-    result["decoded_text"] = text
-    if not result.get("url") and urls:
-        result["url"] = urls[0]
-    return result
+    return _attach_qr(result, decoded)
 
 
 @router.post("/screenshot")
@@ -110,13 +117,10 @@ async def analyze_screenshot(
     if payloads:
         extra = " ".join(payloads)
         text = f"{text}\n{extra}".strip()
-    if not text.strip() and not urls:
+    if not text.strip() and not urls and not payloads:
         raise HTTPException(
             status_code=400,
             detail="No QR code or readable link was found in that image. Paste the visible URL in the optional link field, or paste the message text on the Message tab.",
         )
-        raise HTTPException(
-            status_code=400,
-            detail="No QR code or readable link was found in that image. Paste the visible URL in the optional link field, or paste the message text on the Message tab.",
-        )
-    return analyze_content("screenshot", text=text, urls=urls, user_id=_user_id(credentials))
+    result = analyze_content("screenshot", text=text, urls=urls, user_id=_user_id(credentials))
+    return _attach_qr(result, decoded)
