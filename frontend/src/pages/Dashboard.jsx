@@ -39,14 +39,15 @@ export default function Dashboard() {
 
   if (loading) return <LoadingState label="Loading console" />;
 
-  if (error) {
+  if (error && !overview) {
     return (
-      <TechnicalPanel title="System error" accent>
-        <p className="flex items-center gap-2 text-sm text-[var(--risk-high)]">
-          <span className="dot dot-critical" aria-hidden="true" />
-          {error}
-        </p>
-      </TechnicalPanel>
+      <div className="space-y-8">
+        <PageHeader section="01 / Dashboard" title="Security console" subtitle="You can scan without signing in." />
+        <UrlScanner />
+        <TechnicalPanel title="Account">
+          <p className="text-sm text-ink-soft">{error}</p>
+        </TechnicalPanel>
+      </div>
     );
   }
 

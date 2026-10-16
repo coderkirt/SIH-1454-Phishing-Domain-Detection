@@ -83,12 +83,18 @@ export default function AppLayout() {
               </div>
               <div>
                 <p className="label-tech">Operator</p>
-                <p className="mt-1 truncate">{user?.username || "Unknown"}</p>
+                <p className="mt-1 truncate">{user?.username || "Guest"}</p>
               </div>
             </div>
-            <button onClick={onLogout} className="btn-secondary mt-4 w-full py-2 text-xs">
-              Logout
-            </button>
+            {user?.username ? (
+              <button onClick={onLogout} className="btn-secondary mt-4 w-full py-2 text-xs">
+                Logout
+              </button>
+            ) : (
+              <button onClick={() => navigate("/login")} className="btn-secondary mt-4 w-full py-2 text-xs">
+                Log in
+              </button>
+            )}
           </div>
         </aside>
 
