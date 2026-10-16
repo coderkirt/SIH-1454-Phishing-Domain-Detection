@@ -1,0 +1,87 @@
+=== presentation.xml sldSz ===
+sldSz cx="12192000" cy="6858000"/><p:notesSz cx="6858000" cy="9144000"/><p:defaultTextStyle><a:defPPr><a:defRPr lang="en-US"/></a:defPPr><a:lvl1pPr algn="l" defTabSz="457200" rtl="0" fontAlgn="base"><a:spcBef><a:spcPct val="0"/></a:spcBef><a:spcAft><
+
+=== theme1 schemeClr / srgbClr sample ===
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1F497D"/></a:dk2><a:lt2><a:srgbClr val="EEECE1"/></a:lt2><a:accent1><a:srgbClr val="4F81BD"/></a:accent1><a:accent2><a:srgbClr val="C0504D"/></a:accent2><a:accent3><a:srgbClr val="9BBB59"/></a:accent3><a:accent4><a:srgbClr val="8064A2"/></a:accent4><a:accent5><a:srgbClr val="4BACC6"/></a:accent5><a:accent6><a:srgbClr val="F79646"/></a:accent6><a:hlink><a:srgbClr val="0000FF"/></a:hlink><a:folHlink><a:srgbClr val="800080"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="宋体"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Times New Roman"/><a:font script="Hebr" typeface="Times New Roman"/><a:font script="Thai" typeface="Angsana New"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="MoolBoran"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:fon
+
+===== SLIDE 1 =====
+TITLE PAGE
+SMART INDIA HACKATHON 
+2026
+Problem Statement ID –
+Problem Statement Title-
+Theme-
+PS Category- Software/Hardware
+Team ID-
+Team Name (Registered on portal)
+xml bytes=30590
+
+===== SLIDE 2 =====
+IDEA TITLE
+Proposed Solution (Describe your Idea/Solution/Prototype)
+Detailed explanation of the proposed solution
+ How it addresses the problem
+Innovation and uniqueness of the solution 
+2
+@SIH Idea submission- Template
+Your Team Name
+xml bytes=8823
+
+===== SLIDE 3 =====
+TECHNICAL APPROACH
+Technologies to be used (e.g. programming languages, frameworks, hardware)
+Methodology and process for implementation (Flow Charts/Images/ working prototype)
+3
+@SIH Idea submission- Template
+Your Team Name
+xml bytes=6531
+
+===== SLIDE 4 =====
+FEASIBILITY AND VIABILITY
+Analysis of the feasibility of the idea
+Potential challenges and risks
+Strategies
+ for overcoming these challenges
+4
+@SIH Idea submission- Template
+Your Team Name
+xml bytes=12286
+
+===== SLIDE 5 =====
+IMPACT AND BENEFITS
+Potential impact on the target audience
+Benefits of the solution (social, economic, environmental, etc.)
+5
+@SIH Idea submission- Template
+Your Team Name
+xml bytes=10211
+
+===== SLIDE 6 =====
+RESEARCH  AND REFERENCES
+Details / Links of the reference and research work
+6
+@SIH Idea submission- Template
+Your Team Name
+xml bytes=9717
+
+===== SLIDE 7 =====
+7
+@SIH Idea submission- Template
+Kindly keep the maximum slides limit up to six 
+(6). 
+( Including the 
+title slide) 
+Try to avoid paragraphs and post your idea in points /diagrams / Infographics /pictures 
+Keep your explanation precise and easy to understand
+Idea should be unique and novel. 
+You can only use provided 
+template
+ for making the 
+PPT
+ without changing the idea details pointers (mentioned in previous slides).
+You need to save the file in PDF and upload the same on portal. No PPT, Word Doc or any other format will be supported.
+Note - You can delete this slide (Important Pointers) when you upload the details of your idea on SIH portal.
+IMPORTANT INSTRUCTIONS
+Please ensure below pointers are met while submitting the Idea PPT:
+xml bytes=21142
