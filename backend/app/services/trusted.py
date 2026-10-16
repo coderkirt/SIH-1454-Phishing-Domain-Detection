@@ -40,6 +40,7 @@ TRUSTED_DOMAINS = {
     "amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazon.co.jp",
     "amazon.ca", "amazon.fr", "amazon.es", "amazon.it", "amazon.com.au",
     "amazon.com.br", "amazonaws.com", "aws.amazon.com", "a2z.com",
+    "amzn.in", "amzn.to", "amzn.eu", "amzn.asia", "a.co",
     # Payments / Indian banks
     "paypal.com", "stripe.com", "visa.com", "mastercard.com",
     "paytm.com", "phonepe.com", "razorpay.com", "bhimupi.org.in",

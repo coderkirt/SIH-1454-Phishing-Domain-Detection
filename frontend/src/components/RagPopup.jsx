@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-export const RAG_POPUP_MS = 3000;
+export const RAG_POPUP_MS = 5000;
 
 export function extractRag(result) {
   return result?.technical_view?.rag || result?.evidence?.rag || {};
@@ -22,26 +22,17 @@ export function ragPopupCopy(rag) {
 }
 
 export default function RagPopup({ result, open, onClose }) {
-  const [canClose, setCanClose] = useState(false);
   const onCloseRef = useRef(onClose);
-  const canCloseRef = useRef(false);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return undefined;
-    setCanClose(false);
-    canCloseRef.current = false;
-    const unlock = window.setTimeout(() => {
-      canCloseRef.current = true;
-      setCanClose(true);
-    }, RAG_POPUP_MS);
-    const hide = window.setTimeout(() => onCloseRef.current?.(), RAG_POPUP_MS + 400);
+    const hide = window.setTimeout(() => onCloseRef.current?.(), RAG_POPUP_MS);
     const onKey = (event) => {
-      if (event.key === "Escape" && canCloseRef.current) onCloseRef.current?.();
+      if (event.key === "Escape") onCloseRef.current?.();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      window.clearTimeout(unlock);
       window.clearTimeout(hide);
       window.removeEventListener("keydown", onKey);
     };
@@ -61,14 +52,6 @@ export default function RagPopup({ result, open, onClose }) {
         <p className="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-accent">{copy.status}</p>
         <p className="mt-3 font-mono text-sm text-ink-soft">{copy.rule}</p>
         <p className="mt-3 text-sm leading-6 text-muted">{copy.detail}</p>
-        <button
-          type="button"
-          className="btn-primary mt-5 px-4 py-2 text-xs"
-          disabled={!canClose}
-          onClick={() => onClose?.()}
-        >
-          {canClose ? "Continue" : "Showing 3s"}
-        </button>
       </div>
     </div>
   );

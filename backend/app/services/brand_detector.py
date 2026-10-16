@@ -37,7 +37,7 @@ REAL_DOMAINS = {
     "icici": ["icicibank.com"],
     "axis": ["axisbank.com"],
     "paypal": ["paypal.com"],
-    "amazon": ["amazon.com", "amazon.in"],
+    "amazon": ["amazon.com", "amazon.in", "amzn.in", "amzn.to", "amzn.eu", "amzn.asia", "a.co"],
     "google": ["google.com", "google.co.in", "youtube.com", "youtu.be"],
     "youtube": ["youtube.com", "youtu.be"],
     "github": ["github.com"],

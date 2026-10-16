@@ -78,8 +78,8 @@ def build_simple_view(result: Dict, source: str = "url") -> Dict:
         )
     elif "piracy_scam" in tags:
         warning = (
-            "This is a known piracy or scam website. Ads and download buttons "
-            "on this page can install malware on your phone or computer."
+            "This is a piracy movie website. Pages like this are packed with ads and popups. "
+            "Treat it as suspicious. Do not download files or sign in."
         )
     elif "phishing" in tags:
         warning = (

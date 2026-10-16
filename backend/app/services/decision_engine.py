@@ -317,6 +317,12 @@ def calculate_final_risk(
         score = max(score, 50)
         if classification == "NO_MALICIOUS_EVIDENCE":
             classification = "SUSPICIOUS"
+    if "piracy_scam" in tags and classification == "NO_MALICIOUS_EVIDENCE":
+        classification = "SUSPICIOUS"
+        explanation = (
+            "This is a piracy movie website. These pages are packed with ads and popups, "
+            "so the result stays suspicious."
+        )
     level = _level(score)
     blocking = classification in {"CONFIRMED_MALICIOUS", "SUSPICIOUS"} or level != "LOW"
     if "domain_not_found" in tags or any(tag in tags for tag in LOOKALIKE_TAGS):

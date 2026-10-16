@@ -264,8 +264,10 @@ input[type="checkbox"] { accent-color: var(--accent); }
 }
 .rag-popup-card {
   pointer-events: auto;
-  width: min(22rem, calc(100vw - 24px));
-  padding: 14px;
+  width: min(18rem, calc(100vw - 24px));
+  max-height: min(40vh, 16rem);
+  overflow: auto;
+  padding: 12px;
 }
 .rag-popup-score {
   margin: 10px 0 0;
